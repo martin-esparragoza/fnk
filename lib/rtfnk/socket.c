@@ -4,10 +4,11 @@
  */
 
 #include "../../include/rtfnk/socket.h"
+#include "../util/flinkedlist.h"
 
 extern const char* (* const fnk_socket_errctostr_table[FNK_SOCKET_MAXTYPES])(struct fnk_socket*, unsigned);
 extern void(* const fnk_socket_update_table[FNK_SOCKET_MAXTYPES])(struct fnk_socket*); ///< If something messes up during updating, log it, but don't kill the socket
-extern struct fnk_socket** sockets; ///< All sockets
+extern struct util_flinkedlist* node; // Available node for insertion
 
 const char* fnk_socket_errctostr(struct fnk_socket* self, unsigned char errc) {
     if (errc < sizeof(fnk_socket_def_errcstr) / sizeof(fnk_socket_def_errcstr[0]))
@@ -18,11 +19,11 @@ const char* fnk_socket_errctostr(struct fnk_socket* self, unsigned char errc) {
 }
 
 unsigned char fnk_socket_bind(struct fnk_socket* sock) {
-    if (socketslen + 1 >= FNK_SOCKET_MAXSOCKETS)
+    struct util_flinkedlist* newnode = util_flinkedlist_insert(node, (void *) sock);
+    if (newnode == 0)
         return FNK_SOCKET_ERRC_BIND_WOULDOVERFLOW;
 
-    // TODO: Perhaps we can speed this up with like a linked list or some smarter data structure
-    sockets[socketslen++] = sock;
+    node = newnode;
 
     return FNK_SOCKET_ERRC_OK;
 }
