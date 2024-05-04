@@ -1,6 +1,7 @@
 #include "flinkedlist.h"
+#include <stddef.h>
 
-void util_flinkedlist_init(struct util_flinkedlist* list, unsigned size) {
+void util_flinkedlist_init(struct util_flinkedlist* list, size_t size) {
     if (size <= 1)
         return;
 
@@ -11,8 +12,8 @@ void util_flinkedlist_init(struct util_flinkedlist* list, unsigned size) {
 }
 
 struct util_flinkedlist* util_flinkedlist_insert(struct util_flinkedlist* node, void* data) {
-    if (!node->next)
-        return 0; // We can't add to the linkedlist
+    if (!node->next) // We can't add to the linkedlist
+        return NULL;
 
     node->data = data;
     return node->next;

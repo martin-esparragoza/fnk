@@ -5,6 +5,9 @@
 
 #include "../../include/rtfnk/socket.h"
 #include "../util/flinkedlist.h"
+#include <stdint.h>
+#include <stddef.h>
+#include <stdbool.h>
 
 extern const char* (* const fnk_socket_errctostr_table[FNK_SOCKET_MAXTYPES])(struct fnk_socket*, unsigned);
 extern void(* const fnk_socket_update_table[FNK_SOCKET_MAXTYPES])(struct fnk_socket*); ///< If something messes up during updating, log it, but don't kill the socket
@@ -20,7 +23,7 @@ const char* fnk_socket_errctostr(struct fnk_socket* self, unsigned char errc) {
 
 unsigned char fnk_socket_bind(struct fnk_socket* sock) {
     struct util_flinkedlist* newnode = util_flinkedlist_insert(node, (void *) sock);
-    if (newnode == 0)
+    if (newnode == NULL)
         return FNK_SOCKET_ERRC_BIND_WOULDOVERFLOW;
 
     node = newnode;
@@ -28,11 +31,24 @@ unsigned char fnk_socket_bind(struct fnk_socket* sock) {
     return FNK_SOCKET_ERRC_OK;
 }
 
-unsigned char fnk_socket_write(struct fnk_socket* self, void* buf, unsigned len) {
+unsigned char fnk_socket_write(struct fnk_socket* self, unsigned char* buf, size_t len) {
+    if (len + self->writep > self->writelen)
+        return FNK_SOCKET_ERRC_RW_WOULDOVERFLOW;
+
+    unsigned char padding = ((uintptr_t) buf) % 8;
+
+    // Write until buffer reaches nice bit allignment
+    for (unsigned i = 0; i < padding && i < len; i++) {
+        *(self->writebuffer + self->writep++) = buf[i];
+    }
+
+    // Now write as largest possible
+    for (unsigned i = 0; i < (len - padding) % 8; i++) {
+        *((unsigned long long*) (self->writebuffer + self->writep)) = ((unsigned long long*) buf)[i];
+        self->writep += 8;
+    }
+
+    return FNK_SOCKET_ERRC_OK;
 }
 
-unsigned char fnk_socket_read(struct fnk_socket* self, void* buf, unsigned len);
-
-unsigned char fnk_socket_writee(struct fnk_socket* self, void* buf, unsigned len, _Bool little);
-
-unsigned char fnk_socket_reade(struct fnk_socket* self, void* buf, unsigned len, _Bool little);
+unsigned char fnk_socket_read(struct fnk_socket* self, unsigned char* buf, size_t len);

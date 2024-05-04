@@ -6,6 +6,9 @@
 #ifndef INCLUDE_RTFNK_SOCKET_H_
 #define INCLUDE_RTFNK_SOCKET_H_
 
+#include <stddef.h>
+#include <stdbool.h>
+
 #define FNK_SOCKET_MAXTYPES 256
 #define FNK_SOCKET_MAXSOCKETS 64
 
@@ -18,14 +21,16 @@
 const char* fnk_socket_def_errcstr[] = { ///< Default error codes to string
     [FNK_SOCKET_ERRC_OK] = "Ok",
     [FNK_SOCKET_ERRC_BIND_WOULDOVERFLOW] = "No room in system to add new sockets",
-    [FNK_SOCKET_ERRC_RW_WOULDOVERFLOW] = "Attempted to write/read outside buffer"
+    [FNK_SOCKET_ERRC_RW_WOULDOVERFLOW] = "Attempted to write/read outside buffer",
 };
 
 typedef struct fnk_socket {
-    void const* writebuffer; ///< Information that is to be written
-    void const* readbuffer; ///< Information that has been read and is stored
-    unsigned writeposition; ///< This type might be too small... Change it if you so desire
-    unsigned readposition;
+    unsigned char *const writebuffer; ///< Information that is to be written
+    unsigned char *const readbuffer; ///< Information that has been read and is stored
+    size_t writelen;
+    size_t readlen;
+    size_t writep; ///< P is for position
+    size_t readp;
     const unsigned char type; ///< Types can be defined by anything meaning that custom error codes can exist as well as custom update functions allowing for easier hardware writes
 } fnk_socket_t;
 
@@ -49,7 +54,7 @@ unsigned char fnk_socket_bind(struct fnk_socket* sock);
  * @param buf  Buffer to read from
  * @param len  # of bytes to read
  */
-unsigned char fnk_socket_write(struct fnk_socket* self, void* buf, unsigned len);
+unsigned char fnk_socket_write(struct fnk_socket* self, unsigned char* buf, size_t len);
 
 /**
  * @brief Read content from buffer
@@ -60,26 +65,6 @@ unsigned char fnk_socket_write(struct fnk_socket* self, void* buf, unsigned len)
  * @param buf  Buffer to write to
  * @param len  # of bytes to write
  */
-unsigned char fnk_socket_read(struct fnk_socket* self, void* buf, unsigned len);
-
-/**
- * @brief Write content to buffer
- *
- * @param self   Socket
- * @param buf    Buffer to read from
- * @param len    # of bytes to read
- * @param little Little or big endian
- */
-unsigned char fnk_socket_writee(struct fnk_socket* self, void* buf, unsigned len, _Bool little);
-
-/**
- * @brief Read content from buffer
- *
- * @param self   Socket
- * @param buf    Buffer to write to
- * @param len    # of bytes to write
- * @param little Little or big endian
- */
-unsigned char fnk_socket_reade(struct fnk_socket* self, void* buf, unsigned len, _Bool little);
+unsigned char fnk_socket_read(struct fnk_socket* self, unsigned char* buf, size_t len);
 
 #endif
