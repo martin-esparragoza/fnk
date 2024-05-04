@@ -2,7 +2,9 @@
  * @file inst.h
  * Functions that need to be defined in assembly
  */
-#pragma once
+
+#ifndef INCLUDE_ARCH_INST_H_
+#define INCLUDE_ARCH_INST_H
 
 /**
  * Push all general registers onto the stack
@@ -28,3 +30,5 @@ void arch_inst_enter(void* sp);
  * Then pops ip off the stack in order to return control to the process
  */
 void arch_inst_exit(void* sp);
+
+#endif

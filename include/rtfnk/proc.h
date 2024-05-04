@@ -2,7 +2,8 @@
  * @file proc.h
  * @brief Processes use this to interface with the process system
  */
-#pragma once
+#ifndef INCLUDE_RTFNK_PROC_H
+#define INCLUDE_RTFNK_PROC_H
 #include "pcb.h"
 
 /**
@@ -20,3 +21,5 @@ void fnk_proc_yield(struct fnk_pcb* self);
  * If you call this with not yourself... what are you doing first of all?? But it will have undefined behavior.
  */
 void fnk_proc_yieldnopreg(struct fnk_pcb* self);
+
+#endif

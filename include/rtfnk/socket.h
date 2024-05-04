@@ -3,7 +3,9 @@
  * @brief Buffer read/write handler
  */
 
-#pragma once
+#ifndef INCLUDE_RTFNK_SOCKET_H_
+#define INCLUDE_RTFNK_SOCKET_H_
+
 #define FNK_SOCKET_MAXTYPES 256
 #define FNK_SOCKET_MAXSOCKETS 64
 
@@ -22,7 +24,7 @@ const char* fnk_socket_def_errcstr[] = { ///< Default error codes to string
 typedef struct fnk_socket {
     void const* writebuffer; ///< Information that is to be written
     void const* readbuffer; ///< Information that has been read and is stored
-    unsigned writeposition; ///< This type might be too small... I'd rather it be a long at least
+    unsigned writeposition; ///< This type might be too small... Change it if you so desire
     unsigned readposition;
     const unsigned char type; ///< Types can be defined by anything meaning that custom error codes can exist as well as custom update functions allowing for easier hardware writes
 } fnk_socket_t;
@@ -79,3 +81,5 @@ unsigned char fnk_socket_writee(struct fnk_socket* self, void* buf, unsigned len
  * @param little Little or big endian
  */
 unsigned char fnk_socket_reade(struct fnk_socket* self, void* buf, unsigned len, _Bool little);
+
+#endif

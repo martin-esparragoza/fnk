@@ -8,6 +8,7 @@
  * Also I don't want to be confined by the API
  */
 
-#pragma once
+#ifndef INCLUDE_DRIVERS_EFS_H_
+#define INCLUDE_DRIVERS_EFS_H_
 
-
+#endif

@@ -6,7 +6,9 @@
  * Modeled around SCSI
  */
 
-#pragma once
+#ifndef INCLUDE_DRIVERS_EDISK_H_
+#define INCLUDE_DRIVERS_EDISK_H_
+
 #define DRIVERS_DISK_ERRC_OK 0
 
 // Error type -> unsigned
@@ -63,3 +65,5 @@ unsigned drivers_disk_writemultiblockul(void* block, unsigned long num);
 unsigned drivers_disk_writemultiblocku(void* block, unsigned num);
 unsigned drivers_disk_writemultiblockus(void* block, unsigned short num);
 unsigned drivers_disk_writemultiblockuc(void* block, unsigned char num);
+
+#endif
