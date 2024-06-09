@@ -5,7 +5,7 @@ LIBFILES = $(patsubst %/,%.a,$(wildcard ../lib/*/)) ../lib/arch/$(ARCH)
 .PHONY: all deps build clean
 
 all: build
-	@echo $(DEPFILES) $(OBJFILES) $(LIBFILES)
+	@echo $(DEPFILES) | $(OBJFILES) | $(LIBFILES)
 
 clean:
 	rm -rf *.o
@@ -18,7 +18,8 @@ deps: $(DEPFILES)
 %.d: %.c
 	$(CC) -MM $< -MF $@
 
-%.o: %.c $(LIBFILES)
+%.o: %.c
+	@echo hi
 	$(CC) $(CFLAGS) $< -o $@ $(CLINK) $(LIBFILES)
 
 ifneq ($(MAKECMDGOALS),clean)
