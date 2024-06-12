@@ -1,6 +1,6 @@
 DEPFILES = $(patsubst %.c,%.d,$(wildcard *.c))
 OBJFILES = $(patsubst %.c,%.o,$(wildcard *.c))
-LIBFILES = $(patsubst %/,%.a,$(wildcard ../lib/*/)) ../lib/arch/$(ARCH)
+LIBFILES = $(wildcard ../lib/*.a)
 
 .PHONY: all deps build clean
 
