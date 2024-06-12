@@ -1,8 +1,8 @@
 # This makefile is responsible for the compilation of all libraries (situated in folders)
 
 MAKEDIRS = rtfnk/ $(wildcard arch/*/) drivers/ util/
-dEPFILES = $(patsubst %.c,%.d,$(wildcard */*.c))
-OBJFILES = $(patsubst %.c,%.o,$(wildcard */*.c))
+DEPFILES = $(patsubst %.c,%.d,$(wildcard */*.c))
+OBJFILES = $(patsubst %.c,%.o,$(wildcard */*.c) $(wildcard arch/*/*.c))
 LIBFILES = $(notdir $(patsubst %/,%.a,$(MAKEDIRS)))
 
 .PHONY: all deps build clean
@@ -14,7 +14,7 @@ clean:
 	rm -rf $(MAKEDIRS:=*.d)
 	rm -rf *.a
 
-build: deps $(LIBFILES)
+build: deps $(OBJFILES) $(LIBFILES)
 
 deps: $(DEPFILES)
 

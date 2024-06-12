@@ -5,7 +5,6 @@ LIBFILES = $(wildcard ../lib/*.a)
 .PHONY: all deps build clean
 
 all: build
-	@echo $(DEPFILES) | $(OBJFILES) | $(LIBFILES)
 
 clean:
 	rm -rf *.o
@@ -19,7 +18,6 @@ deps: $(DEPFILES)
 	$(CC) -MM $< -MF $@
 
 %.o: %.c
-	@echo hi
 	$(CC) $(CFLAGS) $< -o $@ $(CLINK) $(LIBFILES)
 
 ifneq ($(MAKECMDGOALS),clean)
