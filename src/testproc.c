@@ -3,19 +3,15 @@
 #include "../lib/util/flinkedlist.h"
 
 unsigned int proc;
-struct fnk_pcb* pcbs;
 struct fnk_pcb* self;
 struct util_flinkedlist list[50];
 
 /**
  * It is assumed that ALL programs will use a calling convention for the main function that treats its arguments as strictly on the stack
  */
-int main(unsigned int argproc, struct fnk_pcb argpcbs[]) {
+int main(struct fnk_pcb* argself) {
     // Store them
-    proc = argproc;
-    pcbs = argpcbs;
-
-    self = &(pcbs[proc]);
+    self = argself;
 
     util_flinkedlist_init(list, sizeof(list) / sizeof(list[0]));
 

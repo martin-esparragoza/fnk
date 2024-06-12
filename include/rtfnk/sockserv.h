@@ -11,3 +11,6 @@
 #define FNK_SOCKSRV_MAXSOCKETS 256;
 
 struct fnk_sockserv;
+typedef struct fnk_sockserv fnk_sockserv_t;
+
+#endif

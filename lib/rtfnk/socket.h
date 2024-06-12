@@ -5,6 +5,7 @@
 
 #ifndef LIB_RTFNK_SOCKET_H_
 #define LIB_RTFNK_SOCKET_H
+
 #include "../../include/rtfnk/socket.h"
 
 struct fnk_socket {
