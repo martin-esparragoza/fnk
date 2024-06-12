@@ -10,6 +10,14 @@
 #include <stddef.h>
 #include <stdbool.h>
 
+const char* fnk_socket_errctostr_def(unsigned char errc) {
+    if (errc < sizeof(fnk_socket_def_errcstr) / sizeof(fnk_socket_def_errcstr[0]))
+        return fnk_socket_def_errcstr[errc];
+
+    // Default errc not found
+    return NULL;
+}
+
 unsigned char fnk_socket_write(struct fnk_socket* self, unsigned char* buf, size_t len) {
     if (len + self->writep > self->writelen)
         return FNK_SOCKET_ERRC_DEF_RW_WOULDOVERFLOW;
