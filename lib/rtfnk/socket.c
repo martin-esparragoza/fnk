@@ -4,32 +4,15 @@
  */
 
 #include "../../include/rtfnk/socket.h"
+#include "socket.h"
 #include "../util/flinkedlist.h"
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
 
-const char* fnk_socket_errctostr(struct fnk_socket* self, unsigned char errc) {
-    if (errc < sizeof(fnk_socket_def_errcstr) / sizeof(fnk_socket_def_errcstr[0]))
-        return fnk_socket_def_errcstr[errc];
-
-    // Default errc not found. Ask the others
-    return (*fnk_socket_errctostr_table[self->type])(self, errc);
-}
-
-unsigned char fnk_socket_bind(struct fnk_socket* sock, struct fnk_socketsrv* srv) {
-    struct util_flinkedlist* newnode = util_flinkedlist_insert(node, (void *) sock);
-    if (newnode == NULL)
-        return FNK_SOCKET_ERRC_BIND_WOULDOVERFLOW;
-
-    node = newnode;
-
-    return FNK_SOCKET_ERRC_OK;
-}
-
 unsigned char fnk_socket_write(struct fnk_socket* self, unsigned char* buf, size_t len) {
     if (len + self->writep > self->writelen)
-        return FNK_SOCKET_ERRC_RW_WOULDOVERFLOW;
+        return FNK_SOCKET_ERRC_DEF_RW_WOULDOVERFLOW;
 
     unsigned char padding = ((uintptr_t) buf) % 8;
 
@@ -44,7 +27,7 @@ unsigned char fnk_socket_write(struct fnk_socket* self, unsigned char* buf, size
         self->writep += 8;
     }
 
-    return FNK_SOCKET_ERRC_OK;
+    return FNK_SOCKET_ERRC_DEF_OK;
 }
 
 unsigned char fnk_socket_read(struct fnk_socket* self, unsigned char* buf, size_t len);
