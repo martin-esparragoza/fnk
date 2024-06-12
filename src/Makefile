@@ -17,7 +17,7 @@ deps: $(DEPFILES)
 %.d: %.c
 	$(CC) -MM $< -MF $@
 
-%.o: %.c
+%.o: %.c $(LIBFILES)
 	$(CC) $(CFLAGS) $< -o $@ $(CLINK) $(LIBFILES)
 
 ifneq ($(MAKECMDGOALS),clean)
