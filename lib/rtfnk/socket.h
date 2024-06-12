@@ -4,7 +4,7 @@
  */
 
 #ifndef LIB_RTFNK_SOCKET_H_
-#define LIB_RTFNK_SOCKET_H
+#define LIB_RTFNK_SOCKET_H_
 
 #include "../../include/rtfnk/socket.h"
 #include "../util/flinkedlist.h"

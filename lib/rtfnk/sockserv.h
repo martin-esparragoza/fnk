@@ -10,7 +10,7 @@
 #include "socket.h"
 #include "../util/flinkedlist.h"
 
-#define FNK_SOCKSRV_MAXSOCKETS 256;
+#define FNK_SOCKSRV_MAXSOCKETS 256
 
 // Right now its literally just an array but I'd like to give flexibility
 struct fnk_sockserv {

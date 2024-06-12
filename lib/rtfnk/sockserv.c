@@ -8,13 +8,13 @@ void fnk_sockserv_init(struct fnk_sockserv* self) {
     self->node = self->sockets;
 }
 
-void fnk_sockserv_bind(struct fnk_sockserv* self, struct fnk_socket* socket) {
+unsigned char fnk_sockserv_bind(struct fnk_sockserv* self, struct fnk_socket* socket) {
     struct util_flinkedlist* node = util_flinkedlist_insert(self->node, (void *) socket);
     // BAD.
     if (!node)
-        return false;
+        return FNK_SOCKET_ERRC_DEF_BIND_WOULDOVERFLOW;
     self->node = socket->node = node;
-    return true;
+    return FNK_SOCKET_ERRC_DEF_OK;
 }
 
 void fnk_sockserv_remove(struct fnk_sockserv* self, struct fnk_socket* socket) {
