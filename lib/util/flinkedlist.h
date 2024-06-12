@@ -2,6 +2,7 @@
  * @file flinkedlist.h
  * @brief Fixed size linked list
  * This means that the linked list relies on the fact of the linked list already being fully assembled and then rearrangeable
+ * Doubly linked
  */
 
 #ifndef UTIL_FLINKEDLIST_H_
@@ -12,6 +13,7 @@
 typedef struct util_flinkedlist {
     void* data;
     struct util_flinkedlist* next;
+    struct util_flinkedlist* prev;
 } util_flinkedlist_t;
 
 /**
