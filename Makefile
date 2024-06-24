@@ -3,7 +3,7 @@ ARCH = testlinux.a
 
 CC = gcc
 AR = ar
-CFLAGS = -Wall --freestanding -fPIC
+CFLAGS = -Wall --freestanding -std=c99
 CLINK =
 export
 
