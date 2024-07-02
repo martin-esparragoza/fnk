@@ -5,7 +5,6 @@ LIBFILES = $(wildcard ../lib/*.a) ../lib/arch/$(ARCH)
 .PHONY: all deps build clean
 
 all: build
-	@echo $(LIBFILES)
 
 clean:
 	rm -rf *.o

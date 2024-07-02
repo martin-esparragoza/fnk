@@ -5,8 +5,8 @@
  * Doubly linked
  */
 
-#ifndef UTIL_FLINKEDLIST_H_
-#define UTIL_FLINKEDLIST_H_
+#ifndef LIB_UTIL_FLINKEDLIST_H_
+#define LIB_UTIL_FLINKEDLIST_H_
 
 #include <stddef.h>
 
