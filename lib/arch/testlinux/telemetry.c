@@ -2,19 +2,19 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-unsigned char sdrive_telemetry_init() {
+int sdrive_telemetry_init() {
     return 0;
 }
 
-unsigned char sdrive_telemetry_fini() {
+int sdrive_telemetry_fini() {
     return 0;
 }
 
-unsigned char sdrive_telemetry_puts(const char* str) {
+int sdrive_telemetry_puts(const char* str) {
     return puts(str);
 }
 
-unsigned char sdrive_telemetry_printf(const char* format, ...) {
+int sdrive_telemetry_printf(const char* format, ...) {
     va_list args;
     va_start(args, format);
     int ret = vfprintf(stdout, format, args);

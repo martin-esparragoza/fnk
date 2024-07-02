@@ -3,24 +3,31 @@
  * @brief Telemetry output (implementation of this can be skipped if desired)
  */
 
+#ifndef INCLUDE_SDRIVE_TELEMETRY_H_
+#define INCLUDE_SDRIVE_TELEMETRY_H_
+
 /**
  * @brief Init telemetry before sending anything
  * @return Error code
  */
-unsigned char sdrive_telemetry_init();
+int sdrive_telemetry_init();
 
 /**
  * @brief Remove telemetry stream
  */
-unsigned char sdrive_telemetry_fini();
+int  sdrive_telemetry_fini();
 
 /**
  * @brief Put string
  */
-unsigned char sdrive_telemetry_puts();
+int  sdrive_telemetry_puts();
 
 /**
  * @brief Put string to telemetry
  * @return Error code
  */
-unsigned char sdrive_telemetry_printf(const char* format, ...);
+int sdrive_telemetry_printf(const char* format, ...);
+
+#define SDRIVE_TELEMETRY_LOG(format, ...) sdrive_telemetry_printf("[%s:%d]" format, __FILE__, __LINE__, ## __VA_ARGS__)
+
+#endif

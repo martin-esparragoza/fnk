@@ -8,7 +8,7 @@ void fnk_sockserv_init(struct fnk_sockserv* self) {
     self->node = self->sockets;
 }
 
-unsigned char fnk_sockserv_bind(struct fnk_sockserv* self, struct fnk_socket* socket) {
+int fnk_sockserv_bind(struct fnk_sockserv* self, struct fnk_socket* socket) {
     struct util_flinkedlist* node = util_flinkedlist_insert(self->node, (void *) socket);
     // BAD.
     if (!node)

@@ -4,8 +4,18 @@
  * OS is only meant for 1 FS to be accesed at once (and 1 disk)
  */
 
+#ifndef INCLUDE_SDRIVE_FAT16_H_
+#define INCLUDE_SDRIVE_FAT16_H_
+
 /**
  * @brief Grabs FAT table and other things
  * Needs to be ran before any disk operations happen
  */
-unsigned char sdrive_fat16_init();
+int sdrive_fat16_init();
+
+/**
+ * @brief Closes everything
+ */
+int sdrive_fat16_fini();
+
+#endif

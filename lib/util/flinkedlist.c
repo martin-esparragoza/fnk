@@ -5,7 +5,7 @@ void util_flinkedlist_init(struct util_flinkedlist* list, size_t size) {
     if (size <= 1)
         return;
 
-    struct util_flinkedlist* prev = NULL;
+    // struct util_flinkedlist* prev = NULL;
     list[0].next = list + 1;
     list[0].prev = NULL;
     for (unsigned i = 1; i < size - 1; i++) {

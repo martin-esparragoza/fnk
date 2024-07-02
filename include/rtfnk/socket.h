@@ -32,7 +32,7 @@ typedef struct fnk_socket fnk_socket_t;
  * @param errc Error code
  * @return String and if cannot find returns NULL
  */
-const char* fnk_socket_errctostr_def(unsigned char errc);
+const char* fnk_socket_errctostr_def(int errc);
 
 /**
  * @brief Write content to buffer
@@ -42,8 +42,9 @@ const char* fnk_socket_errctostr_def(unsigned char errc);
  * @param self Socket
  * @param buf  Buffer to read from
  * @param len  # of bytes to read
+ * @return # of bytes written
  */
-unsigned char fnk_socket_write(struct fnk_socket* self, unsigned char* buf, size_t len);
+int fnk_socket_write(struct fnk_socket* self, unsigned char* buf, size_t len);
 
 /**
  * @brief Read content from buffer
@@ -51,9 +52,10 @@ unsigned char fnk_socket_write(struct fnk_socket* self, unsigned char* buf, size
  * Used in native endianness
  *
  * @param self Socket
- * @param buf  Buffer to write to
+ * @param buf Buffer to write to
  * @param len  # of bytes to write
+ * @return # of bytes read
  */
-unsigned char fnk_socket_read(struct fnk_socket* self, unsigned char* buf, size_t len);
+int fnk_socket_read(struct fnk_socket* self, unsigned char* buf, size_t len);
 
 #endif

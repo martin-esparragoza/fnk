@@ -23,7 +23,7 @@ void fnk_sockserv_init(struct fnk_sockserv* self);
 /**
  * @brief Add socket to server
  */
-unsigned char fnk_sockserv_bind(struct fnk_sockserv* self, struct fnk_socket* socket);
+int fnk_sockserv_bind(struct fnk_sockserv* self, struct fnk_socket* socket);
 
 /**
  * @brief Remove socket from server

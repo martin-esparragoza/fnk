@@ -4,29 +4,45 @@
  */
 
 #include "../include/sdrive/telemetry.h"
+#include "../include/sdrive/drive.h"
+#include "../include/sdrive/fat16.h"
+#include <stdint.h>
 #include <stdbool.h>
 
 static __attribute__((__used__,section(".memdump"))) struct { ///< Debug information memdump
     unsigned char telemetry_init_status;
     unsigned char drive_init_status;
-    int main_return_code
+    unsigned char fat16_init_status;
+    int main_return_code;
 } memdump;
 
-int main() __attribute__((noreturn)) {
-    if (!(memdump.telemetry_status = sdrive_telemetry_init()))
-        sdrive_telemetry_printf("STATIC DRIVER TELEMETRY INIT SUCCESS\n");
+static void errorhang();
+
+int __attribute__((noreturn)) main() {
+    if (!(memdump.telemetry_init_status = sdrive_telemetry_init()))
+        SDRIVE_TELEMETRY_LOG("Successfully inited static telemetry driver\n");
 
     memdump.drive_init_status = sdrive_drive_init();
     for (unsigned char i = 0; i < 3 && !memdump.drive_init_status; i++) {
-        sdrive_telemetry_log("Failed to init drive static driver. Retrying..\n")
+        SDRIVE_TELEMETRY_LOG("Failed to init drive static driver. Retrying..\n");
 
         memdump.drive_init_status = sdrive_drive_init();
     }
+    
+    if ((memdump.fat16_init_status = sdrive_fat16_init())) {
+        SDRIVE_TELEMETRY_LOG("Failed to init fat16 static driver\n");
+        errorhang();
+    }
 
-
-    main_return_code =
+    memdump.main_return_code =
         sdrive_telemetry_fini() |
-        sdrive_drive_fini();
+        sdrive_drive_fini() |
+        sdrive_fat16_fini();
 
     // Jump out here
+}
+
+static void __attribute__((noreturn)) errorhang() {
+    SDRIVE_TELEMETRY_LOG("Hanging due to error..\n");
+    while (1);
 }
