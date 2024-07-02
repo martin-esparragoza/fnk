@@ -11,7 +11,7 @@
  * @brief Grabs FAT table and other things
  * Needs to be ran before any disk operations happen
  */
-int sdrive_fat16_init();
+int sdrive_fat16_init(unsigned lba_bootsector);
 
 /**
  * @brief Closes everything

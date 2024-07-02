@@ -8,6 +8,7 @@ int sdrive_drive_init() {
     fp = fopen("test.img", "a");
     fclose(fp);
     fp = fopen("test.img", "rb+");
+    return 0;
 }
 
 int sdrive_drive_fini() {

@@ -1,6 +1,6 @@
 # This makefile is responsible for the compilation of all libraries (situated in folders)
 
-MAKEDIRS = rtfnk/ $(wildcard arch/*/) drivers/ util/
+MAKEDIRS = rtfnk/ $(wildcard arch/*/) sdrive/ util/
 DEPFILES = $(patsubst %.c,%.d,$(wildcard */*.c))
 OBJFILES = $(patsubst %.c,%.o,$(wildcard */*.c) $(wildcard arch/*/*.c))
 LIBFILES = $(notdir $(patsubst %/,%.a,$(MAKEDIRS)))

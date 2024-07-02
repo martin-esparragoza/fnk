@@ -23,13 +23,15 @@ int __attribute__((noreturn)) main() {
         SDRIVE_TELEMETRY_LOG("Successfully inited static telemetry driver\n");
 
     memdump.drive_init_status = sdrive_drive_init();
-    for (unsigned char i = 0; i < 3 && !memdump.drive_init_status; i++) {
+    for (unsigned char i = 0; i < 3 && memdump.drive_init_status; i++) {
         SDRIVE_TELEMETRY_LOG("Failed to init drive static driver. Retrying..\n");
 
         memdump.drive_init_status = sdrive_drive_init();
     }
+    if (memdump.drive_init_status)
+        errorhang();
     
-    if ((memdump.fat16_init_status = sdrive_fat16_init())) {
+    if ((memdump.fat16_init_status = sdrive_fat16_init(0))) {
         SDRIVE_TELEMETRY_LOG("Failed to init fat16 static driver\n");
         errorhang();
     }
