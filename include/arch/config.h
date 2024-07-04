@@ -8,7 +8,7 @@
 #define INCLUDE_ARCH_CONFIG_H_
 
 #define ARCH_CONFIG_VERBOSE 3
-#define ARCH_CONFIG_STACK_DIR DOWN ///< Define this to DOWN or UP
-#define ARCH_CONFIG_ENDIANESS LITTLE ///< Define this to be LITTLE or BIG
+#define ARCH_CONFIG_STACK_DIR_DOWN ///< Define this to DOWN or UP
+#define ARCH_CONFIG_BIG_ENDIAN ///< Define this to be LITTLE or BIG
 
 #endif

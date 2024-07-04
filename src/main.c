@@ -10,7 +10,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-__attribute__((__used__,section(".memdump"))) struct memdump md;
+__attribute__((__used__,section(".memdump"))) struct util_memdump md;
 
 static void errorhang();
 

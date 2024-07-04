@@ -3,22 +3,17 @@
 #include "../../include/sdrive/telemetry.h"
 #include "../../include/arch/config.h"
 #include "../util/memdump.h"
+#include "../util/ops.h"
 #include <stdint.h>
-#include <stdbool.h>
 
-extern struct memdump md;
-
-static bool ispowertwo(unsigned x);
-static inline bool ispowertwo(unsigned x) {
-    return x && !(x & (x - 1)); // && x to make sure x != 0
-}
+extern struct util_memdump md;
 
 // Do note that you can treat this as a union to bring fat32 support
 struct __attribute__((packed)) {
     uint8_t jmpboot[3];
     uint8_t oemname[8];
     uint16_t bytespersector;
-    uint8_t bytespercluster;
+    uint8_t sectorspercluster;
     uint16_t reservedsectors;
     uint8_t numfats;
     uint16_t rootentrycount;
@@ -45,10 +40,17 @@ int sdrive_fat16_init(unsigned lba_bootsector) {
     bs = __builtin_alloca_with_align(blocksize, 8);
     if ((md.num_blocks_read_bs = sdrive_drive_readblock(bs, lba_bootsector)) != 1)
         return -1;
+
+    // Painful endian conversion...
+
+#ifdef ARCH_CONFIG_BIG_ENDIAN
+// TODO
+    util_ops_bswap(bs->strfattype, sizeof(bs->strfattype));
+#endif
     
-    SDRIVE_TELEMETRY_INF("oemname: %.8s\n", bs->oemname);
+    SDRIVE_TELEMETRY_INF("OEMName: %.8s\n", bs->oemname);
     SDRIVE_TELEMETRY_INF("Bytes/Sector: %hu\n", bs->bytespersector);
-    SDRIVE_TELEMETRY_INF("Bytes/Cluster: %hu\n", bs->bytespercluster);
+    SDRIVE_TELEMETRY_INF("Sectors/Cluster: %hu\n", bs->sectorspercluster);
     SDRIVE_TELEMETRY_INF("Reserved Sectors: %hhu\n", bs->reservedsectors);
     SDRIVE_TELEMETRY_INF("# of FATs: %hhu\n", bs->numfats);
     SDRIVE_TELEMETRY_INF("Root Entry Count: %hu\n", bs->rootentrycount);
@@ -69,10 +71,10 @@ int sdrive_fat16_init(unsigned lba_bootsector) {
     // Ugly bootsector verification
 
     bool flag = false;
-    if ((flag |= (!ispowertwo(bs->bytespersector) || bs->bytespersector >= 4096)))
+    if ((flag |= (!util_ops_ispowertwo(bs->bytespersector) || bs->bytespersector >= 4096)))
         SDRIVE_TELEMETRY_ERR("Bytes/Sector is not 512, 1024, 2048, or 4096\n");
-    if ((flag |= (!ispowertwo(bs->bytespercluster) || bs->bytespercluster >= 128)))
-        SDRIVE_TELEMETRY_ERR("Bytes/Cluster is not a power of two greater than 0 between 1-128\n");
+    if ((flag |= (!util_ops_ispowertwo(bs->sectorspercluster) || bs->sectorspercluster >= 128)))
+        SDRIVE_TELEMETRY_ERR("Sectors/Cluster is not a power of two greater than 0 between 1-128\n");
     if ((flag |= (bs->reservedsectors == 0)))
         SDRIVE_TELEMETRY_ERR("Reserved sectors must not be 0 for FAT16\n");
     if ((flag |= !(bs->numfats == 1 || bs->numfats == 2)))
