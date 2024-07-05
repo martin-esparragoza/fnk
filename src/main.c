@@ -9,6 +9,7 @@
 #include "../lib/util/memdump.h"
 #include <stdint.h>
 #include <stdbool.h>
+#include <stddef.h>
 
 __attribute__((__used__,section(".memdump"))) struct util_memdump md;
 
@@ -32,6 +33,8 @@ int __attribute__((noreturn)) main() {
         SDRIVE_TELEMETRY_ERR("Failed to init fat16 static driver\n");
         errorhang();
     }
+
+    sdrive_fat16_fopen("", NULL);
 
     md.main_return_code =
         sdrive_telemetry_fini() |

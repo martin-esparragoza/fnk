@@ -11,3 +11,5 @@ void util_ops_bswap(uint8_t* data, size_t size) {
         data[i] ^= data[size - i - 1];
     }
 }
+
+extern inline bool util_ops_ispowertwo(unsigned x);
