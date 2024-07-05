@@ -11,4 +11,6 @@
 #define ARCH_CONFIG_STACK_DIR_DOWN ///< Define this to DOWN or UP
 // #define ARCH_CONFIG_BIG_ENDIAN ///< Define this to be LITTLE or BIG
 
+#define ARCH_CONFIG_SECTORBUFFER_SZ 4 // 4 Sectors
+
 #endif

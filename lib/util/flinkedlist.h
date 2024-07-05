@@ -11,9 +11,8 @@
 #include <stddef.h>
 
 typedef struct util_flinkedlist {
-    void* data;
-    struct util_flinkedlist* next;
-    struct util_flinkedlist* prev;
+    size_t next;
+    size_t prev;
 } util_flinkedlist_t;
 
 /**
@@ -28,9 +27,9 @@ void util_flinkedlist_init(struct util_flinkedlist* list, size_t size);
  *
  * @param node Last node returned
  *
- * @return Next available node NULL if can't insert one
+ * @return Next available node 0 if can't insert one
  */
-struct util_flinkedlist* util_flinkedlist_insert(struct util_flinkedlist* node, void* data);
+size_t util_flinkedlist_insert(struct util_flinkedlist* list, size_t node);
 
 /**
  * @brief Remove that node
@@ -39,6 +38,6 @@ struct util_flinkedlist* util_flinkedlist_insert(struct util_flinkedlist* node, 
  * @param target Node to remove
  * @return Next available node
  */
-struct util_flinkedlist* util_flinkedlist_remove(struct util_flinkedlist* node, struct util_flinkedlist* target);
+size_t util_flinkedlist_remove(struct util_flinkedlist* list, size_t node, size_t target);
 
 #endif

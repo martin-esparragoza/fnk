@@ -34,7 +34,7 @@ struct __attribute__((packed)) {
     uint16_t signature;
 }* bs;
 
-typedef struct __attribute__((packed)) sdrive_fat16_dir {
+typedef struct __attribute__((packed)) dir_sfn {
     uint8_t name[11];
     uint8_t attr;
     uint8_t ntres;
@@ -47,9 +47,29 @@ typedef struct __attribute__((packed)) sdrive_fat16_dir {
     uint16_t writedate;
     uint16_t firstclusterlo;
     uint32_t filesize;
-} sdrive_fat16_dir_t;
+} dir_sfn_t ;
+
+typedef struct __attribute__((packed)) dir_lfn {
+    uint8_t ord;
+    uint16_t name1[5];
+    uint8_t attribute;
+    uint8_t type;
+    uint8_t chksum;
+    uint16_t name2[6];
+    uint16_t firstclusterlo;
+    uint16_t name3[2];
+} dir_lfn_t;
+
+#define SDRIVE_FAT16_DIR_ATTR_READ_ONLY      0x01
+#define SDRIVE_FAT16_DIR_ATTR_HIDDEN         0x02
+#define SDRIVE_FAT16_DIR_ATTR_SYSTEM         0x04
+#define SDRIVE_FAT16_DIR_ATTR_VOLUME_ID      0x08
+#define SDRIVE_FAT16_DIR_ATTR_DIRECTORY      0x10
+#define SDRIVE_FAT16_DIR_ATTR_ARCHIVE        0x20
+#define SDRIVE_FAT16_DIR_ATTR_LONG_FILE_NAME 0x0F
 
 static uint_fast32_t fatstart, fatsize, rootstart, rootsize, datastart, datasize, numclusters;
+static uint_fast16_t bytespersector, sectorspercluster;
 
 // Because this driver is literally only going to read only, I'm not going to update the last access dates and also not going to include even a pointer to the directory entry
 struct sdrive_fat16_file {
@@ -84,6 +104,8 @@ int sdrive_fat16_init(unsigned lba_bootsector) {
 #endif
 
     // Param setting
+    bytespersector = bs->bytespersector;
+    sectorspercluster = bs->sectorspercluster;
     fatstart = bs->reservedsectors;
     fatsize = bs->fatsize16 * bs->numfats;
     rootstart = fatstart + fatsize;
@@ -146,15 +168,22 @@ int sdrive_fat16_init(unsigned lba_bootsector) {
 }
 
 void sdrive_fat16_fopen(const char* path, struct sdrive_fat16_file* fp) {
-    struct sdrive_fat16_dir root[16];
-    for (unsigned i = rootstart; i < rootstart + rootsize; i++) {
-        sdrive_drive_readblock((void*) root, i);
-        for (unsigned j = 0; j < 16; j++) {
-            SDRIVE_TELEMETRY_INF("-------------------------------------------------------\n");
-            //SDRIVE_TELEMETRY_INF("Location: 0x%X\n", i * 512 + j * 16);
-            SDRIVE_TELEMETRY_INF("Name: %.11s\n", root[j].name);
-            SDRIVE_TELEMETRY_INF("First Cluster: %hu\n", root[j].firstclusterlo);
-            SDRIVE_TELEMETRY_INF("Directory? %hhu\n", root[j].attr & 0x10);
+    void* buffer = __builtin_alloca_with_align(bytespersector * ARCH_CONFIG_SECTORBUFFER_SZ, 8);
+
+    // The worst most garbagest queue known to man (I AM LAZY AND FLINKEDLIST ISN'T BUILT FOR THIS)
+
+    // For consistency and loopability we must convert this to sectors and not use clusters
+    uint_fast16_t dirstart = rootstart;
+    uint_fast16_t dirsize = rootsize;
+
+    while (1) {
+        bool eod = false;
+        if ((eod = ARCH_CONFIG_SECTORBUFFER_SZ > dirsize)) {
+            sdrive_drive_readmultiblock(buffer, dirstart, dirsize);
+        } else {
+            sdrive_drive_readmultiblock(buffer, dirstart, ARCH_CONFIG_SECTORBUFFER_SZ);
+            dirstart += ARCH_CONFIG_SECTORBUFFER_SZ;
+            dirsize -= ARCH_CONFIG_SECTORBUFFER_SZ;
         }
     }
 }

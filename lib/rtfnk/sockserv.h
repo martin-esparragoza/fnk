@@ -9,13 +9,15 @@
 #include "../../include/rtfnk/sockserv.h"
 #include "socket.h"
 #include "../util/flinkedlist.h"
+#include <stddef.h>
 
 #define FNK_SOCKSRV_MAXSOCKETS 256
 
 // Right now its literally just an array but I'd like to give flexibility
 struct fnk_sockserv {
-    struct util_flinkedlist sockets[FNK_SOCKSRV_MAXSOCKETS];
-    struct util_flinkedlist* node;
+    struct util_flinkedlist ll[FNK_SOCKSRV_MAXSOCKETS];
+    struct fnk_socket* sockets[FNK_SOCKSRV_MAXSOCKETS];
+    size_t node;
 };
 
 #endif
