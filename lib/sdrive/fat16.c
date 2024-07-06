@@ -215,7 +215,7 @@ int sdrive_fat16_fopen(const char* path, struct sdrive_fat16_file* fp) {
         }
 
         // Now to check all entries in the directory
-        for (struct dir_sfn* dir = buffer; dir < ((uintptr_t) buffer) + bytesread; dir++) {
+        for (struct dir_sfn* dir = buffer; ((uintptr_t) dir) < ((uintptr_t) buffer) + bytesread; dir++) {
 if (dir->name[0] == 0xE5)
     continue;
 

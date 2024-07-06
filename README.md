@@ -1,11 +1,11 @@
 An operating system frame. (written in C99 for GCC compiler)
 
-Restrictions:
-* It is assumed that there is 1 storage medium formatted FULLY with a fat16 filesystem
-* Shared sp (ideally there is enough memory)
+!CARE
+* Unsafely written for the most part
+* Designed to have an image file that fits in 4K of codespace
 
-Features:
-* Socket API
-* Multiple processes
-
-- Made by Martin Esparragoza
+FEATURES (atttempted)
+* Cooperative sceduling
+* Socket API for communications (internally and externally)
+* Dynamically allocated drivers that can be updated in real time
+* Fast driver and interrupt processing
