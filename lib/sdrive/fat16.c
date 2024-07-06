@@ -4,6 +4,7 @@
 #include "../../include/arch/config.h"
 #include "../util/memdump.h"
 #include "../util/ops.h"
+#include "../util/flinkedlist.h"
 #include <stdint.h>
 
 extern struct util_memdump md;
@@ -47,7 +48,7 @@ typedef struct __attribute__((packed)) dir_sfn {
     uint16_t writedate;
     uint16_t firstclusterlo;
     uint32_t filesize;
-} dir_sfn_t ;
+} dir_sfn_t;
 
 typedef struct __attribute__((packed)) dir_lfn {
     uint8_t ord;
@@ -60,6 +61,12 @@ typedef struct __attribute__((packed)) dir_lfn {
     uint16_t name3[2];
 } dir_lfn_t;
 
+// Because this driver is literally only going to read only, I'm not going to update the last access dates and also not going to include even a pointer to the directory entry
+struct sdrive_fat16_file {
+    uint_fast16_t startingcluster;
+    uint_fast16_t currentcluster;
+};
+
 #define SDRIVE_FAT16_DIR_ATTR_READ_ONLY      0x01
 #define SDRIVE_FAT16_DIR_ATTR_HIDDEN         0x02
 #define SDRIVE_FAT16_DIR_ATTR_SYSTEM         0x04
@@ -68,20 +75,29 @@ typedef struct __attribute__((packed)) dir_lfn {
 #define SDRIVE_FAT16_DIR_ATTR_ARCHIVE        0x20
 #define SDRIVE_FAT16_DIR_ATTR_LONG_FILE_NAME 0x0F
 
+static const char* sdrive_fat16_errcstr[] = {
+    [SDRIVE_FAT16_ERRC_OK] = "Ok",
+    [SDRIVE_FAT16_ERRC_CORRUPTBS] = "Boot segment is corrupted",
+    [SDRIVE_FAT16_ERRC_READ_FAIL] = "Failed to read sector(s)",
+    [SDRIVE_FAT16_ERRC_FILE_NOT_FOUND] = "Failed to find file"
+};
+
 static uint_fast32_t fatstart, fatsize, rootstart, rootsize, datastart, datasize, numclusters;
 static uint_fast16_t bytespersector, sectorspercluster;
 
-// Because this driver is literally only going to read only, I'm not going to update the last access dates and also not going to include even a pointer to the directory entry
-struct sdrive_fat16_file {
-    uint_fast16_t startingcluster;
-    uint_fast16_t currentcluster;
-};
+const char* sdrive_fat16_errctostr(int errc) {
+    if (errc < sizeof(sdrive_fat16_errcstr) / sizeof(sdrive_fat16_errcstr[0]) && errc > 0)
+        return sdrive_fat16_errcstr[errc];
+
+    // Default errc not found
+    return NULL;
+}
 
 int sdrive_fat16_init(unsigned lba_bootsector) {
     uint_fast16_t blocksize = sdrive_drive_getblocksize();
     bs = __builtin_alloca_with_align(blocksize, 8);
     if ((md.num_blocks_read_bs = sdrive_drive_readblock(bs, lba_bootsector)) != 1)
-        return -1;
+        return SDRIVE_FAT16_ERRC_READ_FAIL;
 
     // Painful endian conversion...
 #ifdef ARCH_CONFIG_BIG_ENDIAN
@@ -162,30 +178,85 @@ int sdrive_fat16_init(unsigned lba_bootsector) {
         SDRIVE_TELEMETRY_ERR("Media type is not 0xF0, 0xF8, 0xF9, 0xFA, 0xFC, 0xFD, 0xFE, or 0xFF\n");
 
     if (flag)
-        return -1;
+        return SDRIVE_FAT16_ERRC_CORRUPTBS;
 
     return 0;
 }
 
-void sdrive_fat16_fopen(const char* path, struct sdrive_fat16_file* fp) {
-    void* buffer = __builtin_alloca_with_align(bytespersector * ARCH_CONFIG_SECTORBUFFER_SZ, 8);
+int sdrive_fat16_fopen(const char* path, struct sdrive_fat16_file* fp) {
+    void* buffer = __builtin_alloca_with_align(bytespersector * ARCH_CONFIG_FAT16_SECTORBUFFER_SZ, 8);
 
-    // The worst most garbagest queue known to man (I AM LAZY AND FLINKEDLIST ISN'T BUILT FOR THIS)
+    // LFN contenders queue
+    struct util_flinkedlist ll[ARCH_CONFIG_FAT16_LFNQUEUE_SZ];
+    struct {
+        // Really the only two values we could possibly need
+        size_t index; // TODO: They are NOT actually in order you have to make a bitmap and check off the values........
+        uint_fast16_t startingcluster;
+    } lldata[ARCH_CONFIG_FAT16_LFNQUEUE_SZ];
+    util_flinkedlist_init(ll, sizeof(ll) / sizeof(ll[0]));
 
     // For consistency and loopability we must convert this to sectors and not use clusters
-    uint_fast16_t dirstart = rootstart;
-    uint_fast16_t dirsize = rootsize;
+    uint_fast32_t dirstart = rootstart;
+    uint_fast32_t dirsize = rootsize;
+    bool eod = false;
 
-    while (1) {
-        bool eod = false;
-        if ((eod = ARCH_CONFIG_SECTORBUFFER_SZ > dirsize)) {
-            sdrive_drive_readmultiblock(buffer, dirstart, dirsize);
+    while (dirsize != 0 && !eod) {
+        uint_fast16_t bytesread = 0;
+        
+        // Clamp values to buffer size
+        if ((eod = (ARCH_CONFIG_FAT16_SECTORBUFFER_SZ > dirsize))) {
+            if ((bytesread = sdrive_drive_readmultiblock(buffer, dirstart, dirsize) * bytespersector) <= 0) // Bad1
+                return SDRIVE_FAT16_ERRC_READ_FAIL;
         } else {
-            sdrive_drive_readmultiblock(buffer, dirstart, ARCH_CONFIG_SECTORBUFFER_SZ);
-            dirstart += ARCH_CONFIG_SECTORBUFFER_SZ;
-            dirsize -= ARCH_CONFIG_SECTORBUFFER_SZ;
+            if ((bytesread = sdrive_drive_readmultiblock(buffer, dirstart, ARCH_CONFIG_FAT16_SECTORBUFFER_SZ) * bytespersector) <= 0) // Bad2
+                return SDRIVE_FAT16_ERRC_READ_FAIL;
+            dirstart += ARCH_CONFIG_FAT16_SECTORBUFFER_SZ;
+            dirsize -= ARCH_CONFIG_FAT16_SECTORBUFFER_SZ;
         }
+
+        // Now to check all entries in the directory
+        for (struct dir_sfn* dir = buffer; dir < ((uintptr_t) buffer) + bytesread; dir++) {
+if (dir->name[0] == 0xE5)
+    continue;
+
+            if (dir->attr & SDRIVE_FAT16_DIR_ATTR_LONG_FILE_NAME) {
+                struct dir_lfn* dir2 = (void*) dir;
+                SDRIVE_TELEMETRY_INF("LFN found. Ord: %hhu Last: %d Name: ", dir2->ord, (dir2->ord & 0x40) > 0);
+                for (unsigned i = 0; i < 10; i += 2) {
+                    sdrive_telemetry_putc(((uint8_t*) dir2->name1)[i]);
+                }
+                for (unsigned i = 0; i < 12; i += 2) {
+                    sdrive_telemetry_putc(((uint8_t*) dir2->name2)[i]);
+                }
+                for (unsigned i = 0; i < 4; i += 2) {
+                    sdrive_telemetry_putc(((uint8_t*) dir2->name3)[i]);
+                }
+                sdrive_telemetry_putc('\n');
+                //struct dir_lfn* dir2 = (void*) dir;
+                //SDRIVE_TELEMETRY_INF("LFN Detected. %.5s is name\n", dir2->name1);
+            } else {
+                SDRIVE_TELEMETRY_INF("SFN found. Name: %.11s\n", dir->name);
+                /*bool flag = false; // Flag for getting kicked out of a file
+                for (size_t i = 0; i < sizeof(dir->name) / sizeof(dir->name[0]) && !flag; i++) {
+                    // Characters don't align + we are are not ending with 
+                    if (path[i] == '\0') {
+                        if (dir->name[i] != ' ') // End of search but not end of name therefore bad
+                            flag = true;
+                        break;
+                    }
+
+                    flag = (path[i] != dir->name[i]);
+                }
+                if (!flag) {
+                    SDRIVE_TELEMETRY_INF("Found the file!\n");
+                    //return SDRIVE_FAT16_ERRC_OK;
+                }*/
+            }
+        }
+        break;
     }
+
+    return SDRIVE_FAT16_ERRC_FILE_NOT_FOUND;
 }
 
 int sdrive_fat16_fini() {

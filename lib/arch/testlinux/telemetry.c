@@ -14,6 +14,10 @@ int sdrive_telemetry_puts(const char* str) {
     return puts(str);
 }
 
+int sdrive_telemetry_putc(char c) {
+    return putc(c, stdout);
+}
+
 int sdrive_telemetry_printf(const char* format, ...) {
     va_list args;
     va_start(args, format);

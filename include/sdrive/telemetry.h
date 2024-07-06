@@ -17,12 +17,17 @@ int sdrive_telemetry_init();
 /**
  * @brief Remove telemetry stream
  */
-int  sdrive_telemetry_fini();
+int sdrive_telemetry_fini();
 
 /**
  * @brief Put string
  */
-int  sdrive_telemetry_puts();
+int sdrive_telemetry_puts(const char* str);
+
+/**
+ * @brief Put character
+ */
+int sdrive_telemetry_putc(char c);
 
 /**
  * @brief Put string to telemetry
