@@ -29,3 +29,7 @@ size_t util_flinkedlist_remove(struct util_flinkedlist* list, size_t node, size_
 
     return target;
 }
+
+size_t util_flinkedlist_getnext(struct util_flinkedlist* list, size_t node) {
+    return list[node].next;
+}

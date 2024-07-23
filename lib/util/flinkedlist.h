@@ -40,4 +40,9 @@ size_t util_flinkedlist_insert(struct util_flinkedlist* list, size_t node);
  */
 size_t util_flinkedlist_remove(struct util_flinkedlist* list, size_t node, size_t target);
 
+/**
+ * @brief Used to recur through
+ */
+size_t util_flinkedlist_getnext(struct util_flinkedlist* list, size_t node);
+
 #endif
