@@ -2,6 +2,7 @@
  * @file fat16.h
  * @brief Synch static lib for fat16 driver
  * OS is only meant for 1 FS to be accesed at once (and 1 disk)
+ * Partitioning unsupported
  */
 
 #ifndef INCLUDE_SDRIVE_FAT16_H_
@@ -35,6 +36,8 @@ int sdrive_fat16_init(unsigned lba_bootsector);
  * @brief Opens a file
  * @param path String file path. ABSOLUTE PATHING IS A MUST (omit the starting slash which indicates the root directory e.g. /home/code would become home/code). NULL terminated ofc
  * @param fp NULL if can't open file
+ *
+ * Does not convert to SFN compatable just use the proper file names
  *
  * @return error code
  */

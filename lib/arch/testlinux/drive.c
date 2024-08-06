@@ -15,26 +15,26 @@ int sdrive_drive_fini() {
     return fclose(fp);
 }
 
-inline uint_fast16_t sdrive_drive_getblocksize() {
+inline int_fast16_t sdrive_drive_getblocksize() {
     return 512;
 }
 
-int sdrive_drive_readblock(void* data, unsigned lba) {
+int_fast8_t sdrive_drive_readblock(void* data, unsigned lba) {
     fseek(fp, lba * sdrive_drive_getblocksize(), SEEK_SET);
     return fread(data, sdrive_drive_getblocksize(), 1, fp);
 }
 
-int sdrive_drive_writeblock(void* data, unsigned lba) {
+int_fast8_t sdrive_drive_writeblock(void* data, unsigned lba) {
     fseek(fp, lba * sdrive_drive_getblocksize(), SEEK_SET);
     return fwrite(data, sdrive_drive_getblocksize(), 1, fp);
 }
 
-int_fast16_t sdrive_drive_readmultiblock(void* data, unsigned lba, uint_fast16_t num) {
+int sdrive_drive_readmultiblock(void* data, unsigned lba, size_t num) {
     fseek(fp, lba * sdrive_drive_getblocksize(), SEEK_SET);
     return fread(data, sdrive_drive_getblocksize(), num, fp);
 }
 
-int_fast16_t sdrive_drive_writemultiblock(void* data, unsigned lba, uint_fast16_t num) {
+int sdrive_drive_writemultiblock(void* data, unsigned lba, size_t num) {
     fseek(fp, lba * sdrive_drive_getblocksize(), SEEK_SET);
     return fwrite(data, sdrive_drive_getblocksize(), num, fp);
 }

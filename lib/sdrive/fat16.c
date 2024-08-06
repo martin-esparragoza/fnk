@@ -50,6 +50,14 @@ typedef struct __attribute__((packed)) dir_sfn {
     uint32_t filesize;
 } dir_sfn_t;
 
+uint8_t getchksum(struct dir_sfn* dir);
+inline uint8_t getchksum(struct dir_sfn* dir) {
+    uint8_t sum = 0;
+    for (uint_fast8_t i = 0; i < sizeof(dir->name) / sizeof(dir->name[0]); i++)
+        sum = (sum >> 1) + (sum << 7) + dir->name[i];
+    return sum;
+}
+
 typedef struct __attribute__((packed)) dir_lfn {
     uint8_t ord;
     uint16_t name1[5];
@@ -185,23 +193,16 @@ int sdrive_fat16_init(unsigned lba_bootsector) {
 
 int sdrive_fat16_fopen(const char* path, struct sdrive_fat16_file* fp) {
     void* buffer = __builtin_alloca_with_align(bytespersector * ARCH_CONFIG_FAT16_SECTORBUFFER_SZ, 8);
-
-    // LFN contenders queue
-    struct util_flinkedlist ll[ARCH_CONFIG_FAT16_LFNQUEUE_SZ];
-    struct {
-        // Really the only two values we could possibly need
-        size_t index; // TODO: They are NOT actually in order you have to make a bitmap and check off the values........
-        uint_fast16_t startingcluster;
-    } lldata[ARCH_CONFIG_FAT16_LFNQUEUE_SZ];
-    util_flinkedlist_init(ll, sizeof(ll) / sizeof(ll[0]));
+    uint_fast8_t length = util_strlen(path); // Max length of anything in FAT is 255 anyway
 
     // For consistency and loopability we must convert this to sectors and not use clusters
     uint_fast32_t dirstart = rootstart;
     uint_fast32_t dirsize = rootsize;
     bool eod = false;
 
+    // Directory read loop
     while (dirsize != 0 && !eod) {
-        uint_fast16_t bytesread = 0;
+        int bytesread = 0;
         
         // Clamp values to buffer size
         if ((eod = (ARCH_CONFIG_FAT16_SECTORBUFFER_SZ > dirsize))) {
@@ -214,46 +215,41 @@ int sdrive_fat16_fopen(const char* path, struct sdrive_fat16_file* fp) {
             dirsize -= ARCH_CONFIG_FAT16_SECTORBUFFER_SZ;
         }
 
-        // Now to check all entries in the directory
+        // Now to check all entries in the read content (with this terrible FSM)
+        bool readinglfn = false;
+        uint_fast8_t index = length;
+        bool badlfn = false;
         for (struct dir_sfn* dir = buffer; ((uintptr_t) dir) < ((uintptr_t) buffer) + bytesread; dir++) {
-if (dir->name[0] == 0xE5)
-    continue;
-
-            if (dir->attr & SDRIVE_FAT16_DIR_ATTR_LONG_FILE_NAME) {
-                struct dir_lfn* dir2 = (void*) dir;
-                SDRIVE_TELEMETRY_INF("LFN found. Ord: %hhu Last: %d Name: ", dir2->ord, (dir2->ord & 0x40) > 0);
-                for (unsigned i = 0; i < 10; i += 2) {
-                    sdrive_telemetry_putc(((uint8_t*) dir2->name1)[i]);
-                }
-                for (unsigned i = 0; i < 12; i += 2) {
-                    sdrive_telemetry_putc(((uint8_t*) dir2->name2)[i]);
-                }
-                for (unsigned i = 0; i < 4; i += 2) {
-                    sdrive_telemetry_putc(((uint8_t*) dir2->name3)[i]);
-                }
-                sdrive_telemetry_putc('\n');
-                //struct dir_lfn* dir2 = (void*) dir;
-                //SDRIVE_TELEMETRY_INF("LFN Detected. %.5s is name\n", dir2->name1);
-            } else {
-                SDRIVE_TELEMETRY_INF("SFN found. Name: %.11s\n", dir->name);
-                /*bool flag = false; // Flag for getting kicked out of a file
-                for (size_t i = 0; i < sizeof(dir->name) / sizeof(dir->name[0]) && !flag; i++) {
-                    // Characters don't align + we are are not ending with 
-                    if (path[i] == '\0') {
-                        if (dir->name[i] != ' ') // End of search but not end of name therefore bad
-                            flag = true;
-                        break;
+            // Goal of this state is to check SFNs as well as 
+            if (!readinglfn) {
+                if (!(readinglfn = (dir->attr & SDRIVE_FAT16_DIR_ATTR_LONG_FILE_NAME))) { // Set the readinglfn to be true if a lfn appears otherwise (SFN) we compare
+                    for (size_t i = 0; i < sizeof(dir->name) / sizeof(dir->name[0]); i++) {
+                        if (path[i] != dir->name[i]) {
+                            if (path[i] == '\0' && dir->name == ' ')
+                                SDRIVE_TELEMETRY_INF("Found it\n");
+                            break;
+                        }
                     }
-
-                    flag = (path[i] != dir->name[i]);
                 }
-                if (!flag) {
-                    SDRIVE_TELEMETRY_INF("Found the file!\n");
-                    //return SDRIVE_FAT16_ERRC_OK;
-                }*/
+            }
+
+            // Positionally placed so if we exit the first state we can instantly go to the 2nd
+            if (readinglfn) {
+                if (!(readinglfn = !(dir->attr & SDRIVE_FAT16_DIR_ATTR_LONG_FILE_NAME)) && !badlfn) { // Set the readinglfn to be true if a sfn appears otherwise (LFN) we compare
+                    // Read all 3 names
+                    struct dir_lfn* lfn = (struct dir_lfn*) dir;
+                    for (uint_fast8_t i = 0; i < sizeof(lfn->name1) / sizeof(lfn->name1[0]); i++) {
+                        if (lfn->name1[i] != path[index]) {
+                            if (lfn->name[i] == '\0' && index == length) { // Stuff hasn't started
+                                continue;
+                            }
+                            badlfn = true;
+                            continue;
+                        }
+                    }
+                }
             }
         }
-        break;
     }
 
     return SDRIVE_FAT16_ERRC_FILE_NOT_FOUND;
