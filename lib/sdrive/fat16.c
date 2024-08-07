@@ -5,7 +5,10 @@
 #include "../util/memdump.h"
 #include "../util/ops.h"
 #include "../util/flinkedlist.h"
+#include "../util/string.h"
 #include <stdint.h>
+#include <stddef.h>
+#include <stdbool.h>
 
 extern struct util_memdump md;
 
@@ -158,7 +161,7 @@ int sdrive_fat16_init(unsigned lba_bootsector) {
         SDRIVE_TELEMETRY_INF("Label: %.11s\n", bs->label);
         SDRIVE_TELEMETRY_INF("Fat Type (unreliable): %.8s\n", bs->strfattype);
     }
-    SDRIVE_TELEMETRY_INF("0x55AA Existance: 0x%04hX\n", bs->signature);
+    SDRIVE_TELEMETRY_INF("0xAA55 Existance: 0x%04hX\n", bs->signature);
     SDRIVE_TELEMETRY_INF("FAT Start: %d\n", fatstart);
     SDRIVE_TELEMETRY_INF("FAT Size (sectors): %d\n", fatsize);
     SDRIVE_TELEMETRY_INF("Root Directory start: %d\n", rootstart);
@@ -191,9 +194,18 @@ int sdrive_fat16_init(unsigned lba_bootsector) {
     return 0;
 }
 
+/**
+ * The default state. Reads SFNs however once a LFN is detected it pivots states to process it
+ */
+#define sdrive_fat16_fopen_STATE_READING_SFN 0
+/**
+ * Processes newlyfound LFNs
+ */
+#define sdrive_fat16_fopen_STATE_READING_LFN 1
+
 int sdrive_fat16_fopen(const char* path, struct sdrive_fat16_file* fp) {
     void* buffer = __builtin_alloca_with_align(bytespersector * ARCH_CONFIG_FAT16_SECTORBUFFER_SZ, 8);
-    uint_fast8_t length = util_strlen(path); // Max length of anything in FAT is 255 anyway
+    uint_fast8_t pathlen = util_strlen(path); // Max length of anything in FAT is 255 anyway
 
     // For consistency and loopability we must convert this to sectors and not use clusters
     uint_fast32_t dirstart = rootstart;
@@ -211,12 +223,42 @@ int sdrive_fat16_fopen(const char* path, struct sdrive_fat16_file* fp) {
         } else {
             if ((bytesread = sdrive_drive_readmultiblock(buffer, dirstart, ARCH_CONFIG_FAT16_SECTORBUFFER_SZ) * bytespersector) <= 0) // Bad2
                 return SDRIVE_FAT16_ERRC_READ_FAIL;
+
+            // Move respective counting values
             dirstart += ARCH_CONFIG_FAT16_SECTORBUFFER_SZ;
             dirsize -= ARCH_CONFIG_FAT16_SECTORBUFFER_SZ;
         }
+        
+        // Read all directory loop (by SFNs first)
+        uint_fast8_t state = sdrive_fat16_fopen_STATE_READING_SFN;
+        for (struct dir_sfn* dir = buffer; ((uintptr_t) dir) < ((uintptr_t) buffer) + bytesread; dir++) {
+            switch (state) {
+                case sdrive_fat16_fopen_STATE_READING_SFN:
+                    if (dir->attr & SDRIVE_FAT16_DIR_ATTR_LONG_FILE_NAME) {
+                        state = sdrive_fat16_fopen_STATE_READING_LFN;
+                        goto sdrive_fat16_fopen_STATE_READING_LFN_L;
+                    }
+                    
+                    // Check the SFN for existance
+                    if (pathlen < 11) { // We shouldn't check if its going to be a lfn anyway (yes you could further optimize this but this is a good lazy solution)
+                        for (size_t i = 0; i < 11; i++) {
+                            if (path[i] != dir->name[i]) {
+                                if (path[i] == '\0' && dir->name[i] == ' ')
+                                    SDRIVE_TELEMETRY_INF("Found the file. dirname: %11s\n", dir->name);
+                                break;
+                            }
+                        }
+                    }
+                    break;
+                case sdrive_fat16_fopen_STATE_READING_LFN: sdrive_fat16_fopen_STATE_READING_LFN_L:
+                    // TODO
+                    state = sdrive_fat16_fopen_STATE_READING_SFN;
+                    break;
+            }
+        }
 
         // Now to check all entries in the read content (with this terrible FSM)
-        bool readinglfn = false;
+        /*bool readinglfn = false;
         uint_fast8_t index = length;
         bool badlfn = false;
         for (struct dir_sfn* dir = buffer; ((uintptr_t) dir) < ((uintptr_t) buffer) + bytesread; dir++) {
@@ -249,7 +291,11 @@ int sdrive_fat16_fopen(const char* path, struct sdrive_fat16_file* fp) {
                     }
                 }
             }
-        }
+
+        }*/
+        
+        
+        // Check entries using GOOD FSM
     }
 
     return SDRIVE_FAT16_ERRC_FILE_NOT_FOUND;
