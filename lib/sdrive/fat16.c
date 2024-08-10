@@ -202,7 +202,6 @@ int sdrive_fat16_init(unsigned lba_bootsector) {
  * Processes newlyfound LFNs
  */
 #define sdrive_fat16_fopen_STATE_READING_LFN 1
-#include <stdio.h>
 
 int sdrive_fat16_fopen(const char* path, struct sdrive_fat16_file* fp) {
     // TODO: Deal with discarded qualifiers
@@ -302,46 +301,6 @@ int sdrive_fat16_fopen(const char* path, struct sdrive_fat16_file* fp) {
                     break;
             }
         }
-
-        // Now to check all entries in the read content (with this terrible FSM)
-        /*bool readinglfn = false;
-        uint_fast8_t index = length;
-        bool badlfn = false;
-        for (struct dir_sfn* dir = buffer; ((uintptr_t) dir) < ((uintptr_t) buffer) + bytesread; dir++) {
-            // Goal of this state is to check SFNs as well as 
-            if (!readinglfn) {
-                if (!(readinglfn = (dir->attr & SDRIVE_FAT16_DIR_ATTR_LONG_FILE_NAME))) { // Set the readinglfn to be true if a lfn appears otherwise (SFN) we compare
-                    for (size_t i = 0; i < sizeof(dir->name) / sizeof(dir->name[0]); i++) {
-                        if (path[i] != dir->name[i]) {
-                            if (path[i] == '\0' && dir->name == ' ')
-                                SDRIVE_TELEMETRY_INF("Found it\n");
-                            break;
-                        }
-                    }
-                }
-            }
-
-            // Positionally placed so if we exit the first state we can instantly go to the 2nd
-            if (readinglfn) {
-                if (!(readinglfn = !(dir->attr & SDRIVE_FAT16_DIR_ATTR_LONG_FILE_NAME)) && !badlfn) { // Set the readinglfn to be true if a sfn appears otherwise (LFN) we compare
-                    // Read all 3 names
-                    struct dir_lfn* lfn = (struct dir_lfn*) dir;
-                    for (uint_fast8_t i = 0; i < sizeof(lfn->name1) / sizeof(lfn->name1[0]); i++) {
-                        if (lfn->name1[i] != path[index]) {
-                            if (lfn->name[i] == '\0' && index == length) { // Stuff hasn't started
-                                continue;
-                            }
-                            badlfn = true;
-                            continue;
-                        }
-                    }
-                }
-            }
-
-        }*/
-        
-        
-        // Check entries using GOOD FSM
     }
 
     return SDRIVE_FAT16_ERRC_FILE_NOT_FOUND;
