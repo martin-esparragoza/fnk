@@ -202,8 +202,10 @@ int sdrive_fat16_init(unsigned lba_bootsector) {
  * Processes newlyfound LFNs
  */
 #define sdrive_fat16_fopen_STATE_READING_LFN 1
+#include <stdio.h>
 
 int sdrive_fat16_fopen(const char* path, struct sdrive_fat16_file* fp) {
+    // TODO: Deal with discarded qualifiers
     void* buffer = __builtin_alloca_with_align(bytespersector * ARCH_CONFIG_FAT16_SECTORBUFFER_SZ, 8);
     uint_fast8_t pathlen = util_strlen(path); // Max length of anything in FAT is 255 anyway
 
@@ -229,19 +231,24 @@ int sdrive_fat16_fopen(const char* path, struct sdrive_fat16_file* fp) {
             dirsize -= ARCH_CONFIG_FAT16_SECTORBUFFER_SZ;
         }
         
-        // Read all directory loop (by SFNs first)
+        // Read all directories loop (by SFNs first)
         uint_fast8_t state = sdrive_fat16_fopen_STATE_READING_SFN;
+        uint_fast8_t lfnindex = pathlen;
+        bool lfnbad = false; // Set to true when lfn is found to be invalid
+        bool lfnpaddingused = false; // There could be some of the text not being used
         for (struct dir_sfn* dir = buffer; ((uintptr_t) dir) < ((uintptr_t) buffer) + bytesread; dir++) {
             switch (state) {
-                case sdrive_fat16_fopen_STATE_READING_SFN:
+                case sdrive_fat16_fopen_STATE_READING_SFN: sdrive_fat16_fopen_STATE_READING_SFN_L:
                     if (dir->attr & SDRIVE_FAT16_DIR_ATTR_LONG_FILE_NAME) {
                         state = sdrive_fat16_fopen_STATE_READING_LFN;
+                        lfnindex = pathlen;
+                        lfnbad = lfnpaddingused = false;
                         goto sdrive_fat16_fopen_STATE_READING_LFN_L;
                     }
                     
                     // Check the SFN for existance
                     if (pathlen < 11) { // We shouldn't check if its going to be a lfn anyway (yes you could further optimize this but this is a good lazy solution)
-                        for (size_t i = 0; i < 11; i++) {
+                        for (uint_fast8_t i = 0; i < 11; i++) {
                             if (path[i] != dir->name[i]) {
                                 if (path[i] == '\0' && dir->name[i] == ' ')
                                     SDRIVE_TELEMETRY_INF("Found the file. dirname: %11s\n", dir->name);
@@ -251,8 +258,47 @@ int sdrive_fat16_fopen(const char* path, struct sdrive_fat16_file* fp) {
                     }
                     break;
                 case sdrive_fat16_fopen_STATE_READING_LFN: sdrive_fat16_fopen_STATE_READING_LFN_L:
-                    // TODO
-                    state = sdrive_fat16_fopen_STATE_READING_SFN;
+                    if (!(dir->attr & SDRIVE_FAT16_DIR_ATTR_LONG_FILE_NAME)) {
+                        if (!lfnbad) {
+                            SDRIVE_TELEMETRY_INF("Found the file with FAT entry %d\n", dir->firstclusterlo);
+                        }
+                        state = sdrive_fat16_fopen_STATE_READING_SFN;
+                        break;
+                    }
+
+                    if (lfnbad)
+                        break;
+
+                    struct dir_lfn* lfn = (void*) dir;
+
+                    uint16_t* p = lfn->name3 + 1;
+                    while (1) {
+                        char c = ((const char) *p);
+                        
+                        if (c != ' ' && !lfnpaddingused) {
+                            lfnpaddingused = true;
+                        }
+
+                        if (lfnpaddingused) {
+                            if (c != path[lfnindex]) {
+                                lfnbad = true;
+                                break;
+                            } else {
+                                lfnindex--;
+                            }
+                        }
+
+                        if (p == lfn->name3) {
+                            p = lfn->name2 + 5;
+                        } else if (p == lfn->name2) {
+                            p = lfn->name1 + 4;
+                        } else if (p == lfn->name1) {
+                            break;
+                        } else {
+                            p--;
+                        }
+                    }
+
                     break;
             }
         }
