@@ -258,7 +258,7 @@ int sdrive_fat16_fopen(const char* path, struct sdrive_fat16_file* fp) {
                     if (pathlen < 11) { // We shouldn't check if its going to be a lfn anyway (yes you could further optimize this but this is a good lazy solution)
                         for (uint_fast8_t i = 0; i < 11; i++) { // 11 is SFN name length
                             if (path[i] != sfn->name[i]) {
-                                if (sfn->name[i] == ' ' && path[i] == '\0') {
+                                if ((sfn->name[i] == ' ' || i == 10) && path[i] == '\0') {
                                     makedirfromsfn(sfn, fp);
                                 }
                                 
@@ -277,8 +277,8 @@ int sdrive_fat16_fopen(const char* path, struct sdrive_fat16_file* fp) {
                         break;
                     }
 
-                    //if (lfnbad)
-                    //    break;
+                    if (lfnbad)
+                        break;
 
                     struct dir_lfn* lfn = (void*) sfn;
 
