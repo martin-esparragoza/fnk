@@ -90,7 +90,8 @@ static const char* sdrive_fat16_errcstr[] = {
     [SDRIVE_FAT16_ERRC_OK] = "Ok",
     [SDRIVE_FAT16_ERRC_CORRUPTBS] = "Boot segment is corrupted",
     [SDRIVE_FAT16_ERRC_READ_FAIL] = "Failed to read sector(s)",
-    [SDRIVE_FAT16_ERRC_FILE_NOT_FOUND] = "Failed to find file"
+    [SDRIVE_FAT16_ERRC_FILE_NOT_FOUND] = "Failed to find file",
+    [SDRIVE_FAT16_ERRC_INVALID_PATH] = "Invalid path"
 };
 
 static uint_fast32_t fatstart, fatsize, rootstart, rootsize, datastart, datasize, numclusters;
@@ -194,6 +195,10 @@ int sdrive_fat16_init(unsigned lba_bootsector) {
     return 0;
 }
 
+void makedirfromsfn(struct dir_sfn* sfn, struct sdrive_fat16_file* fp) {
+    SDRIVE_TELEMETRY_INF("Found the file!\n");
+}
+
 /**
  * The default state. Reads SFNs however once a LFN is detected it pivots states to process it
  */
@@ -204,9 +209,12 @@ int sdrive_fat16_init(unsigned lba_bootsector) {
 #define sdrive_fat16_fopen_STATE_READING_LFN 1
 
 int sdrive_fat16_fopen(const char* path, struct sdrive_fat16_file* fp) {
-    // TODO: Deal with discarded qualifiers
     void* buffer = __builtin_alloca_with_align(bytespersector * ARCH_CONFIG_FAT16_SECTORBUFFER_SZ, 8);
     uint_fast8_t pathlen = util_strlen(path); // Max length of anything in FAT is 255 anyway
+
+    if (pathlen == 0) {
+        return SDRIVE_FAT16_ERRC_INVALID_PATH;
+    }
 
     // For consistency and loopability we must convert this to sectors and not use clusters
     uint_fast32_t dirstart = rootstart;
@@ -235,62 +243,70 @@ int sdrive_fat16_fopen(const char* path, struct sdrive_fat16_file* fp) {
         uint_fast8_t lfnindex = pathlen;
         bool lfnbad = false; // Set to true when lfn is found to be invalid
         bool lfnpaddingused = false; // There could be some of the text not being used
-        for (struct dir_sfn* dir = buffer; ((uintptr_t) dir) < ((uintptr_t) buffer) + bytesread; dir++) {
+        for (struct dir_sfn* sfn = buffer; ((uintptr_t) sfn) < ((uintptr_t) buffer) + bytesread; sfn++) {
             switch (state) {
                 case sdrive_fat16_fopen_STATE_READING_SFN: sdrive_fat16_fopen_STATE_READING_SFN_L:
-                    if (dir->attr & SDRIVE_FAT16_DIR_ATTR_LONG_FILE_NAME) {
+                    if (sfn->attr & SDRIVE_FAT16_DIR_ATTR_LONG_FILE_NAME) {
+                        // Transition stuffs
                         state = sdrive_fat16_fopen_STATE_READING_LFN;
-                        lfnindex = pathlen;
+                        lfnindex = pathlen - 1;
                         lfnbad = lfnpaddingused = false;
                         goto sdrive_fat16_fopen_STATE_READING_LFN_L;
                     }
                     
                     // Check the SFN for existance
                     if (pathlen < 11) { // We shouldn't check if its going to be a lfn anyway (yes you could further optimize this but this is a good lazy solution)
-                        for (uint_fast8_t i = 0; i < 11; i++) {
-                            if (path[i] != dir->name[i]) {
-                                if (path[i] == '\0' && dir->name[i] == ' ')
-                                    SDRIVE_TELEMETRY_INF("Found the file. dirname: %11s\n", dir->name);
+                        for (uint_fast8_t i = 0; i < 11; i++) { // 11 is SFN name length
+                            if (path[i] != sfn->name[i]) {
+                                if (sfn->name[i] == ' ' && path[i] == '\0') {
+                                    makedirfromsfn(sfn, fp);
+                                }
+                                
                                 break;
                             }
                         }
                     }
                     break;
+
                 case sdrive_fat16_fopen_STATE_READING_LFN: sdrive_fat16_fopen_STATE_READING_LFN_L:
-                    if (!(dir->attr & SDRIVE_FAT16_DIR_ATTR_LONG_FILE_NAME)) {
+                    if (!(sfn->attr & SDRIVE_FAT16_DIR_ATTR_LONG_FILE_NAME)) {
                         if (!lfnbad) {
-                            SDRIVE_TELEMETRY_INF("Found the file with FAT entry %d\n", dir->firstclusterlo);
+                            makedirfromsfn(sfn, fp);
                         }
                         state = sdrive_fat16_fopen_STATE_READING_SFN;
                         break;
                     }
 
-                    if (lfnbad)
-                        break;
+                    //if (lfnbad)
+                    //    break;
 
-                    struct dir_lfn* lfn = (void*) dir;
+                    struct dir_lfn* lfn = (void*) sfn;
 
-                    uint16_t* p = lfn->name3 + 1;
+                    uint16_t* p = lfn->name3 + 1; // 2 is name3 length
                     while (1) {
-                        char c = ((const char) *p);
+                        uint16_t val = *p;
+#ifdef ARCH_CONFIG_BIG_ENDIAN
+                        val = __builtin_bswap16(val);
+#endif
+                        char c = (const char) val;
                         
-                        if (c != ' ' && !lfnpaddingused) {
+                        if (!(c == 0 || c == (char) 255) && !lfnpaddingused) {
                             lfnpaddingused = true;
                         }
 
                         if (lfnpaddingused) {
                             if (c != path[lfnindex]) {
                                 lfnbad = true;
-                                break;
+                                //break;
                             } else {
                                 lfnindex--;
                             }
                         }
 
                         if (p == lfn->name3) {
-                            p = lfn->name2 + 5;
+                            p = lfn->name2 + 5; // 6 is name2 length
                         } else if (p == lfn->name2) {
-                            p = lfn->name1 + 4;
+                            p = lfn->name1 + 4; // 5 is name1 length
                         } else if (p == lfn->name1) {
                             break;
                         } else {

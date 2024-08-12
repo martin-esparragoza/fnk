@@ -14,6 +14,7 @@
 #define SDRIVE_FAT16_ERRC_CORRUPTBS 1
 #define SDRIVE_FAT16_ERRC_READ_FAIL 2
 #define SDRIVE_FAT16_ERRC_FILE_NOT_FOUND 3
+#define SDRIVE_FAT16_ERRC_INVALID_PATH 4
 
 struct sdrive_fat16_file;
 typedef struct sdrive_fat16_file sdrive_fat16_file_t;

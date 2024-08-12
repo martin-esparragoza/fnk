@@ -36,7 +36,7 @@ int __attribute__((noreturn)) main() {
 
     int errc = SDRIVE_FAT16_ERRC_OK;
     if ((errc = sdrive_fat16_fopen("TESTLONGFILENAMENUMBERONE", NULL)) != SDRIVE_FAT16_ERRC_OK)
-        SDRIVE_TELEMETRY_ERR("Failed to open file. Error %s\n", sdrive_fat16_errctostr(errc));
+        SDRIVE_TELEMETRY_ERR("Failed to open file. Error: %s\n", sdrive_fat16_errctostr(errc));
 
     md.main_return_code =
         sdrive_telemetry_fini() |
