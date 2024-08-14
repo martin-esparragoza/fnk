@@ -15,11 +15,16 @@
 #define SDRIVE_FAT16_ERRC_READ_FAIL 2
 #define SDRIVE_FAT16_ERRC_FILE_NOT_FOUND 3
 #define SDRIVE_FAT16_ERRC_INVALID_PATH 4
+#define SDRIVE_FAT16_ERRC_FATSZ_TOO_SMALL 5
 
-struct sdrive_fat16_file;
-struct sdrive_fat16_dir;
-typedef struct sdrive_fat16_file sdrive_fat16_file_t;
-typedef struct sdrive_fat16_dir sdrive_fat16_dir_t;
+typedef struct sdrive_fat16_file {
+    uint_fast16_t startingcluster;
+    uint_fast16_t nextcluster;
+} sdrive_fat16_file_t;
+
+typedef struct sdrive_fat16_dir {
+    struct sdrive_fat16_file fp;
+} sdrive_fat16_dir_t;
 
 /**
  * @brief Convert errc to string

@@ -20,11 +20,14 @@ build: deps $(OBJFILES) $(LIBFILES)
 
 deps: $(DEPFILES)
 
+# You may be asking why the -I . is there. It is so the deps can be relative to lib/ when we do the deps check
+# (its because of subdirs)
+
 %.d: %.c
-	$(CC) -MM $< -MF $@
+	$(CC) -MM -I . $< -MF $@
 
 %.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@ $(CLINK)
+	$(CC) $(CFLAGS) -I . -c $< -o $@ $(CLINK)
 
 %.a: $(OBJFILES)
 	$(eval DIR = $(patsubst %.a,%,$@))

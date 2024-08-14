@@ -1,11 +1,11 @@
-#include "../../include/sdrive/fat16.h"
-#include "../../include/sdrive/drive.h"
-#include "../../include/sdrive/telemetry.h"
-#include "../../include/arch/config.h"
-#include "../util/memdump.h"
-#include "../util/ops.h"
-#include "../util/flinkedlist.h"
-#include "../util/string.h"
+#include "../include/sdrive/fat16.h"
+#include "../include/sdrive/drive.h"
+#include "../include/sdrive/telemetry.h"
+#include "../include/arch/config.h"
+#include "util/memdump.h"
+#include "util/ops.h"
+#include "util/flinkedlist.h"
+#include "util/string.h"
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
@@ -53,8 +53,8 @@ typedef struct __attribute__((packed)) dir_sfn {
     uint32_t filesize;
 } dir_sfn_t;
 
-uint8_t getchksum(struct dir_sfn* dir);
-inline uint8_t getchksum(struct dir_sfn* dir) {
+static uint8_t getchksum(struct dir_sfn* dir);
+inline static uint8_t getchksum(struct dir_sfn* dir) {
     uint8_t sum = 0;
     for (uint_fast8_t i = 0; i < sizeof(dir->name) / sizeof(dir->name[0]); i++)
         sum = (sum >> 1) + (sum << 7) + dir->name[i];
@@ -72,21 +72,6 @@ typedef struct __attribute__((packed)) dir_lfn {
     uint16_t name3[2];
 } dir_lfn_t;
 
-// Because this driver is literally only going to read only, I'm not going to update the last access dates and also not going to include even a pointer to the directory entry
-struct sdrive_fat16_file {
-    uint_fast16_t startingcluster;
-    uint_fast16_t currentcluster;
-};
-
-struct sdrive_fat16_root {
-    uint_fast16_t rootstart;
-    uint_fast16_t rootsize;
-};
-
-struct sdrive_fat16_dir {
-    struct sdrive_fat16_file file;
-};
-
 #define SDRIVE_FAT16_DIR_ATTR_READ_ONLY      0x01
 #define SDRIVE_FAT16_DIR_ATTR_HIDDEN         0x02
 #define SDRIVE_FAT16_DIR_ATTR_SYSTEM         0x04
@@ -100,11 +85,13 @@ static const char* sdrive_fat16_errcstr[] = {
     [SDRIVE_FAT16_ERRC_CORRUPTBS] = "Boot segment is corrupted",
     [SDRIVE_FAT16_ERRC_READ_FAIL] = "Failed to read sector(s)",
     [SDRIVE_FAT16_ERRC_FILE_NOT_FOUND] = "Failed to find file",
-    [SDRIVE_FAT16_ERRC_INVALID_PATH] = "Invalid file"
+    [SDRIVE_FAT16_ERRC_INVALID_PATH] = "Invalid file",
+    [SDRIVE_FAT16_ERRC_FATSZ_TOO_SMALL] = "FATSZ (buffer allocated) too small for expected FAT"
 };
 
 static uint_fast32_t fatstart, fatsize, rootstart, rootsize, datastart, datasize, numclusters;
 static uint_fast16_t bytespersector, sectorspercluster;
+static uint16_t fat[ARCH_CONFIG_FAT16_FATSZ / 2]; // Divided by 2 because FATSZ is supposed to be in bytes
 
 const char* sdrive_fat16_errctostr(int errc) {
     if (errc < sizeof(sdrive_fat16_errcstr) / sizeof(sdrive_fat16_errcstr[0]) && errc > 0)
@@ -172,10 +159,10 @@ int sdrive_fat16_init(unsigned lba_bootsector) {
         SDRIVE_TELEMETRY_INF("Fat Type (unreliable): %.8s\n", bs->strfattype);
     }
     SDRIVE_TELEMETRY_INF("0xAA55 Existance: 0x%04hX\n", bs->signature);
-    SDRIVE_TELEMETRY_INF("FAT Start: %d\n", fatstart);
-    SDRIVE_TELEMETRY_INF("FAT Size (sectors): %d\n", fatsize);
-    SDRIVE_TELEMETRY_INF("Root Directory start: %d\n", rootstart);
-    SDRIVE_TELEMETRY_INF("Root Directory size (sectors): %d\n", rootsize);
+    SDRIVE_TELEMETRY_INF("FAT (region) Start: %d\n", fatstart);
+    SDRIVE_TELEMETRY_INF("FAT (region) Size (sectors): %d\n", fatsize);
+    SDRIVE_TELEMETRY_INF("Root Directory Start: %d\n", rootstart);
+    SDRIVE_TELEMETRY_INF("Root Directory Size (sectors): %d\n", rootsize);
     SDRIVE_TELEMETRY_INF("Data Start: %d\n", datastart);
     SDRIVE_TELEMETRY_INF("Data Size (sectors): %d\n", datasize);
     SDRIVE_TELEMETRY_INF("# of Clusters: %d\n", numclusters);
@@ -200,6 +187,16 @@ int sdrive_fat16_init(unsigned lba_bootsector) {
 
     if (flag)
         return SDRIVE_FAT16_ERRC_CORRUPTBS;
+    
+    const uint_fast32_t fatszexpected = bs->fatsize16 * bytespersector;
+    // Get the first FAT and read that in
+    if (ARCH_CONFIG_FAT16_FATSZ < fatszexpected) {
+        SDRIVE_TELEMETRY_ERR("FATSZ too small for this volume. Expected %u bytes got %u bytes\n", fatszexpected, ARCH_CONFIG_FAT16_FATSZ);
+        return SDRIVE_FAT16_ERRC_FATSZ_TOO_SMALL;
+    } else if (ARCH_CONFIG_FAT16_SECTORBUFFER_SZ > bs->fatsize16 * bytespersector) {
+        SDRIVE_TELEMETRY_WRN("FATSZ too large for this volume. Continuing. Expected %u bytes and got %u byts\n", fatszexpected, ARCH_CONFIG_FAT16_FATSZ);
+    }
+    SDRIVE_TELEMETRY_INF("FAT is %d bytes\n", bs->fatsize16 * bytespersector);
 
     return 0;
 }
@@ -307,7 +304,8 @@ int sdrive_fat16_open(const char* file, struct dir_sfn* outsfn, void* buffer, si
 }
 
 // Yes i know how to avoid the memcpy but this file is already heinous enough thank you.
-int sdrive_fat16_root_open(const char* file, struct dir_sfn* sfn) {
+// This function creates the buffer and stuff and handles the "optimized" reading
+static int sdrive_fat16_root_open(const char* file, struct dir_sfn* sfn) {
     void* buffer = __builtin_alloca_with_align(bytespersector * ARCH_CONFIG_FAT16_SECTORBUFFER_SZ, 8);
     // For consistency and loopability we must convert this to sectors and not use clusters
     uint_fast32_t dirstart = rootstart;
@@ -336,17 +334,34 @@ int sdrive_fat16_root_open(const char* file, struct dir_sfn* sfn) {
     return SDRIVE_FAT16_ERRC_FILE_NOT_FOUND;
 }
 
-// I can deal with a copy and paste its fine
 int sdrive_fat16_root_fopen(const char* file, struct sdrive_fat16_file* fp) {
     struct dir_sfn sfn;
     int errc = SDRIVE_FAT16_ERRC_OK;
     if ((errc = sdrive_fat16_root_open(file, &sfn)) != SDRIVE_FAT16_ERRC_OK)
         return errc;
-    fp->
+#ifdef ARCH_CONFIG_BIG_ENDIAN
+    sfn.firstclusterlo = __builtin_bswap16(sfn.firstclusterlo);
+#endif
+    fp->startingcluster = sfn.firstclusterlo;
+    fp->nextcluster = fp->startingcluster;
     return SDRIVE_FAT16_ERRC_OK;
 }
 
 int sdrive_fat16_root_diropen(const char* file, struct sdrive_fat16_dir* dp) {
+    struct dir_sfn sfn;
+    int errc = SDRIVE_FAT16_ERRC_OK;
+    if ((errc = sdrive_fat16_root_open(file, &sfn)) != SDRIVE_FAT16_ERRC_OK)
+        return errc;
+#ifdef ARCH_CONFIG_BIG_ENDIAN
+    sfn.firstclusterlo = __builtin_bswap16(sfn.firstclusterlo);
+#endif
+    dp->fp.startingcluster = sfn.firstclusterlo;
+    dp->fp.nextcluster = dp->fp.startingcluster;
+    return SDRIVE_FAT16_ERRC_OK;
+}
+
+int sdrive_fat16_freadcluster(struct sdrive_fat16_file* fp) {
+    // TODO:
     return SDRIVE_FAT16_ERRC_OK;
 }
 

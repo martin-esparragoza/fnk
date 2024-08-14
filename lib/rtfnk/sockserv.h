@@ -6,9 +6,9 @@
 #ifndef LIB_RTFNK_SOCKSERV_H_
 #define LIB_RTFNK_SOCKSERV_H_
 
-#include "../../include/rtfnk/sockserv.h"
-#include "socket.h"
-#include "../util/flinkedlist.h"
+#include "../include/rtfnk/sockserv.h"
+#include "rtfnk/socket.h"
+#include "util/flinkedlist.h"
 #include <stddef.h>
 
 #define FNK_SOCKSRV_MAXSOCKETS 256
