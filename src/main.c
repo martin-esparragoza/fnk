@@ -30,14 +30,16 @@ int __attribute__((noreturn)) main() {
         errorhang();
     
     if ((md.fat16_init_status = sdrive_fat16_init(0)) != SDRIVE_FAT16_ERRC_OK) {
-        SDRIVE_TELEMETRY_ERR("Failed to init fat16 static driver\n");
+        SDRIVE_TELEMETRY_ERR("Failed to init fat16 static driver. Error: %s\n", sdrive_fat16_errctostr(md.fat16_init_status));
         errorhang();
     }
 
     struct sdrive_fat16_dir dir;
     int errc = SDRIVE_FAT16_ERRC_OK;
-    if ((errc = sdrive_fat16_root_diropen("TEST", &dir)) != SDRIVE_FAT16_ERRC_OK)
+    if ((errc = sdrive_fat16_root_diropen("TEST", &dir)) != SDRIVE_FAT16_ERRC_OK) {
         SDRIVE_TELEMETRY_ERR("Failed to open file. Error: %s\n", sdrive_fat16_errctostr(errc));
+        errorhang();
+    }
 
     md.main_return_code =
         sdrive_telemetry_fini() |

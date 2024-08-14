@@ -188,15 +188,18 @@ int sdrive_fat16_init(unsigned lba_bootsector) {
     if (flag)
         return SDRIVE_FAT16_ERRC_CORRUPTBS;
     
+    // TODO: Ponder if its even good here to like print and stuff
     const uint_fast32_t fatszexpected = bs->fatsize16 * bytespersector;
     // Get the first FAT and read that in
     if (ARCH_CONFIG_FAT16_FATSZ < fatszexpected) {
         SDRIVE_TELEMETRY_ERR("FATSZ too small for this volume. Expected %u bytes got %u bytes\n", fatszexpected, ARCH_CONFIG_FAT16_FATSZ);
         return SDRIVE_FAT16_ERRC_FATSZ_TOO_SMALL;
-    } else if (ARCH_CONFIG_FAT16_SECTORBUFFER_SZ > bs->fatsize16 * bytespersector) {
+    } else if (ARCH_CONFIG_FAT16_FATSZ > fatszexpected) {
         SDRIVE_TELEMETRY_WRN("FATSZ too large for this volume. Continuing. Expected %u bytes and got %u byts\n", fatszexpected, ARCH_CONFIG_FAT16_FATSZ);
     }
-    SDRIVE_TELEMETRY_INF("FAT is %d bytes\n", bs->fatsize16 * bytespersector);
+
+    if (sdrive_drive_readmultiblock((void*) fat, bs->fatsize16 * ARCH_CONFIG_FAT16_FAT, bs->fatsize16) != bs->fatsize16)
+        return SDRIVE_FAT16_ERRC_READ_FAIL;
 
     return 0;
 }

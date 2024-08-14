@@ -19,9 +19,8 @@ clean:
 build: deps $(OBJFILES) $(LIBFILES)
 
 deps: $(DEPFILES)
-
-# You may be asking why the -I . is there. It is so the deps can be relative to lib/ when we do the deps check
-# (its because of subdirs)
+	
+# Yeah idk why deps sometimes doesnt work
 
 %.d: %.c
 	$(CC) -MM -I . $< -MF $@
@@ -32,7 +31,7 @@ deps: $(DEPFILES)
 %.a: $(OBJFILES)
 	$(eval DIR = $(patsubst %.a,%,$@))
 	$(AR) cr $@ $(filter $(DIR)/%.o,$^)
-
+	
 ifneq ($(MAKECMDGOALS),clean)
 include $(DEPFILES)
 endif
