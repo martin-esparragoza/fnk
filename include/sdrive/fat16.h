@@ -17,7 +17,9 @@
 #define SDRIVE_FAT16_ERRC_INVALID_PATH 4
 
 struct sdrive_fat16_file;
+struct sdrive_fat16_dir;
 typedef struct sdrive_fat16_file sdrive_fat16_file_t;
+typedef struct sdrive_fat16_dir sdrive_fat16_dir_t;
 
 /**
  * @brief Convert errc to string
@@ -33,16 +35,20 @@ const char* sdrive_fat16_errctostr(int errc);
  */
 int sdrive_fat16_init(unsigned lba_bootsector);
 
+struct sdrive_fat16_root* sdrive_fat16_getroot();
+
 /**
- * @brief Opens a file
- * @param path String file path. ABSOLUTE PATHING IS A MUST (omit the starting slash which indicates the root directory e.g. /home/code would become home/code). NULL terminated ofc
- * @param fp NULL if can't open file
- *
- * Does not convert to SFN compatable just use the proper file names
+ * @brief Opens a directory
+ * @param path String file name
+ * @param fp Pointer to directory
  *
  * @return error code
  */
-int sdrive_fat16_fopen(const char* path, struct sdrive_fat16_file* fp);
+int sdrive_fat16_root_diropen(const char* file, struct sdrive_fat16_dir* fp);
+
+int sdrive_fat16_root_fopen(const char* file, struct sdrive_fat16_file* fp);
+
+int sdrive_fat16_fopen(const char* file, struct sdrive_fat16_dir* dp, struct sdrive_fat16_file* fp);
 
 /**
  * @brief Closes everything

@@ -78,6 +78,15 @@ struct sdrive_fat16_file {
     uint_fast16_t currentcluster;
 };
 
+struct sdrive_fat16_root {
+    uint_fast16_t rootstart;
+    uint_fast16_t rootsize;
+};
+
+struct sdrive_fat16_dir {
+    struct sdrive_fat16_file file;
+};
+
 #define SDRIVE_FAT16_DIR_ATTR_READ_ONLY      0x01
 #define SDRIVE_FAT16_DIR_ATTR_HIDDEN         0x02
 #define SDRIVE_FAT16_DIR_ATTR_SYSTEM         0x04
@@ -91,7 +100,7 @@ static const char* sdrive_fat16_errcstr[] = {
     [SDRIVE_FAT16_ERRC_CORRUPTBS] = "Boot segment is corrupted",
     [SDRIVE_FAT16_ERRC_READ_FAIL] = "Failed to read sector(s)",
     [SDRIVE_FAT16_ERRC_FILE_NOT_FOUND] = "Failed to find file",
-    [SDRIVE_FAT16_ERRC_INVALID_PATH] = "Invalid path"
+    [SDRIVE_FAT16_ERRC_INVALID_PATH] = "Invalid file"
 };
 
 static uint_fast32_t fatstart, fatsize, rootstart, rootsize, datastart, datasize, numclusters;
@@ -195,132 +204,156 @@ int sdrive_fat16_init(unsigned lba_bootsector) {
     return 0;
 }
 
-void makedirfromsfn(struct dir_sfn* sfn, struct sdrive_fat16_file* fp) {
-    SDRIVE_TELEMETRY_INF("Found the file!\n");
-}
-
 /**
  * The default state. Reads SFNs however once a LFN is detected it pivots states to process it
  */
-#define sdrive_fat16_fopen_STATE_READING_SFN 0
+#define sdrive_fat16_open_STATE_READING_SFN 0
 /**
  * Processes newlyfound LFNs
  */
-#define sdrive_fat16_fopen_STATE_READING_LFN 1
+#define sdrive_fat16_open_STATE_READING_LFN 1
 
-int sdrive_fat16_fopen(const char* path, struct sdrive_fat16_file* fp) {
-    void* buffer = __builtin_alloca_with_align(bytespersector * ARCH_CONFIG_FAT16_SECTORBUFFER_SZ, 8);
-    uint_fast8_t pathlen = util_strlen(path); // Max length of anything in FAT is 255 anyway
+// Grabs us a SFN for a file we want
+int sdrive_fat16_open(const char* file, struct dir_sfn* outsfn, void* buffer, size_t bufferlen) {
+    uint_fast8_t filenamelen = util_strlen(file); // Max length of anything in FAT is 255 anyway
 
-    if (pathlen == 0) {
+    if (filenamelen == 0) {
         return SDRIVE_FAT16_ERRC_INVALID_PATH;
     }
 
-    // For consistency and loopability we must convert this to sectors and not use clusters
-    uint_fast32_t dirstart = rootstart;
-    uint_fast32_t dirsize = rootsize;
-    bool eod = false;
+    // Read all directories loop (by SFNs first)
+    uint_fast8_t state = sdrive_fat16_open_STATE_READING_SFN;
+    uint_fast8_t lfnindex = filenamelen;
+    bool lfnbad = false; // Set to true when lfn is found to be invalid
+    bool lfnpaddingused = false; // There could be some of the text not being used
 
-    // Directory read loop
-    while (dirsize != 0 && !eod) {
-        int bytesread = 0;
-        
-        // Clamp values to buffer size
-        if ((eod = (ARCH_CONFIG_FAT16_SECTORBUFFER_SZ > dirsize))) {
-            if ((bytesread = sdrive_drive_readmultiblock(buffer, dirstart, dirsize) * bytespersector) <= 0) // Bad1
-                return SDRIVE_FAT16_ERRC_READ_FAIL;
-        } else {
-            if ((bytesread = sdrive_drive_readmultiblock(buffer, dirstart, ARCH_CONFIG_FAT16_SECTORBUFFER_SZ) * bytespersector) <= 0) // Bad2
-                return SDRIVE_FAT16_ERRC_READ_FAIL;
-
-            // Move respective counting values
-            dirstart += ARCH_CONFIG_FAT16_SECTORBUFFER_SZ;
-            dirsize -= ARCH_CONFIG_FAT16_SECTORBUFFER_SZ;
-        }
-        
-        // Read all directories loop (by SFNs first)
-        uint_fast8_t state = sdrive_fat16_fopen_STATE_READING_SFN;
-        uint_fast8_t lfnindex = pathlen;
-        bool lfnbad = false; // Set to true when lfn is found to be invalid
-        bool lfnpaddingused = false; // There could be some of the text not being used
-        for (struct dir_sfn* sfn = buffer; ((uintptr_t) sfn) < ((uintptr_t) buffer) + bytesread; sfn++) {
-            switch (state) {
-                case sdrive_fat16_fopen_STATE_READING_SFN: sdrive_fat16_fopen_STATE_READING_SFN_L:
-                    if (sfn->attr & SDRIVE_FAT16_DIR_ATTR_LONG_FILE_NAME) {
-                        // Transition stuffs
-                        state = sdrive_fat16_fopen_STATE_READING_LFN;
-                        lfnindex = pathlen - 1;
-                        lfnbad = lfnpaddingused = false;
-                        goto sdrive_fat16_fopen_STATE_READING_LFN_L;
-                    }
-                    
-                    // Check the SFN for existance
-                    if (pathlen < 11) { // We shouldn't check if its going to be a lfn anyway (yes you could further optimize this but this is a good lazy solution)
-                        for (uint_fast8_t i = 0; i < 11; i++) { // 11 is SFN name length
-                            if (path[i] != sfn->name[i]) {
-                                if ((sfn->name[i] == ' ' || i == 10) && path[i] == '\0') {
-                                    makedirfromsfn(sfn, fp);
-                                }
-                                
-                                break;
+    for (struct dir_sfn* sfn = buffer; ((uintptr_t) sfn) < ((uintptr_t) buffer) + bufferlen; sfn++) {
+        switch (state) {
+            case sdrive_fat16_open_STATE_READING_SFN: sdrive_fat16_open_STATE_READING_SFN_L:
+                if (sfn->attr & SDRIVE_FAT16_DIR_ATTR_LONG_FILE_NAME) {
+                    // Transition stuffs
+                    state = sdrive_fat16_open_STATE_READING_LFN;
+                    lfnindex = filenamelen - 1;
+                    lfnbad = lfnpaddingused = false;
+                    goto sdrive_fat16_open_STATE_READING_LFN_L;
+                }
+                
+                // Check the SFN for existance
+                if (filenamelen < 11) { // We shouldn't check if its going to be a lfn anyway (yes you could further optimize this but this is a good lazy solution)
+                    for (uint_fast8_t i = 0; i < 11; i++) { // 11 is SFN name length
+                        if (file[i] != sfn->name[i]) {
+                            if ((sfn->name[i] == ' ' || i == 10) && file[i] == '\0') {
+                                *outsfn = *sfn;
+                                return SDRIVE_FAT16_ERRC_OK;
                             }
+                            
+                            break;
                         }
                     }
+                }
+                break;
+
+            case sdrive_fat16_open_STATE_READING_LFN: sdrive_fat16_open_STATE_READING_LFN_L:
+                if (!(sfn->attr & SDRIVE_FAT16_DIR_ATTR_LONG_FILE_NAME)) {
+                    if (!lfnbad) {
+                        *outsfn = *sfn;
+                        return SDRIVE_FAT16_ERRC_OK;
+                    }
+                    state = sdrive_fat16_open_STATE_READING_SFN;
+                    break;
+                }
+
+                if (lfnbad)
                     break;
 
-                case sdrive_fat16_fopen_STATE_READING_LFN: sdrive_fat16_fopen_STATE_READING_LFN_L:
-                    if (!(sfn->attr & SDRIVE_FAT16_DIR_ATTR_LONG_FILE_NAME)) {
-                        if (!lfnbad) {
-                            makedirfromsfn(sfn, fp);
-                        }
-                        state = sdrive_fat16_fopen_STATE_READING_SFN;
-                        break;
+                struct dir_lfn* lfn = (void*) sfn;
+
+                uint16_t* p = lfn->name3 + 1; // 2 is name3 length
+                while (1) {
+                    uint16_t val = *p;
+#ifdef ARCH_CONFIG_BIG_ENDIAN
+                    val = __builtin_bswap16(val);
+#endif
+                    char c = (const char) val;
+                    
+                    if (!(c == 0 || c == (char) 255) && !lfnpaddingused) {
+                        lfnpaddingused = true;
                     }
 
-                    if (lfnbad)
-                        break;
-
-                    struct dir_lfn* lfn = (void*) sfn;
-
-                    uint16_t* p = lfn->name3 + 1; // 2 is name3 length
-                    while (1) {
-                        uint16_t val = *p;
-#ifdef ARCH_CONFIG_BIG_ENDIAN
-                        val = __builtin_bswap16(val);
-#endif
-                        char c = (const char) val;
-                        
-                        if (!(c == 0 || c == (char) 255) && !lfnpaddingused) {
-                            lfnpaddingused = true;
-                        }
-
-                        if (lfnpaddingused) {
-                            if (c != path[lfnindex]) {
-                                lfnbad = true;
-                                //break;
-                            } else {
-                                lfnindex--;
-                            }
-                        }
-
-                        if (p == lfn->name3) {
-                            p = lfn->name2 + 5; // 6 is name2 length
-                        } else if (p == lfn->name2) {
-                            p = lfn->name1 + 4; // 5 is name1 length
-                        } else if (p == lfn->name1) {
+                    if (lfnpaddingused) {
+                        if (c != file[lfnindex]) {
+                            lfnbad = true;
                             break;
                         } else {
-                            p--;
+                            lfnindex--;
                         }
                     }
 
-                    break;
-            }
+                    if (p == lfn->name3) {
+                        p = lfn->name2 + 5; // 6 is name2 length
+                    } else if (p == lfn->name2) {
+                        p = lfn->name1 + 4; // 5 is name1 length
+                    } else if (p == lfn->name1) {
+                        break;
+                    } else {
+                        p--;
+                    }
+                }
+                break;
         }
     }
 
     return SDRIVE_FAT16_ERRC_FILE_NOT_FOUND;
 }
+
+// Yes i know how to avoid the memcpy but this file is already heinous enough thank you.
+int sdrive_fat16_root_open(const char* file, struct dir_sfn* sfn) {
+    void* buffer = __builtin_alloca_with_align(bytespersector * ARCH_CONFIG_FAT16_SECTORBUFFER_SZ, 8);
+    // For consistency and loopability we must convert this to sectors and not use clusters
+    uint_fast32_t dirstart = rootstart;
+    uint_fast32_t dirsize = rootsize;
+    int errc = SDRIVE_FAT16_ERRC_OK;
+
+    while (dirsize >= 0) {
+        int bytesread = 0;
+        
+        // This is just us clamping the size of what we read to not overflow the buffer
+        uint_fast32_t sectorstoread = util_ops_min(dirsize, ARCH_CONFIG_FAT16_SECTORBUFFER_SZ);
+        if ((bytesread = sdrive_drive_readmultiblock(buffer, dirstart, sectorstoread) * bytespersector) <= 0) {
+            return SDRIVE_FAT16_ERRC_READ_FAIL;
+        }
+        dirstart += ARCH_CONFIG_FAT16_SECTORBUFFER_SZ;
+        dirsize -= ARCH_CONFIG_FAT16_SECTORBUFFER_SZ; 
+
+        
+        errc = sdrive_fat16_open(file, sfn, buffer, bytespersector * ARCH_CONFIG_FAT16_SECTORBUFFER_SZ);
+        if (errc == SDRIVE_FAT16_ERRC_OK) {
+            return SDRIVE_FAT16_ERRC_OK;
+        } else if (errc != SDRIVE_FAT16_ERRC_FILE_NOT_FOUND) {
+            return errc;
+        }
+    }
+    return SDRIVE_FAT16_ERRC_FILE_NOT_FOUND;
+}
+
+// I can deal with a copy and paste its fine
+int sdrive_fat16_root_fopen(const char* file, struct sdrive_fat16_file* fp) {
+    struct dir_sfn sfn;
+    int errc = SDRIVE_FAT16_ERRC_OK;
+    if ((errc = sdrive_fat16_root_open(file, &sfn)) != SDRIVE_FAT16_ERRC_OK)
+        return errc;
+    fp->
+    return SDRIVE_FAT16_ERRC_OK;
+}
+
+int sdrive_fat16_root_diropen(const char* file, struct sdrive_fat16_dir* dp) {
+    return SDRIVE_FAT16_ERRC_OK;
+}
+
+int sdrive_fat16_fopen(const char* file, struct sdrive_fat16_dir* dp, struct sdrive_fat16_file* fp) {
+    return SDRIVE_FAT16_ERRC_OK;
+}
+
 
 int sdrive_fat16_fini() {
     return 0;
