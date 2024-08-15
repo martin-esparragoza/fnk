@@ -34,13 +34,19 @@ int __attribute__((noreturn)) main() {
         errorhang();
     }
 
-    struct sdrive_fat16_dir dir;
+    struct sdrive_fat16_file file;
     int errc = SDRIVE_FAT16_ERRC_OK;
-    if ((errc = sdrive_fat16_root_diropen("TEST", &dir)) != SDRIVE_FAT16_ERRC_OK) {
+    if ((errc = sdrive_fat16_root_fopen("TESTFILE", &file)) != SDRIVE_FAT16_ERRC_OK) {
         SDRIVE_TELEMETRY_ERR("Failed to open file. Error: %s\n", sdrive_fat16_errctostr(errc));
         errorhang();
     }
-
+    
+    void* buffer = __builtin_alloca_with_align(sdrive_fat16_getbytespercluster(), 8);
+    if ((errc = sdrive_fat16_freadcluster(&file, buffer)) != SDRIVE_FAT16_ERRC_OK) {
+        SDRIVE_TELEMETRY_ERR("Error: %s\n", sdrive_fat16_errctostr(errc));
+        errorhang();
+    }
+    
     md.main_return_code =
         sdrive_telemetry_fini() |
         sdrive_drive_fini() |

@@ -86,12 +86,14 @@ static const char* sdrive_fat16_errcstr[] = {
     [SDRIVE_FAT16_ERRC_READ_FAIL] = "Failed to read sector(s)",
     [SDRIVE_FAT16_ERRC_FILE_NOT_FOUND] = "Failed to find file",
     [SDRIVE_FAT16_ERRC_INVALID_PATH] = "Invalid file",
-    [SDRIVE_FAT16_ERRC_FATSZ_TOO_SMALL] = "FATSZ (buffer allocated) too small for expected FAT"
+    [SDRIVE_FAT16_ERRC_FATSZ_TOO_SMALL] = "FATSZ (buffer allocated) too small for expected FAT",
+    [SDRIVE_FAT16_ERRC_CORRUPTED_FILE] = "File corrupted",
+    [SDRIVE_FAT16_ERRC_EOF] = "End of file reached"
 };
 
 static uint_fast32_t fatstart, fatsize, rootstart, rootsize, datastart, datasize, numclusters;
 static uint_fast16_t bytespersector, sectorspercluster;
-static uint16_t fat[ARCH_CONFIG_FAT16_FATSZ / 2]; // Divided by 2 because FATSZ is supposed to be in bytes
+static __attribute__((aligned(8))) uint16_t fat[ARCH_CONFIG_FAT16_FATSZ / 2]; // Divided by 2 because FATSZ is supposed to be in bytes
 
 const char* sdrive_fat16_errctostr(int errc) {
     if (errc < sizeof(sdrive_fat16_errcstr) / sizeof(sdrive_fat16_errcstr[0]) && errc > 0)
@@ -198,9 +200,9 @@ int sdrive_fat16_init(unsigned lba_bootsector) {
         SDRIVE_TELEMETRY_WRN("FATSZ too large for this volume. Continuing. Expected %u bytes and got %u byts\n", fatszexpected, ARCH_CONFIG_FAT16_FATSZ);
     }
 
-    if (sdrive_drive_readmultiblock((void*) fat, bs->fatsize16 * ARCH_CONFIG_FAT16_FAT, bs->fatsize16) != bs->fatsize16)
+    if (sdrive_drive_readmultiblock((void*) fat, fatstart + bs->fatsize16 * ARCH_CONFIG_FAT16_FAT, bs->fatsize16) != bs->fatsize16)
         return SDRIVE_FAT16_ERRC_READ_FAIL;
-
+    
     return 0;
 }
 
@@ -344,13 +346,24 @@ int sdrive_fat16_root_fopen(const char* file, struct sdrive_fat16_file* fp) {
         return errc;
 #ifdef ARCH_CONFIG_BIG_ENDIAN
     sfn.firstclusterlo = __builtin_bswap16(sfn.firstclusterlo);
+    sfn.filesize = __builtin_bswap32(sfn.filesize);
 #endif
     fp->startingcluster = sfn.firstclusterlo;
     fp->nextcluster = fp->startingcluster;
+    
+    // Garbage floor I can't think rn TODO:
+    fp->size = sfn.filesize / (bytespersector * sectorspercluster);
+    if (sfn.filesize % bytespersector % sectorspercluster != 0)
+        fp->size++;
+
+    fp->clustersread = 0;
+    if (fp->nextcluster <= 1)
+        return SDRIVE_FAT16_ERRC_CORRUPTED_FILE;
+    
     return SDRIVE_FAT16_ERRC_OK;
 }
 
-int sdrive_fat16_root_diropen(const char* file, struct sdrive_fat16_dir* dp) {
+int sdrive_fat16_root_dopen(const char* file, struct sdrive_fat16_dir* dp) {
     struct dir_sfn sfn;
     int errc = SDRIVE_FAT16_ERRC_OK;
     if ((errc = sdrive_fat16_root_open(file, &sfn)) != SDRIVE_FAT16_ERRC_OK)
@@ -358,18 +371,34 @@ int sdrive_fat16_root_diropen(const char* file, struct sdrive_fat16_dir* dp) {
 #ifdef ARCH_CONFIG_BIG_ENDIAN
     sfn.firstclusterlo = __builtin_bswap16(sfn.firstclusterlo);
 #endif
-    dp->fp.startingcluster = sfn.firstclusterlo;
+    // TODO:
+    /*dp->fp.startingcluster = sfn.firstclusterlo;
     dp->fp.nextcluster = dp->fp.startingcluster;
+    if (dp->fp.nextcluster >= 1)
+        return SDRIVE_FAT16_CORRUPTED_FILE;*/
     return SDRIVE_FAT16_ERRC_OK;
 }
 
-int sdrive_fat16_freadcluster(struct sdrive_fat16_file* fp) {
-    // TODO:
+int sdrive_fat16_freadcluster(struct sdrive_fat16_file* fp, void* buffer) {
+    if (fp->clustersread >= fp->size)
+        return SDRIVE_FAT16_ERRC_EOF;
+
+    if (sdrive_drive_readmultiblock(buffer, datastart + (fp->nextcluster - 2) * sectorspercluster, sectorspercluster) != sectorspercluster)
+        return SDRIVE_FAT16_ERRC_READ_FAIL;
+    
+    // Update next
+    fp->nextcluster = fat[fp->nextcluster];
+    fp->clustersread++;
+
     return SDRIVE_FAT16_ERRC_OK;
 }
 
 int sdrive_fat16_fopen(const char* file, struct sdrive_fat16_dir* dp, struct sdrive_fat16_file* fp) {
     return SDRIVE_FAT16_ERRC_OK;
+}
+
+uint_fast32_t sdrive_fat16_getbytespercluster() {
+    return bytespersector * sectorspercluster;
 }
 
 

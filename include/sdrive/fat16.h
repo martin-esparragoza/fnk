@@ -16,14 +16,24 @@
 #define SDRIVE_FAT16_ERRC_FILE_NOT_FOUND 3
 #define SDRIVE_FAT16_ERRC_INVALID_PATH 4
 #define SDRIVE_FAT16_ERRC_FATSZ_TOO_SMALL 5
+#define SDRIVE_FAT16_ERRC_CORRUPTED_FILE 6
+#define SDRIVE_FAT16_ERRC_EOF 7
 
+/**
+ * @private
+ */
 typedef struct sdrive_fat16_file {
     uint_fast16_t startingcluster;
     uint_fast16_t nextcluster;
+    uint_fast16_t size; //< Clusters
+    uint_fast16_t clustersread;
 } sdrive_fat16_file_t;
 
+/**
+ * @private
+ */
 typedef struct sdrive_fat16_dir {
-    struct sdrive_fat16_file fp;
+    //struct sdrive_fat16_file fp;
 } sdrive_fat16_dir_t;
 
 /**
@@ -49,11 +59,15 @@ struct sdrive_fat16_root* sdrive_fat16_getroot();
  *
  * @return error code
  */
-int sdrive_fat16_root_diropen(const char* file, struct sdrive_fat16_dir* fp);
+int sdrive_fat16_root_dopen(const char* file, struct sdrive_fat16_dir* fp);
 
 int sdrive_fat16_root_fopen(const char* file, struct sdrive_fat16_file* fp);
 
 int sdrive_fat16_fopen(const char* file, struct sdrive_fat16_dir* dp, struct sdrive_fat16_file* fp);
+
+int sdrive_fat16_freadcluster(struct sdrive_fat16_file* fp, void* buffer);
+
+uint_fast32_t sdrive_fat16_getbytespercluster();
 
 /**
  * @brief Closes everything
