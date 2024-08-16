@@ -1,5 +1,6 @@
-// TODO: Seperate this into different files
+// Has general FAT16 stuff
 
+#include "sdrive/fat16.h"
 #include "../include/sdrive/fat16.h"
 #include "../include/sdrive/drive.h"
 #include "../include/sdrive/telemetry.h"
@@ -14,85 +15,7 @@
 
 extern struct util_memdump md;
 
-struct sdrive_fat16_file {
-    uint_fast16_t startingcluster;
-    uint_fast16_t nextcluster;
-    uint_fast16_t size; //< Clusters
-    uint_fast16_t clustersread;
-};
-
-// For now this is literally just that but it does make it scalable
-struct sdrive_fat16_dir {
-    uint_fast16_t startingcluster;
-};
-
-// Do note that you can treat this as a union to bring fat32 support
-struct __attribute__((packed)) {
-    uint8_t jmpboot[3];
-    uint8_t oemname[8];
-    uint16_t bytespersector;
-    uint8_t sectorspercluster;
-    uint16_t reservedsectors;
-    uint8_t numfats;
-    uint16_t rootentrycount;
-    uint16_t totalsectors16;
-    uint8_t mediatype;
-    uint16_t fatsize16;
-    uint16_t sectorspertrack;
-    uint16_t numheads;
-    uint32_t hiddensectors;
-    uint32_t totalsectors32;
-    uint8_t drivenum;
-    uint8_t reserved; // Unused
-    uint8_t extendedsignature;
-    uint32_t id;
-    uint8_t label[11];
-    uint8_t strfattype[8];
-    uint8_t bootcode[448];
-    uint16_t signature;
-}* bs;
-
-typedef struct __attribute__((packed)) sdrive_fat16_dir_sfn {
-    uint8_t name[11];
-    uint8_t attr;
-    uint8_t ntres;
-    uint8_t createtimetenth;
-    uint16_t createtime;
-    uint16_t createdate;
-    uint16_t accessdate;
-    uint16_t firstclusterhi;
-    uint16_t writetime;
-    uint16_t writedate;
-    uint16_t firstclusterlo;
-    uint32_t filesize;
-} sdrive_fat16_dir_sfn_t;
-
-static uint8_t getchksum(struct sdrive_fat16_dir_sfn* dir);
-inline static uint8_t getchksum(struct sdrive_fat16_dir_sfn* dir) {
-    uint8_t sum = 0;
-    for (uint_fast8_t i = 0; i < sizeof(dir->name) / sizeof(dir->name[0]); i++)
-        sum = (sum >> 1) + (sum << 7) + dir->name[i];
-    return sum;
-}
-
-typedef struct __attribute__((packed)) sdrive_fat16_dir_lfn {
-    uint8_t ord;
-    uint16_t name1[5];
-    uint8_t attribute;
-    uint8_t type;
-    uint8_t chksum;
-    uint16_t name2[6];
-    uint16_t firstclusterlo;
-    uint16_t name3[2];
-} sdrive_fat16_dir_lfn_t;
-
-#define SDRIVE_FAT16_DIR_ATTR_READ_ONLY      0x01
-#define SDRIVE_FAT16_DIR_ATTR_HIDDEN         0x02
-#define SDRIVE_FAT16_DIR_ATTR_SYSTEM         0x04
-#define SDRIVE_FAT16_DIR_ATTR_VOLUME_ID      0x08
-#define SDRIVE_FAT16_DIR_ATTR_DIRECTORY      0x10
-#define SDRIVE_FAT16_DIR_ATTR_ARCHIVE        0x20
-#define SDRIVE_FAT16_DIR_ATTR_LONG_FILE_NAME 0x0F
+struct sdrive_fat16_bs* bs;
 
 static const char* sdrive_fat16_errcstr[] = {
     [SDRIVE_FAT16_ERRC_OK] = "Ok",
@@ -223,6 +146,13 @@ int sdrive_fat16_init(unsigned lba_bootsector) {
     return 0;
 }
 
+inline uint8_t getchksum(struct sdrive_fat16_dir_sfn* dir) {
+    uint8_t sum = 0;
+    for (uint_fast8_t i = 0; i < sizeof(dir->name) / sizeof(dir->name[0]); i++)
+        sum = (sum >> 1) + (sum << 7) + dir->name[i];
+    return sum;
+}
+
 /**
  * The default state. Reads SFNs however once a LFN is detected it pivots states to process it
  */
@@ -233,7 +163,7 @@ int sdrive_fat16_init(unsigned lba_bootsector) {
 #define sdrive_fat16_open_STATE_READING_LFN 1
 
 // Grabs us a SFN for a file we want given a buffer
-static int sdrive_fat16_open(const char* file, struct sdrive_fat16_dir_sfn* outsfn, void* buffer, size_t bufferlen) {
+int sdrive_fat16_open(const char* file, struct sdrive_fat16_dir_sfn* outsfn, void* buffer, size_t bufferlen) {
     uint_fast8_t filenamelen = util_strlen(file); // Max length of anything in FAT is 255 anyway
 
     if (filenamelen == 0) {
@@ -331,7 +261,7 @@ static int sdrive_fat16_open(const char* file, struct sdrive_fat16_dir_sfn* outs
 
 // Yes i know how to avoid the memcpy but this file is already heinous enough thank you.
 // This function creates the buffer and stuff and handles the "optimized" reading
-static int sdrive_fat16_root_open(const char* file, struct sdrive_fat16_dir_sfn* sfn) {
+int sdrive_fat16_root_open(const char* file, struct sdrive_fat16_dir_sfn* sfn) {
     void* buffer = __builtin_alloca_with_align(bytespersector * ARCH_CONFIG_FAT16_SECTORBUFFER_SZ, 8);
     // For consistency and loopability we must convert this to sectors and not use clusters
     uint_fast32_t dirstart = rootstart;
@@ -360,7 +290,7 @@ static int sdrive_fat16_root_open(const char* file, struct sdrive_fat16_dir_sfn*
     return SDRIVE_FAT16_ERRC_FILE_NOT_FOUND;
 }
 
-static int sdrive_fat16_createfpfromsfn(struct sdrive_fat16_file* fp, struct sdrive_fat16_dir_sfn* sfn) {
+int sdrive_fat16_createfpfromsfn(struct sdrive_fat16_file* fp, struct sdrive_fat16_dir_sfn* sfn) {
 #ifdef ARCH_CONFIG_BIG_ENDIAN
     sfn->firstclusterlo = __builtin_bswap16(sfn->firstclusterlo);
     sfn->filesize = __builtin_bswap32(sfn->filesize);
