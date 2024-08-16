@@ -20,6 +20,8 @@
 #define SDRIVE_FAT16_ERRC_CORRUPTED_FILE 6
 #define SDRIVE_FAT16_ERRC_EOF 7
 #define SDRIVE_FAT16_ERRC_NOT_A_FILE 8
+#define SDRIVE_FAT16_ERRC_NOT_A_DIR 9
+#define SDRIVE_FAT16_ERRC_EOD 10
 
 struct sdrive_fat16_file;
 typedef struct sdrive_fat16_file sdrive_fat16_file_t;

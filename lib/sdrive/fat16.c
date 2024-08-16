@@ -23,7 +23,7 @@ struct sdrive_fat16_file {
 
 // For now this is literally just that but it does make it scalable
 struct sdrive_fat16_dir {
-    struct sdrive_fat16_file file;
+    uint_fast16_t startingcluster;
 };
 
 // Do note that you can treat this as a union to bring fat32 support
@@ -52,7 +52,7 @@ struct __attribute__((packed)) {
     uint16_t signature;
 }* bs;
 
-typedef struct __attribute__((packed)) dir_sfn {
+typedef struct __attribute__((packed)) sdrive_fat16_dir_sfn {
     uint8_t name[11];
     uint8_t attr;
     uint8_t ntres;
@@ -65,17 +65,17 @@ typedef struct __attribute__((packed)) dir_sfn {
     uint16_t writedate;
     uint16_t firstclusterlo;
     uint32_t filesize;
-} dir_sfn_t;
+} sdrive_fat16_dir_sfn_t;
 
-static uint8_t getchksum(struct dir_sfn* dir);
-inline static uint8_t getchksum(struct dir_sfn* dir) {
+static uint8_t getchksum(struct sdrive_fat16_dir_sfn* dir);
+inline static uint8_t getchksum(struct sdrive_fat16_dir_sfn* dir) {
     uint8_t sum = 0;
     for (uint_fast8_t i = 0; i < sizeof(dir->name) / sizeof(dir->name[0]); i++)
         sum = (sum >> 1) + (sum << 7) + dir->name[i];
     return sum;
 }
 
-typedef struct __attribute__((packed)) dir_lfn {
+typedef struct __attribute__((packed)) sdrive_fat16_dir_lfn {
     uint8_t ord;
     uint16_t name1[5];
     uint8_t attribute;
@@ -84,7 +84,7 @@ typedef struct __attribute__((packed)) dir_lfn {
     uint16_t name2[6];
     uint16_t firstclusterlo;
     uint16_t name3[2];
-} dir_lfn_t;
+} sdrive_fat16_dir_lfn_t;
 
 #define SDRIVE_FAT16_DIR_ATTR_READ_ONLY      0x01
 #define SDRIVE_FAT16_DIR_ATTR_HIDDEN         0x02
@@ -103,7 +103,9 @@ static const char* sdrive_fat16_errcstr[] = {
     [SDRIVE_FAT16_ERRC_FATSZ_TOO_SMALL] = "FATSZ (buffer allocated) too small for expected FAT",
     [SDRIVE_FAT16_ERRC_CORRUPTED_FILE] = "File corrupted",
     [SDRIVE_FAT16_ERRC_EOF] = "End of file reached",
-    [SDRIVE_FAT16_ERRC_NOT_A_FILE] = "Attempted to open a file that is not one"
+    [SDRIVE_FAT16_ERRC_NOT_A_FILE] = "Attempted to open a file that is not one",
+    [SDRIVE_FAT16_ERRC_NOT_A_DIR] = "Ammpted to open a directory that is not one",
+    [SDRIVE_FAT16_ERRC_EOD] = "End of directory reached"
 };
 
 static uint_fast32_t fatstart, fatsize, rootstart, rootsize, datastart, datasize, numclusters;
@@ -231,7 +233,7 @@ int sdrive_fat16_init(unsigned lba_bootsector) {
 #define sdrive_fat16_open_STATE_READING_LFN 1
 
 // Grabs us a SFN for a file we want given a buffer
-int sdrive_fat16_open(const char* file, struct dir_sfn* outsfn, void* buffer, size_t bufferlen) {
+static int sdrive_fat16_open(const char* file, struct sdrive_fat16_dir_sfn* outsfn, void* buffer, size_t bufferlen) {
     uint_fast8_t filenamelen = util_strlen(file); // Max length of anything in FAT is 255 anyway
 
     if (filenamelen == 0) {
@@ -244,7 +246,11 @@ int sdrive_fat16_open(const char* file, struct dir_sfn* outsfn, void* buffer, si
     bool lfnbad = false; // Set to true when lfn is found to be invalid
     bool lfnpaddingused = false; // There could be some of the text not being used
 
-    for (struct dir_sfn* sfn = buffer; ((uintptr_t) sfn) < ((uintptr_t) buffer) + bufferlen; sfn++) {
+    for (struct sdrive_fat16_dir_sfn* sfn = buffer; ((uintptr_t) sfn) < ((uintptr_t) buffer) + bufferlen; sfn++) {
+        // Duct tape TODO:
+        if (sfn->name[0] == 0)
+            return SDRIVE_FAT16_ERRC_EOD;
+
         switch (state) {
             case sdrive_fat16_open_STATE_READING_SFN: sdrive_fat16_open_STATE_READING_SFN_L:
                 if (sfn->attr & SDRIVE_FAT16_DIR_ATTR_LONG_FILE_NAME) {
@@ -283,7 +289,7 @@ int sdrive_fat16_open(const char* file, struct dir_sfn* outsfn, void* buffer, si
                 if (lfnbad)
                     break;
 
-                struct dir_lfn* lfn = (void*) sfn;
+                struct sdrive_fat16_dir_lfn* lfn = (void*) sfn;
 
                 uint16_t* p = lfn->name3 + 1; // 2 is name3 length
                 while (1) {
@@ -325,14 +331,14 @@ int sdrive_fat16_open(const char* file, struct dir_sfn* outsfn, void* buffer, si
 
 // Yes i know how to avoid the memcpy but this file is already heinous enough thank you.
 // This function creates the buffer and stuff and handles the "optimized" reading
-static int sdrive_fat16_root_open(const char* file, struct dir_sfn* sfn) {
+static int sdrive_fat16_root_open(const char* file, struct sdrive_fat16_dir_sfn* sfn) {
     void* buffer = __builtin_alloca_with_align(bytespersector * ARCH_CONFIG_FAT16_SECTORBUFFER_SZ, 8);
     // For consistency and loopability we must convert this to sectors and not use clusters
     uint_fast32_t dirstart = rootstart;
     uint_fast32_t dirsize = rootsize;
     int errc = SDRIVE_FAT16_ERRC_OK;
 
-    while (dirsize >= 0) {
+    while (dirsize > 0) {
         int bytesread = 0;
         
         // This is just us clamping the size of what we read to not overflow the buffer
@@ -345,8 +351,8 @@ static int sdrive_fat16_root_open(const char* file, struct dir_sfn* sfn) {
 
         
         errc = sdrive_fat16_open(file, sfn, buffer, bytespersector * ARCH_CONFIG_FAT16_SECTORBUFFER_SZ);
-        if (errc == SDRIVE_FAT16_ERRC_OK) {
-            return SDRIVE_FAT16_ERRC_OK;
+        if (errc == SDRIVE_FAT16_ERRC_EOD) { // Jank method..
+            break;
         } else if (errc != SDRIVE_FAT16_ERRC_FILE_NOT_FOUND) {
             return errc;
         }
@@ -354,47 +360,59 @@ static int sdrive_fat16_root_open(const char* file, struct dir_sfn* sfn) {
     return SDRIVE_FAT16_ERRC_FILE_NOT_FOUND;
 }
 
-int sdrive_fat16_root_file_open(const char* file, struct sdrive_fat16_file* fp) {
-    struct dir_sfn sfn;
-    int errc = SDRIVE_FAT16_ERRC_OK;
-    if ((errc = sdrive_fat16_root_open(file, &sfn)) != SDRIVE_FAT16_ERRC_OK)
-        return errc;
+static int sdrive_fat16_createfpfromsfn(struct sdrive_fat16_file* fp, struct sdrive_fat16_dir_sfn* sfn) {
 #ifdef ARCH_CONFIG_BIG_ENDIAN
-    sfn.firstclusterlo = __builtin_bswap16(sfn.firstclusterlo);
-    sfn.filesize = __builtin_bswap32(sfn.filesize);
+    sfn->firstclusterlo = __builtin_bswap16(sfn->firstclusterlo);
+    sfn->filesize = __builtin_bswap32(sfn->filesize);
 #endif
 
-    if (sfn.attr & SDRIVE_FAT16_DIR_ATTR_DIRECTORY)
+    if (sfn->attr & SDRIVE_FAT16_DIR_ATTR_DIRECTORY)
         return SDRIVE_FAT16_ERRC_NOT_A_FILE;
 
-    fp->startingcluster = sfn.firstclusterlo;
+    fp->startingcluster = sfn->firstclusterlo;
     fp->nextcluster = fp->startingcluster;
     
     // Garbage floor I can't think rn TODO:
-    fp->size = sfn.filesize / (bytespersector * sectorspercluster);
-    if (sfn.filesize % bytespersector % sectorspercluster != 0)
+    fp->size = sfn->filesize / (bytespersector * sectorspercluster);
+    if (sfn->filesize % bytespersector % sectorspercluster != 0)
         fp->size++;
 
+
     fp->clustersread = 0;
-    if (fp->nextcluster <= 1)
+    if (fp->nextcluster <= 1 && fp->nextcluster | fp->size /* Jank ahh hack */)
         return SDRIVE_FAT16_ERRC_CORRUPTED_FILE;
+    return SDRIVE_FAT16_ERRC_OK;
+}
+
+int sdrive_fat16_root_file_open(const char* file, struct sdrive_fat16_file* fp) {
+    struct sdrive_fat16_dir_sfn sfn;
+    int errc = SDRIVE_FAT16_ERRC_OK;
+    if ((errc = sdrive_fat16_root_open(file, &sfn)) != SDRIVE_FAT16_ERRC_OK)
+        return errc;
+
+    if ((errc = sdrive_fat16_createfpfromsfn(fp, &sfn)) != SDRIVE_FAT16_ERRC_OK)
+        return errc;
     
     return SDRIVE_FAT16_ERRC_OK;
 }
 
 int sdrive_fat16_root_dir_open(const char* file, struct sdrive_fat16_dir* dp) {
-    struct dir_sfn sfn;
+    struct sdrive_fat16_dir_sfn sfn;
     int errc = SDRIVE_FAT16_ERRC_OK;
     if ((errc = sdrive_fat16_root_open(file, &sfn)) != SDRIVE_FAT16_ERRC_OK)
         return errc;
 #ifdef ARCH_CONFIG_BIG_ENDIAN
     sfn.firstclusterlo = __builtin_bswap16(sfn.firstclusterlo);
 #endif
-    // TODO:
-    /*dp->fp.startingcluster = sfn.firstclusterlo;
-    dp->fp.nextcluster = dp->fp.startingcluster;
-    if (dp->fp.nextcluster >= 1)
-        return SDRIVE_FAT16_CORRUPTED_FILE;*/
+
+    if (!(sfn.attr & SDRIVE_FAT16_DIR_ATTR_DIRECTORY))
+        return SDRIVE_FAT16_ERRC_NOT_A_DIR;
+
+    dp->startingcluster = sfn.firstclusterlo;
+
+    if (dp->startingcluster <= 1)
+        return SDRIVE_FAT16_ERRC_CORRUPTED_FILE;
+    
     return SDRIVE_FAT16_ERRC_OK;
 }
 
@@ -413,6 +431,21 @@ int sdrive_fat16_file_readcluster(struct sdrive_fat16_file* fp, void* buffer) {
 }
 
 int sdrive_fat16_file_open(const char* file, struct sdrive_fat16_dir* dp, struct sdrive_fat16_file* fp) {
+    // Buffer loop & stuff
+    struct sdrive_fat16_dir_sfn sfn;
+    int errc = SDRIVE_FAT16_ERRC_OK;
+    void* buffer = __builtin_alloca_with_align(sdrive_fat16_getbytespercluster(), 8);
+    while (1) {
+        errc = sdrive_fat16_open(file, &sfn, buffer, sdrive_fat16_getbytespercluster());
+        if (errc == SDRIVE_FAT16_ERRC_EOD) {
+            return SDRIVE_FAT16_ERRC_FILE_NOT_FOUND;
+        } else if (errc == SDRIVE_FAT16_ERRC_OK) {
+            if ((errc = sdrive_fat16_createfpfromsfn(fp, &sfn)) != SDRIVE_FAT16_ERRC_OK)
+                return errc;
+            return SDRIVE_FAT16_ERRC_OK;
+        }
+    }
+
     return SDRIVE_FAT16_ERRC_OK;
 }
 
