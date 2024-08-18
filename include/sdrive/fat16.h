@@ -73,6 +73,14 @@ int sdrive_fat16_root_file_open(const char* file, struct sdrive_fat16_file* fp);
 int sdrive_fat16_file_open(const char* file, struct sdrive_fat16_dir* dp, struct sdrive_fat16_file* fp);
 
 /**
+ * @brief Opens a directory from a directory
+ * @param file String directory name
+ * @param dp Pointer to directory
+ * @param fp Pointer to file
+ */
+int sdrive_fat16_dir_open(const char* file, struct sdrive_fat16_dir* dp, struct sdrive_fat16_dir* dpout);
+
+/**
  * @brief Reads a cluster from a file
  *
  * @param fp File to read from

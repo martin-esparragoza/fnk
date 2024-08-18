@@ -35,16 +35,23 @@ int __attribute__((noreturn)) main() {
     }
 
     SDRIVE_TELEMETRY_INF("Searching root directory for directory TESTDIR\n");
-    struct sdrive_fat16_dir* dir = __builtin_alloca(sdrive_fat16_dir_sizeof());
+    struct sdrive_fat16_dir* dir1 = __builtin_alloca(sdrive_fat16_dir_sizeof());
     int errc = SDRIVE_FAT16_ERRC_OK;
-    if ((errc = sdrive_fat16_root_dir_open("TESTDIR", dir)) != SDRIVE_FAT16_ERRC_OK) {
+    if ((errc = sdrive_fat16_root_dir_open("TESTDIR", dir1)) != SDRIVE_FAT16_ERRC_OK) {
         SDRIVE_TELEMETRY_ERR("Failed to open dir. Error: %s\n", sdrive_fat16_errctostr(errc));
         errorhang();
     }
 
-    SDRIVE_TELEMETRY_INF("Searching TESTDIR for file TESTFILE\n");
-    struct sdrive_fat16_file* file = __builtin_alloca(sdrive_fat16_file_sizeof());
-    if ((errc = sdrive_fat16_file_open("TESTFILE", dir, file)) != SDRIVE_FAT16_ERRC_OK) {
+    SDRIVE_TELEMETRY_INF("Searching TESTDIR for directory INTERNALDIR\n");
+    struct sdrive_fat16_dir* dir2 = __builtin_alloca(sdrive_fat16_dir_sizeof());
+    if ((errc = sdrive_fat16_dir_open("INTERNALDIR", dir1, dir2)) != SDRIVE_FAT16_ERRC_OK) {
+        SDRIVE_TELEMETRY_ERR("Failed to open directory. Error: %s\n", sdrive_fat16_errctostr(errc));
+        errorhang();
+    }
+
+    SDRIVE_TELEMETRY_INF("Searching INTERNALDIR for file TESTFILE\n");
+    struct sdrive_fat16_file* file = __builtin_alloca(sdrive_fat16_dir_sizeof());
+    if ((errc = sdrive_fat16_file_open("TESTFILE", dir2, file)) != SDRIVE_FAT16_ERRC_OK) {
         SDRIVE_TELEMETRY_ERR("Failed to open file. Error: %s\n", sdrive_fat16_errctostr(errc));
         errorhang();
     }

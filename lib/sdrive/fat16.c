@@ -314,6 +314,23 @@ int sdrive_fat16_createfpfromsfn(struct sdrive_fat16_file* fp, struct sdrive_fat
     return SDRIVE_FAT16_ERRC_OK;
 }
 
+int sdrive_fat16_createdpfromsfn(struct sdrive_fat16_dir* dp, struct sdrive_fat16_dir_sfn* sfn) {
+#ifdef ARCH_CONFIG_BIG_ENDIAN
+    sfn->firstclusterlo = __builtin_bswap16(sfn->firstclusterlo);
+#endif
+
+    if (!(sfn->attr & SDRIVE_FAT16_DIR_ATTR_DIRECTORY))
+        return SDRIVE_FAT16_ERRC_NOT_A_DIR;
+
+    dp->startingcluster = sfn->firstclusterlo;
+
+    if (dp->startingcluster <= 1)
+        return SDRIVE_FAT16_ERRC_CORRUPTED_FILE;
+    SDRIVE_TELEMETRY_INF("%d\n", dp->startingcluster);
+    
+    return SDRIVE_FAT16_ERRC_OK;
+}
+
 int sdrive_fat16_root_file_open(const char* file, struct sdrive_fat16_file* fp) {
     struct sdrive_fat16_dir_sfn sfn;
     int errc = SDRIVE_FAT16_ERRC_OK;
@@ -354,7 +371,10 @@ int sdrive_fat16_file_readcluster(struct sdrive_fat16_file* fp, void* buffer) {
         return SDRIVE_FAT16_ERRC_READ_FAIL;
     
     // Update next
-    fp->nextcluster = fat[fp->nextcluster];
+    uint_fast16_t newnext = fat[fp->nextcluster];
+    if (newnext <= 1)
+        return SDRIVE_FAT16_ERRC_CORRUPTED_FILE;
+    fp->nextcluster = newnext;
     fp->clustersread++;
 
     return SDRIVE_FAT16_ERRC_OK;
@@ -375,7 +395,7 @@ int sdrive_fat16_file_open(const char* file, struct sdrive_fat16_dir* dp, struct
     };
 
     while (1) {
-        // Read into buffer (copy and pasted from readcluster)
+        // Read into buffer
         if ((errc = sdrive_fat16_file_readcluster(&reader, buffer)) != SDRIVE_FAT16_ERRC_OK) {
             return errc;
         }
@@ -391,7 +411,40 @@ int sdrive_fat16_file_open(const char* file, struct sdrive_fat16_dir* dp, struct
         }
     }
 
-    return SDRIVE_FAT16_ERRC_OK;
+    return SDRIVE_FAT16_ERRC_FILE_NOT_FOUND;
+}
+
+int sdrive_fat16_dir_open(const char* file, struct sdrive_fat16_dir* dp, struct sdrive_fat16_dir* dpout) {
+    // Buffer loop & stuff
+    struct sdrive_fat16_dir_sfn sfn;
+    int errc = SDRIVE_FAT16_ERRC_OK;
+    void* buffer = __builtin_alloca_with_align(sdrive_fat16_getbytespercluster(), 8);
+
+    struct sdrive_fat16_file reader = {
+        .startingcluster = dp->startingcluster,
+        .nextcluster = dp->startingcluster,
+        .size = UINT_FAST16_MAX,
+        .clustersread = 0
+    };
+
+    while (1) {
+        // Read into buffer
+        if ((errc = sdrive_fat16_file_readcluster(&reader, buffer)) != SDRIVE_FAT16_ERRC_OK) {
+            return errc;
+        }
+
+        errc = sdrive_fat16_open(file, &sfn, buffer, sdrive_fat16_getbytespercluster());
+
+        if (errc == SDRIVE_FAT16_ERRC_EOD) { // EOD reached -> File couldn't be found
+            return SDRIVE_FAT16_ERRC_FILE_NOT_FOUND;
+        } else if (errc == SDRIVE_FAT16_ERRC_OK) { // File found -> Return the directory
+            if ((errc = sdrive_fat16_createdpfromsfn(dpout, &sfn)) != SDRIVE_FAT16_ERRC_OK)
+                return errc;
+            return SDRIVE_FAT16_ERRC_OK;
+        }
+    }
+
+    return SDRIVE_FAT16_ERRC_FILE_NOT_FOUND;
 }
 
 uint_fast32_t sdrive_fat16_getbytespercluster() {
