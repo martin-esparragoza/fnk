@@ -137,6 +137,7 @@ int sdrive_fat16_init(unsigned lba_bootsector) {
         SDRIVE_TELEMETRY_ERR("FATSZ too small for this volume. Expected %u bytes got %u bytes\n", fatszexpected, ARCH_CONFIG_FAT16_FATSZ);
         return SDRIVE_FAT16_ERRC_FATSZ_TOO_SMALL;
     } else if (ARCH_CONFIG_FAT16_FATSZ > fatszexpected) {
+        return SDRIVE_FAT16_ERRC_WARN_FATSZ_TOO_LARGE;
         SDRIVE_TELEMETRY_WRN("FATSZ too large for this volume. Continuing. Expected %u bytes and got %u bytes\n", fatszexpected, ARCH_CONFIG_FAT16_FATSZ);
     }
 
@@ -166,9 +167,8 @@ inline uint8_t getchksum(struct sdrive_fat16_dir_sfn* dir) {
 int sdrive_fat16_open(const char* file, struct sdrive_fat16_dir_sfn* outsfn, void* buffer, size_t bufferlen) {
     uint_fast8_t filenamelen = util_strlen(file); // Max length of anything in FAT is 255 anyway
 
-    if (filenamelen == 0) {
+    if (filenamelen == 0)
         return SDRIVE_FAT16_ERRC_INVALID_PATH;
-    }
 
     // Read all directories loop (by SFNs first)
     uint_fast8_t state = sdrive_fat16_open_STATE_READING_SFN;
@@ -326,7 +326,6 @@ int sdrive_fat16_createdpfromsfn(struct sdrive_fat16_dir* dp, struct sdrive_fat1
 
     if (dp->startingcluster <= 1)
         return SDRIVE_FAT16_ERRC_CORRUPTED_FILE;
-    SDRIVE_TELEMETRY_INF("%d\n", dp->startingcluster);
     
     return SDRIVE_FAT16_ERRC_OK;
 }
@@ -334,10 +333,10 @@ int sdrive_fat16_createdpfromsfn(struct sdrive_fat16_dir* dp, struct sdrive_fat1
 int sdrive_fat16_root_file_open(const char* file, struct sdrive_fat16_file* fp) {
     struct sdrive_fat16_dir_sfn sfn;
     int errc = SDRIVE_FAT16_ERRC_OK;
-    if ((errc = sdrive_fat16_root_open(file, &sfn)) != SDRIVE_FAT16_ERRC_OK)
+    if ((errc = sdrive_fat16_root_open(file, &sfn)) > SDRIVE_FAT16_ERRC_OK)
         return errc;
 
-    if ((errc = sdrive_fat16_createfpfromsfn(fp, &sfn)) != SDRIVE_FAT16_ERRC_OK)
+    if ((errc = sdrive_fat16_createfpfromsfn(fp, &sfn)) > SDRIVE_FAT16_ERRC_OK)
         return errc;
     
     return SDRIVE_FAT16_ERRC_OK;
@@ -346,7 +345,7 @@ int sdrive_fat16_root_file_open(const char* file, struct sdrive_fat16_file* fp) 
 int sdrive_fat16_root_dir_open(const char* file, struct sdrive_fat16_dir* dp) {
     struct sdrive_fat16_dir_sfn sfn;
     int errc = SDRIVE_FAT16_ERRC_OK;
-    if ((errc = sdrive_fat16_root_open(file, &sfn)) != SDRIVE_FAT16_ERRC_OK)
+    if ((errc = sdrive_fat16_root_open(file, &sfn)) > SDRIVE_FAT16_ERRC_OK)
         return errc;
 #ifdef ARCH_CONFIG_BIG_ENDIAN
     sfn.firstclusterlo = __builtin_bswap16(sfn.firstclusterlo);
@@ -372,8 +371,6 @@ int sdrive_fat16_file_readcluster(struct sdrive_fat16_file* fp, void* buffer) {
     
     // Update next
     uint_fast16_t newnext = fat[fp->nextcluster];
-    if (newnext <= 1)
-        return SDRIVE_FAT16_ERRC_CORRUPTED_FILE;
     fp->nextcluster = newnext;
     fp->clustersread++;
 
@@ -396,7 +393,7 @@ int sdrive_fat16_file_open(const char* file, struct sdrive_fat16_dir* dp, struct
 
     while (1) {
         // Read into buffer
-        if ((errc = sdrive_fat16_file_readcluster(&reader, buffer)) != SDRIVE_FAT16_ERRC_OK) {
+        if ((errc = sdrive_fat16_file_readcluster(&reader, buffer)) > SDRIVE_FAT16_ERRC_OK) {
             return errc;
         }
 
@@ -405,7 +402,7 @@ int sdrive_fat16_file_open(const char* file, struct sdrive_fat16_dir* dp, struct
         if (errc == SDRIVE_FAT16_ERRC_EOD) { // EOD reached -> File couldnt be found then
             return SDRIVE_FAT16_ERRC_FILE_NOT_FOUND;
         } else if (errc == SDRIVE_FAT16_ERRC_OK) { // File found -> Return the file
-            if ((errc = sdrive_fat16_createfpfromsfn(fp, &sfn)) != SDRIVE_FAT16_ERRC_OK)
+            if ((errc = sdrive_fat16_createfpfromsfn(fp, &sfn)) > SDRIVE_FAT16_ERRC_OK)
                 return errc;
             return SDRIVE_FAT16_ERRC_OK;
         }
@@ -429,16 +426,15 @@ int sdrive_fat16_dir_open(const char* file, struct sdrive_fat16_dir* dp, struct 
 
     while (1) {
         // Read into buffer
-        if ((errc = sdrive_fat16_file_readcluster(&reader, buffer)) != SDRIVE_FAT16_ERRC_OK) {
+        if ((errc = sdrive_fat16_file_readcluster(&reader, buffer)) > SDRIVE_FAT16_ERRC_OK)
             return errc;
-        }
 
         errc = sdrive_fat16_open(file, &sfn, buffer, sdrive_fat16_getbytespercluster());
 
         if (errc == SDRIVE_FAT16_ERRC_EOD) { // EOD reached -> File couldn't be found
             return SDRIVE_FAT16_ERRC_FILE_NOT_FOUND;
         } else if (errc == SDRIVE_FAT16_ERRC_OK) { // File found -> Return the directory
-            if ((errc = sdrive_fat16_createdpfromsfn(dpout, &sfn)) != SDRIVE_FAT16_ERRC_OK)
+            if ((errc = sdrive_fat16_createdpfromsfn(dpout, &sfn)) > SDRIVE_FAT16_ERRC_OK)
                 return errc;
             return SDRIVE_FAT16_ERRC_OK;
         }
