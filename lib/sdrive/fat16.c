@@ -28,7 +28,8 @@ static const char* sdrive_fat16_errcstr[] = {
     [SDRIVE_FAT16_ERRC_EOF] = "End of file reached",
     [SDRIVE_FAT16_ERRC_NOT_A_FILE] = "Attempted to open a file that is not one",
     [SDRIVE_FAT16_ERRC_NOT_A_DIR] = "Ammpted to open a directory that is not one",
-    [SDRIVE_FAT16_ERRC_EOD] = "End of directory reached"
+    [SDRIVE_FAT16_ERRC_EOD] = "End of directory reached",
+    [SDRIVE_FAT16_ERRC_WARN_FATSZ_TOO_LARGE] = "FATSZ (buffer allocated) too large for expected FAT"
 };
 
 static uint_fast32_t fatstart, fatsize, rootstart, rootsize, datastart, datasize, numclusters;
