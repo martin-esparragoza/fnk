@@ -137,7 +137,7 @@ int sdrive_fat16_init(unsigned lba_bootsector) {
         SDRIVE_TELEMETRY_ERR("FATSZ too small for this volume. Expected %u bytes got %u bytes\n", fatszexpected, ARCH_CONFIG_FAT16_FATSZ);
         return SDRIVE_FAT16_ERRC_FATSZ_TOO_SMALL;
     } else if (ARCH_CONFIG_FAT16_FATSZ > fatszexpected) {
-        SDRIVE_TELEMETRY_WRN("FATSZ too large for this volume. Continuing. Expected %u bytes and got %u byts\n", fatszexpected, ARCH_CONFIG_FAT16_FATSZ);
+        SDRIVE_TELEMETRY_WRN("FATSZ too large for this volume. Continuing. Expected %u bytes and got %u bytes\n", fatszexpected, ARCH_CONFIG_FAT16_FATSZ);
     }
 
     if (sdrive_drive_readmultiblock((void*) fat, fatstart + bs->fatsize16 * ARCH_CONFIG_FAT16_FAT, bs->fatsize16) != bs->fatsize16)
@@ -365,11 +365,26 @@ int sdrive_fat16_file_open(const char* file, struct sdrive_fat16_dir* dp, struct
     struct sdrive_fat16_dir_sfn sfn;
     int errc = SDRIVE_FAT16_ERRC_OK;
     void* buffer = __builtin_alloca_with_align(sdrive_fat16_getbytespercluster(), 8);
+
+    // What we can do here is create basically a file so we can use file_readcluster. We just need to make the size essentially infinite
+    struct sdrive_fat16_file reader = {
+        .startingcluster = dp->startingcluster,
+        .nextcluster = dp->startingcluster,
+        .size = UINT_FAST16_MAX,
+        .clustersread = 0
+    };
+
     while (1) {
+        // Read into buffer (copy and pasted from readcluster)
+        if ((errc = sdrive_fat16_file_readcluster(&reader, buffer)) != SDRIVE_FAT16_ERRC_OK) {
+            return errc;
+        }
+
         errc = sdrive_fat16_open(file, &sfn, buffer, sdrive_fat16_getbytespercluster());
-        if (errc == SDRIVE_FAT16_ERRC_EOD) {
+
+        if (errc == SDRIVE_FAT16_ERRC_EOD) { // EOD reached -> File couldnt be found then
             return SDRIVE_FAT16_ERRC_FILE_NOT_FOUND;
-        } else if (errc == SDRIVE_FAT16_ERRC_OK) {
+        } else if (errc == SDRIVE_FAT16_ERRC_OK) { // File found -> Return the file
             if ((errc = sdrive_fat16_createfpfromsfn(fp, &sfn)) != SDRIVE_FAT16_ERRC_OK)
                 return errc;
             return SDRIVE_FAT16_ERRC_OK;

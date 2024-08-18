@@ -34,12 +34,31 @@ int __attribute__((noreturn)) main() {
         errorhang();
     }
 
+    SDRIVE_TELEMETRY_INF("Searching root directory for directory TESTDIR\n");
     struct sdrive_fat16_dir* dir = __builtin_alloca(sdrive_fat16_dir_sizeof());
     int errc = SDRIVE_FAT16_ERRC_OK;
     if ((errc = sdrive_fat16_root_dir_open("TESTDIR", dir)) != SDRIVE_FAT16_ERRC_OK) {
         SDRIVE_TELEMETRY_ERR("Failed to open dir. Error: %s\n", sdrive_fat16_errctostr(errc));
         errorhang();
     }
+
+    SDRIVE_TELEMETRY_INF("Searching TESTDIR for file TESTFILE\n");
+    struct sdrive_fat16_file* file = __builtin_alloca(sdrive_fat16_file_sizeof());
+    if ((errc = sdrive_fat16_file_open("TESTFILE", dir, file)) != SDRIVE_FAT16_ERRC_OK) {
+        SDRIVE_TELEMETRY_ERR("Failed to open file. Error: %s\n", sdrive_fat16_errctostr(errc));
+        errorhang();
+    }
+
+    SDRIVE_TELEMETRY_INF("Reading TESTFILE cluster by cluster\n");
+    void* buffer = __builtin_alloca_with_align(sdrive_fat16_getbytespercluster(), 8);
+    for (unsigned i = 0; i < 5; i++) {
+    if ((errc = sdrive_fat16_file_readcluster(file, buffer)) != SDRIVE_FAT16_ERRC_OK) {
+        SDRIVE_TELEMETRY_ERR("Failed to read file. Error: %s\n", sdrive_fat16_errctostr(errc));
+        errorhang();
+    }
+    SDRIVE_TELEMETRY_INF("%s\n", buffer);
+    }
+
     
     md.main_return_code =
         sdrive_telemetry_fini() |
