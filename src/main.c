@@ -36,7 +36,7 @@ int __attribute__((noreturn)) main() {
 
     SDRIVE_TELEMETRY_INF("Searching root directory for directory TESTDIR\n");
     struct sdrive_fat16_dir* dir1 = __builtin_alloca(sdrive_fat16_dir_sizeof());
-    int errc = SDRIVE_FAT16_ERRC_OK;
+    int eRrc = SDRIVE_FAT16_ERRC_OK;
     if ((errc = sdrive_fat16_root_dir_open("TESTDIR", dir1)) > SDRIVE_FAT16_ERRC_OK) {
         SDRIVE_TELEMETRY_ERR("Failed to open dir. Error: %s\n", sdrive_fat16_errctostr(errc));
         errorhang();

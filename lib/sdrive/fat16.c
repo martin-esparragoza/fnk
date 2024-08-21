@@ -138,8 +138,8 @@ int sdrive_fat16_init(unsigned lba_bootsector) {
         SDRIVE_TELEMETRY_ERR("FATSZ too small for this volume. Expected %u bytes got %u bytes\n", fatszexpected, ARCH_CONFIG_FAT16_FATSZ);
         return SDRIVE_FAT16_ERRC_FATSZ_TOO_SMALL;
     } else if (ARCH_CONFIG_FAT16_FATSZ > fatszexpected) {
-        return SDRIVE_FAT16_ERRC_WARN_FATSZ_TOO_LARGE;
         SDRIVE_TELEMETRY_WRN("FATSZ too large for this volume. Continuing. Expected %u bytes and got %u bytes\n", fatszexpected, ARCH_CONFIG_FAT16_FATSZ);
+        return SDRIVE_FAT16_ERRC_WARN_FATSZ_TOO_LARGE;
     }
 
     if (sdrive_drive_readmultiblock((void*) fat, fatstart + bs->fatsize16 * ARCH_CONFIG_FAT16_FAT, bs->fatsize16) != bs->fatsize16)
