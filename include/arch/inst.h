@@ -4,7 +4,7 @@
  */
 
 #ifndef INCLUDE_ARCH_INST_H_
-#define INCLUDE_ARCH_INST_H
+#define INCLUDE_ARCH_INST_H_
 
 /**
  * Push all general registers onto the stack
