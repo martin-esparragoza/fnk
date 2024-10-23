@@ -1,6 +1,6 @@
 # This makefile is responsible for the compilation of all libraries (situated in folders)
 
-MAKEDIRS = rtfnk/ arch/$(ARCH) sdrive/ util/
+MAKEDIRS = rtfnk/ arch/$(ARCH) sdrive/ util/ comp/$(CC)
 $(eval MAKEDIRS = $(filter %/,$(MAKEDIRS)))
 DEPFILES = $(patsubst %.c,%.d,$(wildcard */*.c))
 OBJFILES = $(patsubst %.c,%.o,$(wildcard */*.c) $(wildcard arch/$(ARCH)/*.c))

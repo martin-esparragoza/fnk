@@ -7,15 +7,16 @@
 #include "include/sdrive/drive.h"
 #include "include/sdrive/fat16.h"
 #include "lib/util/memdump.h"
+#include "attr.h"
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
 
-__attribute__((__used__,section(".memdump"))) struct util_memdump md;
+INCLUDE_COMP_ATTR_USED INCLUDE_COMP_ATTR_SECTION(".memdump") struct util_memdump md;
 
 static void errorhang();
 
-int __attribute__((noreturn)) main() {
+int INCLUDE_COMP_ATTR_NORETURN main() {
     if (!(md.telemetry_init_status = sdrive_telemetry_init()))
         SDRIVE_TELEMETRY_INF("Successfully inited static telemetry driver\n");
 
@@ -75,7 +76,7 @@ int __attribute__((noreturn)) main() {
     // Jump out here
 }
 
-static void __attribute__((noreturn)) errorhang() {
+static void INCLUDE_COMP_ATTR_NORETURN errorhang() {
     SDRIVE_TELEMETRY_ERR("Hanging due to error..\n");
     while (1);
 }

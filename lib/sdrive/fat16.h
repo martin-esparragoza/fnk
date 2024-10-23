@@ -2,6 +2,7 @@
 #define LIB_SDRIVE_FAT16_H_
 
 #include "include/sdrive/fat16.h"
+#include "attr.h"
 #include <stdint.h>
 #include <stddef.h>
 
@@ -24,7 +25,7 @@ struct sdrive_fat16_dir {
     uint_fast16_t startingcluster;
 };
 
-typedef struct __attribute__((packed)) sdrive_fat16_bs {
+typedef struct INCLUDE_COMP_ATTR_PACKED sdrive_fat16_bs {
     uint8_t jmpboot[3];
     uint8_t oemname[8];
     uint16_t bytespersector;
@@ -49,7 +50,7 @@ typedef struct __attribute__((packed)) sdrive_fat16_bs {
     uint16_t signature;
 } sdrive_fat16_bs_t;
 
-typedef struct __attribute__((packed)) sdrive_fat16_dir_sfn {
+typedef struct INCLUDE_COMP_ATTR_PACKED sdrive_fat16_dir_sfn {
     uint8_t name[11];
     uint8_t attr;
     uint8_t ntres;
@@ -64,7 +65,7 @@ typedef struct __attribute__((packed)) sdrive_fat16_dir_sfn {
     uint32_t filesize;
 } sdrive_fat16_dir_sfn_t;
 
-typedef struct __attribute__((packed)) sdrive_fat16_dir_lfn {
+typedef struct INCLUDE_COMP_ATTR_PACKED sdrive_fat16_dir_lfn {
     uint8_t ord;
     uint16_t name1[5];
     uint8_t attribute;
