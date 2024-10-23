@@ -6,7 +6,7 @@
 #ifndef INCLUDE_RTFNK_SOCKSRV_H_
 #define INCLUDE_RTFNK_SOCKSRV_H_
 
-#include "socket.h"
+#include "include/rtfnk/socket.h"
 #include <stdbool.h>
 
 /**

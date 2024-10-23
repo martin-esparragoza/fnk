@@ -1,7 +1,7 @@
 #ifndef LIB_SDRIVE_FAT16_H_
 #define LIB_SDRIVE_FAT16_H_
 
-#include "../include/sdrive/fat16.h"
+#include "include/sdrive/fat16.h"
 #include <stdint.h>
 #include <stddef.h>
 

@@ -1,6 +1,7 @@
 DEPFILES = $(patsubst %.c,%.d,$(wildcard *.c))
 OBJFILES = $(patsubst %.c,%.o,$(wildcard *.c))
-LIBFILES = $(wildcard ../lib/*.a) ../lib/arch/$(ARCH)
+LIBFILES = $(wildcard ../lib/*.a) ../lib/arch/$(ARCH).a
+INCFLAGS = -I../include/arch/$(ARCH) -I ../include/comp/$(CC) -I ../
 
 .PHONY: all deps build clean
 
@@ -15,10 +16,10 @@ build: deps $(OBJFILES)
 deps: $(DEPFILES)
 
 %.d: %.c
-	$(CC) -MM $< -MF $@
+	$(CC) -MM $(INCFLAGS) $< -MF $@
 
 %.o: %.c $(LIBFILES)
-	$(CC) $(CFLAGS) $< -o $@ $(CLINK) $(LIBFILES)
+	$(CC) $(CFLAGS) $(INCFLAGS) $< -o $@ $(CLINK) $(LIBFILES)
 
 ifneq ($(MAKECMDGOALS),clean)
 include $(DEPFILES)

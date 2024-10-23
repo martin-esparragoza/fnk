@@ -3,10 +3,10 @@
  * Entry point of the operating system
  */
 
-#include "../include/sdrive/telemetry.h"
-#include "../include/sdrive/drive.h"
-#include "../include/sdrive/fat16.h"
-#include "../lib/util/memdump.h"
+#include "include/sdrive/telemetry.h"
+#include "include/sdrive/drive.h"
+#include "include/sdrive/fat16.h"
+#include "lib/util/memdump.h"
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>

@@ -4,7 +4,7 @@
  */
 #ifndef INCLUDE_RTFNK_PROC_H
 #define INCLUDE_RTFNK_PROC_H
-#include "pcb.h"
+#include "include/rtfnk/pcb.h"
 
 /**
  * @brief Yield

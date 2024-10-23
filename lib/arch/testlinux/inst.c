@@ -1,4 +1,4 @@
-#include "../../../include/arch/inst.h"
+#include "inst.h"
 
 void arch_inst_pusha() {;}
 

@@ -1,14 +1,14 @@
 // Has general FAT16 stuff
 
-#include "sdrive/fat16.h"
-#include "../include/sdrive/fat16.h"
-#include "../include/sdrive/drive.h"
-#include "../include/sdrive/telemetry.h"
-#include "../include/arch/config.h"
-#include "util/memdump.h"
-#include "util/ops.h"
-#include "util/flinkedlist.h"
-#include "util/string.h"
+#include "lib/sdrive/fat16.h"
+#include "include/sdrive/fat16.h"
+#include "include/sdrive/drive.h"
+#include "include/sdrive/telemetry.h"
+#include "config.h"
+#include "lib/util/memdump.h"
+#include "lib/util/ops.h"
+#include "lib/util/flinkedlist.h"
+#include "lib/util/string.h"
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>

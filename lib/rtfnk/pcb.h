@@ -6,7 +6,7 @@
 #ifndef LIB_RTFNK_PCB_H_
 #define LIB_RTFNK_PCB_H_
 
-#include "../include/rtfnk/pcb.h"
+#include "include/rtfnk/pcb.h"
 
 struct fnk_pcb {
     void* stack; ///< Pointer to the stack in order to yield control

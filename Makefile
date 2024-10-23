@@ -1,5 +1,5 @@
 # Set this yourself
-ARCH = testlinux.a
+ARCH = testlinux
 
 CC = gcc
 AR = ar

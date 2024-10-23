@@ -1,7 +1,7 @@
-#include "rtfnk/sockserv.h"
-#include "../include/rtfnk/sockserv.h"
-#include "rtfnk/socket.h"
-#include "util/flinkedlist.h"
+#include "lib/rtfnk/sockserv.h"
+#include "include/rtfnk/sockserv.h"
+#include "lib/rtfnk/socket.h"
+#include "lib/util/flinkedlist.h"
 
 void fnk_sockserv_init(struct fnk_sockserv* self) {
     util_flinkedlist_init(self->ll, FNK_SOCKSRV_MAXSOCKETS);

@@ -1,10 +1,11 @@
 # This makefile is responsible for the compilation of all libraries (situated in folders)
 
-MAKEDIRS = rtfnk/ $(wildcard arch/*/) sdrive/ util/
+MAKEDIRS = rtfnk/ arch/$(ARCH) sdrive/ util/
 $(eval MAKEDIRS = $(filter %/,$(MAKEDIRS)))
 DEPFILES = $(patsubst %.c,%.d,$(wildcard */*.c))
-OBJFILES = $(patsubst %.c,%.o,$(wildcard */*.c) $(wildcard arch/*/*.c))
+OBJFILES = $(patsubst %.c,%.o,$(wildcard */*.c) $(wildcard arch/$(ARCH)/*.c))
 LIBFILES = $(patsubst %/,%.a,$(MAKEDIRS))
+INCFLAGS = -I ../include/arch/$(ARCH) -I ../include/comp/$(CC) -I ../
 
 .PHONY: all deps build clean
 
@@ -13,7 +14,7 @@ all: build
 clean:
 	rm -rf $(MAKEDIRS:=*.o)
 	rm -rf $(MAKEDIRS:=*.d)
-	rm -rf arch/*.a
+	rm -rf arch/$(ARCH)/*.a
 	rm -rf *.a
 
 build: deps $(OBJFILES) $(LIBFILES)
@@ -23,10 +24,10 @@ deps: $(DEPFILES)
 # Yeah idk why deps sometimes doesnt work
 
 %.d: %.c
-	$(CC) -MM -I . $< -MF $@
+	$(CC) -MM $(INCFLAGS) $< -MF $@
 
 %.o: %.c
-	$(CC) $(CFLAGS) -I . -c $< -o $@ $(CLINK)
+	$(CC) $(CFLAGS) $(INCFLAGS) -c $< -o $@ $(CLINK)
 
 %.a: $(OBJFILES)
 	$(eval DIR = $(patsubst %.a,%,$@))

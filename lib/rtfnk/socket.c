@@ -3,9 +3,9 @@
  * @brief Buffer read/write handler
  */
 
-#include "../include/rtfnk/socket.h"
-#include "rtfnk/socket.h"
-#include "util/flinkedlist.h"
+#include "include/rtfnk/socket.h"
+#include "lib/rtfnk/socket.h"
+#include "lib/util/flinkedlist.h"
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>

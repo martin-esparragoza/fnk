@@ -1,6 +1,6 @@
-#include "../include/rtfnk/proc.h"
-#include "../include/arch/inst.h"
-#include "rtfnk/pcb.h"
+#include "include/rtfnk/proc.h"
+#include "inst.h"
+#include "lib/rtfnk/pcb.h"
 
 inline void fnk_proc_yield(struct fnk_pcb* self) {
     arch_inst_pusha();

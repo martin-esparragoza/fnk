@@ -6,7 +6,7 @@
 #ifndef INCLUDE_SDRIVE_TELEMETRY_H_
 #define INCLUDE_SDRIVE_TELEMETRY_H_
 
-#include "../arch/config.h"
+#include "config.h"
 
 /**
  * @brief Init telemetry before sending anything
