@@ -10,3 +10,16 @@ FEATURES (atttempted)
 * Socket API for communications (internally and externally)
 * Dynamically allocated drivers that can be updated in real time
 * Fast driver and interrupt processing
+  
+# "Documented" Boot Process
+1. Begin in entry.o (src/entry/\{arch\}/entry.o can be generated however you want)
+    1. Load in the bootloader (rest of linked binary file)
+    2. Values such as the sp and mem_alloc_heap_start are set for use in the bootloader
+    3. Call to main occours
+2. main()
+    1. Initialize PCB
+    2. Load in dynamic linker.
+    3. Link dynamic linker to the staying static drivers (static drivers in the staying section)
+    4. Load in dynamically linked drivers
+    5. Load in librtfnk so it can also be linked as well as other libs
+    6. Load in kernel and now execute it
