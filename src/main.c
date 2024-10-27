@@ -14,7 +14,7 @@
 
 INCLUDE_COMP_ATTR_USED INCLUDE_COMP_ATTR_SECTION(".memdump") struct util_memdump md;
 
-static void errorhang();
+void errorhang();
 
 int INCLUDE_COMP_ATTR_NORETURN main() {
     if (!(md.telemetry_init_status = sdrive_telemetry_init()))
@@ -76,7 +76,7 @@ int INCLUDE_COMP_ATTR_NORETURN main() {
     // Jump out here
 }
 
-static void INCLUDE_COMP_ATTR_NORETURN errorhang() {
+void INCLUDE_COMP_ATTR_NORETURN errorhang() {
     SDRIVE_TELEMETRY_ERR("Hanging due to error..\n");
     while (1);
 }

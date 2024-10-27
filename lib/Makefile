@@ -1,9 +1,11 @@
 # This makefile is responsible for the compilation of all libraries (situated in folders)
 
-MAKEDIRS = rtfnk/ arch/$(ARCH) sdrive/ util/ comp/$(CC)
+MAKEDIRS = rtfnk/ arch/$(ARCH) sdrive/ util/ comp/$(CC) mem/
 $(eval MAKEDIRS = $(filter %/,$(MAKEDIRS)))
-DEPFILES = $(patsubst %.c,%.d,$(wildcard */*.c))
-OBJFILES = $(patsubst %.c,%.o,$(wildcard */*.c) $(wildcard arch/$(ARCH)/*.c))
+SOURCES = $(wildcard */*.c) $(wildcard arch/$(ARCH)/*.c)
+
+DEPFILES = $(patsubst %.c,%.d,$(SOURCES))
+OBJFILES = $(patsubst %.c,%.o,$(SOURCES))
 LIBFILES = $(patsubst %/,%.a,$(MAKEDIRS))
 INCFLAGS = -I ../include/arch/$(ARCH) -I ../include/comp/$(CC) -I ../
 
