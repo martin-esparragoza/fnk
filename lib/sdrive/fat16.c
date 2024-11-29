@@ -16,7 +16,7 @@
 
 extern struct util_memdump md;
 
-struct sdrive_fat16_bs* bs;
+static struct sdrive_fat16_bs* bs;
 
 static const char* sdrive_fat16_errcstr[] = {
     [SDRIVE_FAT16_ERRC_OK] = "Ok",

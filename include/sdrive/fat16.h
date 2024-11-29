@@ -41,17 +41,19 @@ const char* sdrive_fat16_errctostr(int errc);
 /**
  * @brief Grabs FAT table and other things
  * Needs to be ran before any disk operations happen
+ * 
+ * @param lba_bootsector Address of boot sector
+ * 
+ * @return Error code
  */
 int sdrive_fat16_init(unsigned lba_bootsector);
-
-struct sdrive_fat16_root* sdrive_fat16_getroot();
 
 /**
  * @brief Opens a directory from /
  * @param file String file name
  * @param fp Pointer to directory to create
  *
- * @return error code
+ * @return Error code
  */
 int sdrive_fat16_root_dir_open(const char* file, struct sdrive_fat16_dir* fp);
 
@@ -92,16 +94,18 @@ int sdrive_fat16_file_readcluster(struct sdrive_fat16_file* fp, void* buffer);
 
 /**
  * @brief Use this to create the readcluster buffer
+ * 
+ * @return Number of bytes per cluster (find this on initialization)
  */
 uint_fast32_t sdrive_fat16_getbytespercluster();
 
 /**
- * Sizeof operator for allocation
+ * @brief Sizeof operator for allocation
  */
 size_t sdrive_fat16_file_sizeof();
 
 /**
- * Sizeof operator for allocation
+ * @brief Sizeof operator for allocation
  */
 size_t sdrive_fat16_dir_sizeof();
 

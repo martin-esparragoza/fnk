@@ -22,7 +22,7 @@ deps: $(DEPFILES)
 	$(CC) -MM $(INCFLAGS) $< -MF $@
 	
 %.o: %.c
-	$(CC) $(CLINK) $(INCFLAGS) -c $< -o $@ $(CLINK)
+	$(CC) $(CFLAGS) $(INCFLAGS) -c $< -o $@ $(CLINK)
 	
 ifneq ($(MAKECMDGOALS),clean)
 include $(DEPFILES)

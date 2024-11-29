@@ -7,19 +7,28 @@
 #include "include/sdrive/drive.h"
 #include "include/sdrive/fat16.h"
 #include "lib/util/memdump.h"
+#include "include/mem/alloc.h"
 #include "attr.h"
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
 
 INCLUDE_COMP_ATTR_USED INCLUDE_COMP_ATTR_SECTION(".memdump") struct util_memdump md;
+int errc = 0; // 0 Isnt standardized or anything but whatever
+              // This is a reused errc variable
 
 void errorhang();
 
 int INCLUDE_COMP_ATTR_NORETURN main() {
     if (!(md.telemetry_init_status = sdrive_telemetry_init()))
         SDRIVE_TELEMETRY_INF("Successfully inited static telemetry driver\n");
-
+    
+    if ((errc = mem_alloc_init()) >= MEM_ALLOC_ERRC_OK) {
+        SDRIVE_TELEMETRY_ERR("Failed to init memory utils. Error: %s\n", mem_alloc_errctostr(errc));
+        errorhang();
+    }
+    SDRIVE_TELEMETRY_INF("Succesfully inited memory utils\n");
+    
     // JANK AS HELL FIXME
     md.drive_init_status = sdrive_drive_init();
     for (unsigned char i = 0; i < 3 && md.drive_init_status; i++) {
@@ -35,9 +44,8 @@ int INCLUDE_COMP_ATTR_NORETURN main() {
         errorhang();
     }
 
-    SDRIVE_TELEMETRY_INF("Searching root directory for directory TESTDIR\n");
+    /*SDRIVE_TELEMETRY_INF("Searching root directory for directory TESTDIR\n");
     struct sdrive_fat16_dir* dir1 = __builtin_alloca(sdrive_fat16_dir_sizeof());
-    int errc = SDRIVE_FAT16_ERRC_OK;
     if ((errc = sdrive_fat16_root_dir_open("TESTDIR", dir1)) > SDRIVE_FAT16_ERRC_OK) {
         SDRIVE_TELEMETRY_ERR("Failed to open dir. Error: %s\n", sdrive_fat16_errctostr(errc));
         errorhang();
@@ -65,13 +73,14 @@ int INCLUDE_COMP_ATTR_NORETURN main() {
         errorhang();
     }
     SDRIVE_TELEMETRY_INF("%s\n", buffer);
-    }
+    } */
 
     
-    md.main_return_code =
-        sdrive_telemetry_fini() |
+    md.main_return_code = // This really doesn't give information other than the fact that something bad happened
+        !!(sdrive_telemetry_fini() |
         sdrive_drive_fini() |
-        sdrive_fat16_fini();
+        sdrive_fat16_fini() |
+        mem_alloc_fini());
 
     // Jump out here
 }

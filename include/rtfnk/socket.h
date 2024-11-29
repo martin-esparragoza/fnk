@@ -14,13 +14,6 @@
 #define FNK_SOCKET_ERRC_DEF_BIND_WOULDOVERFLOW 1
 #define FNK_SOCKET_ERRC_DEF_RW_WOULDOVERFLOW 2
 
-// TODO const char*
-const char* fnk_socket_def_errcstr[] = { ///< Default error codes to string (driver programs, reference this!)
-    [FNK_SOCKET_ERRC_DEF_OK] = "[DEFAULT] Ok",
-    [FNK_SOCKET_ERRC_DEF_BIND_WOULDOVERFLOW] = "[DEFAULT] No room in server to add new sockets",
-    [FNK_SOCKET_ERRC_DEF_RW_WOULDOVERFLOW] = "[DEFAULT] Attempted to write/read outside buffer",
-};
-
 struct fnk_socket;
 typedef struct fnk_socket fnk_socket_t;
 

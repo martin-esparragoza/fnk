@@ -8,10 +8,13 @@
 #define NO_OS_ERROR() printf("Error in entry.\n")
     // Just some error that can be executed without rtfnk and other libs being loaded
 
+// Why externs to essentially pass function args? Because an entry that is able to include and call libraries is morally wrong
+
 // All of these are just implemented in main
 // I don't want to create a header because that's just odd
 extern INCLUDE_COMP_ATTR_NORETURN int main();
 extern INCLUDE_COMP_ATTR_NORETURN void errorhang();
+
 extern void* mem_alloc_heap_start;
 
 // Ideally linking allows you to link this file together with the rest of the bootloader

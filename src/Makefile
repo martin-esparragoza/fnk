@@ -1,4 +1,3 @@
-# I can't do jack here because I can't just add the entry.o later
 SOURCES = main.c entry/$(ARCH)/entry.c
 DEPFILES = $(patsubst %.c,%.d,$(SOURCES))
 OBJFILES = $(patsubst %.c,%.o,$(SOURCES))
@@ -32,7 +31,7 @@ entry/$(ARCH)/entry.d:
 	@:
 
 
-# Avoid custom linker script until this thing actually has be to bsed
+# Avoid custom linker script until this thing actually has be to used. (It should be linked correctly and freestanding later)
 #rtfnk: linker.ld $(OBJFILES) $(LIBFILES)
 #	$(LD) -T $< -o $@ $(OBJFILES) $(LIBFILES)
 	

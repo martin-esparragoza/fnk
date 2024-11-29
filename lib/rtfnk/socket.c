@@ -10,6 +10,14 @@
 #include <stddef.h>
 #include <stdbool.h>
 
+// TODO const char*
+const char* fnk_socket_def_errcstr[] = { ///< Default error codes to string (driver programs, reference this!)
+    [FNK_SOCKET_ERRC_DEF_OK] = "Ok",
+    [FNK_SOCKET_ERRC_DEF_BIND_WOULDOVERFLOW] = "No room in server to add new sockets",
+    [FNK_SOCKET_ERRC_DEF_RW_WOULDOVERFLOW] = "Attempted to write/read outside buffer",
+};
+
+
 const char* fnk_socket_errctostr_def(int errc) {
     if (errc < sizeof(fnk_socket_def_errcstr) / sizeof(fnk_socket_def_errcstr[0]) && errc > 0)
         return fnk_socket_def_errcstr[errc];
