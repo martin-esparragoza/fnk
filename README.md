@@ -23,3 +23,12 @@ FEATURES (atttempted)
     4. Load in dynamically linked drivers
     5. Load in librtfnk so it can also be linked as well as other libs
     6. Load in kernel and now execute it
+
+## Posix deviations?
+1. You shouldn't be trying to port code over usually. Its a HOBBY RTOS, most things should be custom
+2. I disagree with some POSIX functions as they can be restrictive or hard to manage errors. For example malloc can only return if it worked or didn't until further digging, I want error messages to be plentiful, easy to access, and give good information.
+
+TODO (FIX) LIST:
+- FAT16 Write
+- FAT16 Allow for smaller than actual FAT size
+- Telemetry actual error handling (error codes + error strings that are implemented in the .c file)

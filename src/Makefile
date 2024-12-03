@@ -35,8 +35,8 @@ entry/$(ARCH)/entry.d:
 #rtfnk: linker.ld $(OBJFILES) $(LIBFILES)
 #	$(LD) -T $< -o $@ $(OBJFILES) $(LIBFILES)
 	
-rtfnk: $(OBJFILES) $(LIBFILES)
-	$(LD) -o $@ $(OBJFILES) $(LIBFILES)
+rtfnk: linker.ld $(OBJFILES) $(LIBFILES)
+	$(LD) -o $@ $(OBJFILES) -e entry $(LIBFILES)
 
 
 $(MAKEDIRS):

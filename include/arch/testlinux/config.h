@@ -8,8 +8,8 @@
 #define INCLUDE_ARCH_CONFIG_H_
 
 #define ARCH_CONFIG_VERBOSE 3
-#define ARCH_CONFIG_STACK_DIR_DOWN ///< Define this to DOWN or UP
-// #define ARCH_CONFIG_BIG_ENDIAN ///< Define this to be LITTLE or BIG
+#define ARCH_CONFIG_STACK_DIR_DOWN ///< Define this to down or don't to make it up
+// #define ARCH_CONFIG_BIG_ENDIAN ///< Define this to big or dont to make it little
 
 #define ARCH_CONFIG_FAT16_SECTORBUFFER_SZ 4 // 4 Sectors
 #define ARCH_CONFIG_FAT16_FAT 0 //< FAT number to use

@@ -11,6 +11,8 @@
 /**
  * @brief Init telemetry before sending anything
  * @return Error code
+ *
+ * If this fails the code should still be able to run
  */
 int sdrive_telemetry_init();
 
