@@ -11,13 +11,17 @@ export
 
 MAKEDIRS = lib/ src/
 
-.PHONY: all deps build clean $(MAKEDIRS)
+.PHONY: all deps build clean docs $(MAKEDIRS)
 
 all: build
 
 clean: $(MAKEDIRS)
+	rm -rf man/
 
 build: deps
+
+docs:
+	@doxygen
 
 deps: $(MAKEDIRS)
 

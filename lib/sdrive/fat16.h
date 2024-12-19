@@ -1,3 +1,9 @@
+/**
+ * @file fat16.h
+ * @brief Private definitions
+ * // TODO: Groupings
+ */
+
 #ifndef LIB_SDRIVE_FAT16_H_
 #define LIB_SDRIVE_FAT16_H_
 
