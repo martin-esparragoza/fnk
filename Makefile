@@ -20,9 +20,6 @@ clean: $(MAKEDIRS)
 
 build: deps
 
-docs:
-	@doxygen
-
 deps: $(MAKEDIRS)
 
 $(MAKEDIRS):
