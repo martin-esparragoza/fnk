@@ -23,8 +23,8 @@ int INCLUDE_COMP_ATTR_NORETURN main() {
     if (!(md.telemetry_init_status = sdrive_telemetry_init()))
         SDRIVE_TELEMETRY_INF("Successfully inited static telemetry driver\n");
     
-    if ((errc = mem_alloc_init()) > MEM_ALLOC_ERRC_OK) {
-        SDRIVE_TELEMETRY_ERR("Failed to init memory utils. Error: %s\n", mem_alloc_errctostr(errc));
+    if ((md.mem_init_status = mem_alloc_init()) > MEM_ALLOC_ERRC_OK) {
+        SDRIVE_TELEMETRY_ERR("Failed to init memory utils. Error: %s\n", mem_alloc_errctostr(md.mem_init_status));
         errorhang();
     }
     SDRIVE_TELEMETRY_INF("Succesfully inited memory utils\n");
