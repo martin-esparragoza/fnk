@@ -6,21 +6,17 @@
 // Init args set in entry
 void* mem_alloc_heap_start = NULL;
 
+static void* heap_end; // Yes, there is no heap end however this is where the unlimited section begins
 static struct mem_alloc_heap_entry* heap_head;
 
 const char* mem_alloc_errcstr[] = {
     [MEM_ALLOC_ERRC_OK] = "Ok",
-    [MEM_ALLOC_ERRC_HEAP_INIT_FAIL] = "Could not init heap",
-    [MEM_ALLOC_ERRC_HEAP_NO_SPACE] = "No space for attempted allocation"
 };
 
 int mem_alloc_init() {
-    // Cast over thats pretty much all we need to do
-    heap_head = (struct mem_alloc_heap_entry*) mem_alloc_heap_start;
-
-    heap_head->size = 0;
-    heap_head->flags = MEM_ALLOC_HEAP_ENTRY_FLAG_FREE | MEM_ALLOC_HEAP_ENTRY_FLAG_UNLIMITED;
-    heap_head->next = NULL;
+    heap_head = NULL;
+    
+    heap_end = mem_alloc_heap_start;
     
     return MEM_ALLOC_ERRC_OK;
 }
@@ -38,34 +34,41 @@ int mem_alloc_malloc(void** b, size_t size) {
 
     while (entry != NULL) {
         // Check if enough room for allocation
-        if (
-            (entry->size >= size ||
-            entry->flags & MEM_ALLOC_HEAP_ENTRY_FLAG_UNLIMITED) &&
-            entry->flags & MEM_ALLOC_HEAP_ENTRY_FLAG_FREE)
+        if (entry->size >= size && entry->flags & MEM_ALLOC_HEAP_ENTRY_FLAG_FREE)
             break;
 
         entry = entry->next;
     }
     
-    if (entry == NULL)
-        return MEM_ALLOC_ERRC_HEAP_NO_SPACE;
+    if (entry == NULL) { // No section found; allocate in unlimited land!
+        struct mem_alloc_heap_entry* new_entry = heap_end;
+        heap_end += sizeof(struct mem_alloc_heap_entry) + size;
+        new_entry->size = size;
+        new_entry->flags = entry->flags & !MEM_ALLOC_HEAP_ENTRY_FLAG_FREE;
+        new_entry->next = heap_head; // P sure if heap_head is null this still works
+        heap_head = new_entry;
+        *b = (void*) (heap_head + sizeof(struct mem_alloc_heap_entry));
+    } else { // Otherwise we can attempt to split it into two
+        // Going to create and insert the new segment first because many of the values in the new segment are inherited or require old segment values
+        if ((size + sizeof(struct mem_alloc_heap_entry) /* clip it TODO: bc */) < entry->size) {
+            struct mem_alloc_heap_entry* new_entry = (void*) (((uintptr_t) entry) + sizeof(struct mem_alloc_heap_entry) + size);
+            // First 2 parts just gets the location of the end then we add the size to get the end
 
-    // Now create new entry (allocate it in heap space)
-    if (entry->next == NULL) {
-        struct mem_alloc_heap_entry* prevnext = entry->next;
-        entry->next = (void*) &(entry->data[size]);
-        entry->next->flags = entry->flags;
-        entry->next->size = entry->size - size;
-        entry->next->next = prevnext;
+            new_entry->size = entry->size - size - sizeof(struct mem_alloc_heap_entry);
+            new_entry->flags = entry->flags; // FREE should already be on
+
+            // Insertion into ll
+            new_entry->next = heap_head;
+            heap_head = new_entry;
+
+            entry->size = size; // Only set the size to reduced if we meet the threshold; otherwise no clip it to the largest possible
+        }
+        
+        // Finally making the old entry occupied
+        entry->flags &= !MEM_ALLOC_HEAP_ENTRY_FLAG_FREE; // Mark it as used
+        *b = (void*) (((uintptr_t) entry) + sizeof(struct mem_alloc_heap_entry)); // Return val
     }
     
-    // Allocate section after because we are done copying over values
-    entry->size = size;
-    entry->flags ^= MEM_ALLOC_HEAP_ENTRY_FLAG_FREE;
-    entry->flags &= !MEM_ALLOC_HEAP_ENTRY_FLAG_UNLIMITED; // Turn off unlimited
-
-    *b = entry->data;
-
     return MEM_ALLOC_ERRC_OK;
 }
 

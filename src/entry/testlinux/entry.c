@@ -39,14 +39,9 @@ int INCLUDE_COMP_ATTR_NORETURN entry() {
     ucontext_t context;
     getcontext(&context);
     
-    // Set respective stack and heap
-#ifdef ARCH_CONFIG_STACK_DIR_DOWN
+    // Stack direction down and heap direction up
     context.uc_stack.ss_sp = (void*) (((uintptr_t) pmem) + PMEM_SIZE);
     mem_alloc_heap_start = pmem;
-#else
-    context.uc_stack.ss_sp = pmem;
-    mem_alloc_heap_start = ((uintptr_t) pmem) + PMEM_SIZE;
-#endif
 
     context.uc_stack.ss_size = PMEM_SIZE;
     context.uc_stack.ss_flags = 0; // Use ss stack

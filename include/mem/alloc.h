@@ -12,12 +12,12 @@
 #include <stdint.h>
 
 #define MEM_ALLOC_ERRC_OK 0
-#define MEM_ALLOC_ERRC_HEAP_INIT_FAIL 1
-#define MEM_ALLOC_ERRC_HEAP_NO_SPACE 2
 
 /**
  * @brief Inits the heap
  *
+ * Makes the head heap entry
+ * 
  * @return Errc
  */
 int mem_alloc_init();
