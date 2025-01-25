@@ -18,6 +18,9 @@ void mem_alloc_init() {
 
 // TODO: SP head check
 void* mem_alloc_malloc(size_t size) {
+    if (size == 0)
+        return NULL;
+
     // First find a section of memory that can be allocated
     struct mem_alloc_heap_entry* entry;
     
@@ -54,13 +57,13 @@ void* mem_alloc_malloc(size_t size) {
         
         if (new_entry_size > sizeof(struct mem_alloc_heap_entry)) {
             // Create new entry
-            struct mem_alloc_heap_entry* new_entry = (void*) (((uintptr_t) entry) + sizeof(mem_alloc_heap_entry) + size);
+            struct mem_alloc_heap_entry* new_entry = (void*) (((uintptr_t) entry) + sizeof(struct mem_alloc_heap_entry) + size);
             if (prev != NULL) // Chop it out of ll
                 prev->next = new_entry;
             else
                 heap_head = new_entry;
             new_entry->next = entry->next; // Assumes the perfect thing that entry->next must be NULL if at end
-            new_entry->size = new_entry_size - sizeof(mem_alloc_heap_entry);
+            new_entry->size = new_entry_size - sizeof(struct mem_alloc_heap_entry);
 
         // This thing is to chop out of ll
         } else {
@@ -86,6 +89,8 @@ void mem_alloc_free(void* ptr) {
     
     entry->next = heap_head;
     heap_head = entry;
+    
+    // TODO: Add coalescing
 }
 
 void mem_alloc_fini() {
