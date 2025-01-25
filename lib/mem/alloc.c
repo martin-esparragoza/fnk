@@ -1,5 +1,4 @@
 #include "include/mem/alloc.h"
-    #include "include/sdrive/telemetry.h"
 #include "alloc.h"
 #include <stddef.h>
 #include <stdint.h>
@@ -31,21 +30,17 @@ void* mem_alloc_malloc(size_t size) {
     
     // TODO: Alignment shenanigans
     if (entry == NULL) { // No section found; allocate in unlimited land!
-        SDRIVE_TELEMETRY_INF("Allocating in unlimited land!\n");
         // Increase the size of the heap and add our new element. This descriptor data will be invisible
         heap_end += sizeof(struct mem_alloc_heap_entry) + size;
         struct mem_alloc_heap_entry* new_entry = heap_end;
         new_entry->size = size;
 
         // DON'T add it to the linked list. We will add it later when we FREE it
-        SDRIVE_TELEMETRY_INF("Created entry at 0x%x\n", new_entry);
         return (void*) (((uintptr_t) new_entry) - sizeof(struct mem_alloc_heap_entry));
     } else { // Otherwise we can attempt to split it into two
-        SDRIVE_TELEMETRY_INF("Allocating in limited land\n");
         
         // To do this first repurpose the previous heap entry
         uintptr_t new_entry_size = entry->size - size; // We have to add a free segment
-        SDRIVE_TELEMETRY_INF("Difference %d\n", new_entry_size);
         entry->size = size;
         // Don't alter next. It will be altered to be inserted to the front of the LL later
 
@@ -58,7 +53,6 @@ void* mem_alloc_malloc(size_t size) {
         );
         
         if (new_entry_size > sizeof(struct mem_alloc_heap_entry)) {
-            SDRIVE_TELEMETRY_INF("Happening\n");
             // Create new entry
             struct mem_alloc_heap_entry* new_entry = (void*) (((uintptr_t) entry) + sizeof(mem_alloc_heap_entry) + size);
             if (prev != NULL) // Chop it out of ll
