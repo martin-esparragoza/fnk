@@ -1,4 +1,5 @@
 #include "include/mem/alloc.h"
+    #include "include/sdrive/telemetry.h"
 #include "alloc.h"
 #include <stddef.h>
 #include <stdint.h>
@@ -9,78 +10,91 @@ void* mem_alloc_heap_start = NULL;
 static void* heap_end; // Yes, there is no heap end however this is where the unlimited section begins
 static struct mem_alloc_heap_entry* heap_head;
 
-const char* mem_alloc_errcstr[] = {
-    [MEM_ALLOC_ERRC_OK] = "Ok",
-};
 
-int mem_alloc_init() {
+void mem_alloc_init() {
     heap_head = NULL;
     
     heap_end = mem_alloc_heap_start;
-    
-    return MEM_ALLOC_ERRC_OK;
 }
 
-const char* mem_alloc_errctostr(int errc) {
-    if (errc < sizeof(mem_alloc_errcstr) / sizeof(mem_alloc_errcstr[0]))
-        return mem_alloc_errcstr[errc];
-
-    return NULL;
-}
-
-int mem_alloc_malloc(void** b, size_t size) {
+// TODO: SP head check
+void* mem_alloc_malloc(size_t size) {
     // First find a section of memory that can be allocated
-    struct mem_alloc_heap_entry* entry = heap_head;
-
-    while (entry != NULL) {
-        // Check if enough room for allocation
-        if (entry->size >= size && entry->flags & MEM_ALLOC_HEAP_ENTRY_FLAG_FREE)
-            break;
-
-        entry = entry->next;
-    }
+    struct mem_alloc_heap_entry* entry;
     
+    // Find an entry in the list that could house it
+    for (
+        entry = heap_head;
+        entry != NULL && entry->size < size;
+        entry = entry->next
+    );
+    
+    // TODO: Alignment shenanigans
     if (entry == NULL) { // No section found; allocate in unlimited land!
-        struct mem_alloc_heap_entry* new_entry = heap_end;
+        SDRIVE_TELEMETRY_INF("Allocating in unlimited land!\n");
+        // Increase the size of the heap and add our new element. This descriptor data will be invisible
         heap_end += sizeof(struct mem_alloc_heap_entry) + size;
+        struct mem_alloc_heap_entry* new_entry = heap_end;
         new_entry->size = size;
-        new_entry->flags = entry->flags & !MEM_ALLOC_HEAP_ENTRY_FLAG_FREE;
-        new_entry->next = heap_head; // P sure if heap_head is null this still works
-        heap_head = new_entry;
-        *b = (void*) (heap_head + sizeof(struct mem_alloc_heap_entry));
+
+        // DON'T add it to the linked list. We will add it later when we FREE it
+        SDRIVE_TELEMETRY_INF("Created entry at 0x%x\n", new_entry);
+        return (void*) (((uintptr_t) new_entry) - sizeof(struct mem_alloc_heap_entry));
     } else { // Otherwise we can attempt to split it into two
-        // Going to create and insert the new segment first because many of the values in the new segment are inherited or require old segment values
-        if ((size + sizeof(struct mem_alloc_heap_entry) /* clip it TODO: bc */) < entry->size) {
-            struct mem_alloc_heap_entry* new_entry = (void*) (((uintptr_t) entry) + sizeof(struct mem_alloc_heap_entry) + size);
-            // First 2 parts just gets the location of the end then we add the size to get the end
+        SDRIVE_TELEMETRY_INF("Allocating in limited land\n");
+        
+        // To do this first repurpose the previous heap entry
+        uintptr_t new_entry_size = entry->size - size; // We have to add a free segment
+        SDRIVE_TELEMETRY_INF("Difference %d\n", new_entry_size);
+        entry->size = size;
+        // Don't alter next. It will be altered to be inserted to the front of the LL later
 
-            new_entry->size = entry->size - size - sizeof(struct mem_alloc_heap_entry);
-            new_entry->flags = entry->flags; // FREE should already be on
+        // Regardless we need to find the prev entry so we can chop this out of the LL
+        struct mem_alloc_heap_entry* prev = NULL;
+        for (
+            struct mem_alloc_heap_entry* e = heap_head;
+            e->next != NULL;
+            prev = e, e = e->next
+        );
+        
+        if (new_entry_size > sizeof(struct mem_alloc_heap_entry)) {
+            SDRIVE_TELEMETRY_INF("Happening\n");
+            // Create new entry
+            struct mem_alloc_heap_entry* new_entry = (void*) (((uintptr_t) entry) + sizeof(mem_alloc_heap_entry) + size);
+            if (prev != NULL) // Chop it out of ll
+                prev->next = new_entry;
+            else
+                heap_head = new_entry;
+            new_entry->next = entry->next; // Assumes the perfect thing that entry->next must be NULL if at end
+            new_entry->size = new_entry_size - sizeof(mem_alloc_heap_entry);
 
-            // Insertion into ll
-            new_entry->next = heap_head;
-            heap_head = new_entry;
+        // This thing is to chop out of ll
+        } else {
+            // We don't have enough space. Add it to the return entry
+            entry->size += new_entry_size;
 
-            entry->size = size; // Only set the size to reduced if we meet the threshold; otherwise no clip it to the largest possible
+            if (prev != NULL)
+                prev->next = entry->next;
+            else // If prev is NULL that means it was the head
+                heap_head = entry->next;
         }
         
-        // Finally making the old entry occupied
-        entry->flags &= !MEM_ALLOC_HEAP_ENTRY_FLAG_FREE; // Mark it as used
-        *b = (void*) (((uintptr_t) entry) + sizeof(struct mem_alloc_heap_entry)); // Return val
+        return (void*) (((uintptr_t) entry) - sizeof(struct mem_alloc_heap_entry));
     }
-    
-    return MEM_ALLOC_ERRC_OK;
 }
 
-int mem_alloc_calloc(void** b, size_t num, size_t size);
+void* mem_alloc_calloc(uint64_t value, size_t size);
 
-int mem_alloc_realloc(void* ptr, size_t size);
+void* mem_alloc_realloc(void* b, size_t size);
 
-int mem_alloc_free(void* ptr);
+void mem_alloc_free(void* ptr) {
+    struct mem_alloc_heap_entry* entry = ((struct mem_alloc_heap_entry*) ptr) + 1;
+    
+    entry->next = heap_head;
+    heap_head = entry;
+}
 
-int mem_alloc_fini() {
+void mem_alloc_fini() {
     mem_alloc_heap_start = NULL;
     heap_head = NULL;
-
-    return MEM_ALLOC_ERRC_OK;
 }

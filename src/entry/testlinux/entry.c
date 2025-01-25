@@ -7,7 +7,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#define PMEM_SIZE 1024 * 8 /* 8kb */
+#define PMEM_SIZE 1024 * 16 /* 16kb */
 #define NO_OS_ERROR() printf("Error in entry.\n")
     // Just some error that can be executed without rtfnk and other libs being loaded
 

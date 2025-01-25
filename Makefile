@@ -5,7 +5,7 @@ CC = gcc
 AR = ar
 # Im using gcc here just because some stdc stuff is used for now
 LD = gcc
-CFLAGS = -Wall --freestanding -std=c99 -fno-stack-protector
+CFLAGS = -Wall --freestanding -std=c99 -fno-stack-protector -g
 CLINK =
 export
 

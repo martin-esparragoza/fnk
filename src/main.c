@@ -22,12 +22,11 @@ void errorhang();
 int INCLUDE_COMP_ATTR_NORETURN main() {
     if (!(md.telemetry_init_status = sdrive_telemetry_init()))
         SDRIVE_TELEMETRY_INF("Successfully inited static telemetry driver\n");
+    else
+        SDRIVE_TELEMETRY_WRN("Failed to init static telemetry driver\n");
     
-    if ((md.mem_init_status = mem_alloc_init()) > MEM_ALLOC_ERRC_OK) {
-        SDRIVE_TELEMETRY_ERR("Failed to init memory utils. Error: %s\n", mem_alloc_errctostr(md.mem_init_status));
-        errorhang();
-    }
-    SDRIVE_TELEMETRY_INF("Succesfully inited memory utils\n");
+    mem_alloc_init();
+    SDRIVE_TELEMETRY_INF("Inited memory utils\n");
     
     // JANK AS HELL FIXME
     md.drive_init_status = sdrive_drive_init();
@@ -36,6 +35,7 @@ int INCLUDE_COMP_ATTR_NORETURN main() {
 
         md.drive_init_status = sdrive_drive_init();
     }
+
     if (md.drive_init_status)
         errorhang();
     
@@ -43,6 +43,12 @@ int INCLUDE_COMP_ATTR_NORETURN main() {
         SDRIVE_TELEMETRY_ERR("Failed to init fat16 static driver. Error: %s\n", sdrive_fat16_errctostr(md.fat16_init_status));
         errorhang();
     }
+    
+    void* buf = mem_alloc_malloc(1024);
+    mem_alloc_free(buf);
+    void* buf2 = mem_alloc_malloc(2048);
+    buf = mem_alloc_malloc(1023);
+    mem_alloc_malloc(100);
 
     /*SDRIVE_TELEMETRY_INF("Searching root directory for directory TESTDIR\n");
     struct sdrive_fat16_dir* dir1 = __builtin_alloca(sdrive_fat16_dir_sizeof());
@@ -74,13 +80,13 @@ int INCLUDE_COMP_ATTR_NORETURN main() {
     }
     SDRIVE_TELEMETRY_INF("%s\n", buffer);
     } */
-
     
-    md.main_return_code = // This really doesn't give information other than the fact that something bad happened
-        !!(sdrive_telemetry_fini() |
+// This really doesn't give information other than the fact that something bad happened
+    md.main_return_code = !!(
+        sdrive_telemetry_fini() |
         sdrive_drive_fini() |
-        sdrive_fat16_fini() |
-        mem_alloc_fini());
+        sdrive_fat16_fini()
+    );
 
     // Jump out here
 }

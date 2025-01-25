@@ -26,7 +26,7 @@ FEATURES (atttempted)
 
 ## Posix deviations?
 1. You shouldn't be trying to port code over usually. Its a HOBBY RTOS, most things should be custom
-2. I disagree with some POSIX functions as they can be restrictive or hard to manage errors. For example malloc can only return if it worked or didn't until further digging, I want error messages to be plentiful, easy to access, and give good information.
+2. I disagree with some POSIX functions as they can be restrictive or hard to manage errors. I want error messages to be plentiful, easy to access, and give good information.
 
 TODO (FIX) LIST:
 - FAT16 Write
