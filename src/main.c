@@ -1,7 +1,7 @@
 /**
  * @file main.c
  * Entry point of the operating system
- */
+*/
 
 #include "include/sdrive/telemetry.h"
 #include "include/sdrive/drive.h"

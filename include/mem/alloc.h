@@ -16,11 +16,10 @@
  * @def MEM_ALLOC_OPS_BEFORE_COALESCE
  * @brief Number of ops before running a coalesce on the heap
  * 
- * Define this before the file. Default is 5
+ * Can't be defined before the file cuz its a static library :( <br>
+ * A.K.A change it here
  */
-#ifndef MEM_ALLOC_FREES_BEFORE_COALESCE
-    #define MEM_ALLOC_FREES_BEFORE_COALESCE 5
-#endif
+#define MEM_ALLOC_FREES_BEFORE_COALESCE 1
 
 /**
  * @brief Inits the heap

@@ -11,6 +11,64 @@ static void* heap_end; // Yes, there is no heap end however this is where the un
 static struct mem_alloc_heap_entry* heap_head;
 static unsigned char coalescing_prio = 0;
 
+static void coalesce() {
+    SDRIVE_TELEMETRY_INF("call\n");
+    // O(n)
+    // TODO: 1 line variable decleration. I'm on a plane flight and forgot how to do it
+    struct mem_alloc_heap_entry* next = NULL;
+    struct mem_alloc_heap_entry* entry = heap_head;
+    while (entry->next != NULL) {
+        SDRIVE_TELEMETRY_INF("processing 0x%x\n", entry);
+        // Check if on the same bounds
+        if (((uintptr_t) entry) - entry->size - sizeof(struct mem_alloc_heap_entry) == (uintptr_t) next) {
+            SDRIVE_TELEMETRY_INF("Coalescing 0x%x with 0x%x\n", entry, next);
+            
+            
+            SDRIVE_TELEMETRY_INF("SS------------------S SIZE: %d\n", sizeof(struct mem_alloc_heap_entry));
+            for (
+                struct mem_alloc_heap_entry* i = heap_head;
+                i != NULL;
+                i = i->next
+            ) {
+                SDRIVE_TELEMETRY_INF("Loc: 0x%x | Size: %d | Next: 0x%x\n", i, i->size, i->next);
+            }
+            SDRIVE_TELEMETRY_INF("SE------------------E\n");
+            
+            // Coalesce them
+            entry->next = next->next;
+            SDRIVE_TELEMETRY_INF("a\n");
+            entry->size += next->size + sizeof(struct mem_alloc_heap_entry);
+            next = next->next; // For the update loop
+            SDRIVE_TELEMETRY_INF("a\n");
+            
+            
+            SDRIVE_TELEMETRY_INF("ES------------------S\n");
+            for (
+                struct mem_alloc_heap_entry* i = heap_head;
+                i != NULL;
+                i = i->next
+            ) {
+                SDRIVE_TELEMETRY_INF("Loc: 0x%x | Size: %d | Next: 0x%x\n", i, i->size, i->next);
+            }
+            SDRIVE_TELEMETRY_INF("EE------------------E\n");
+            
+            continue; // Redo that loop
+        }
+
+        entry = entry->next;
+        next = entry->next;
+    }
+}
+
+// Effectively lazy coalescing
+static void inc_coalesce();
+static inline void inc_coalesce() {
+    if (++coalescing_prio >= MEM_ALLOC_FREES_BEFORE_COALESCE) {
+        coalesce();
+        coalescing_prio = 0;
+    }
+}
+
 
 void mem_alloc_init() {
     heap_head = NULL;
@@ -81,6 +139,7 @@ void* mem_alloc_malloc(size_t size) {
             // Finally update this
             entry->size = size;
         }
+        
 
         return (void*) (((uintptr_t) entry) - sizeof(struct mem_alloc_heap_entry));
     }
@@ -104,14 +163,16 @@ void mem_alloc_free(void* ptr) {
     }
 
     if (prev != NULL) {
+        // Insert after
         entry->next = prev->next;
         prev->next = entry;
     } else {
+        // Insert to front
         entry->next = heap_head;
         heap_head = entry;
     }
-        
-    // TODO: Add coalescing
+    
+    inc_coalesce();
 }
 
 void mem_alloc_fini() {
