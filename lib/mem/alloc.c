@@ -1,5 +1,4 @@
 #include "include/mem/alloc.h"
-    #include "include/sdrive/telemetry.h"
 #include "alloc.h"
 #include <stddef.h>
 #include <stdint.h>
@@ -12,45 +11,18 @@ static struct mem_alloc_heap_entry* heap_head;
 static unsigned char coalescing_prio = 0;
 
 static void coalesce() {
-    SDRIVE_TELEMETRY_INF("call\n");
     // O(n)
     // TODO: 1 line variable decleration. I'm on a plane flight and forgot how to do it
     struct mem_alloc_heap_entry* next = NULL;
     struct mem_alloc_heap_entry* entry = heap_head;
     while (entry->next != NULL) {
-        SDRIVE_TELEMETRY_INF("processing 0x%x\n", entry);
         // Check if on the same bounds
         if (((uintptr_t) entry) - entry->size - sizeof(struct mem_alloc_heap_entry) == (uintptr_t) next) {
-            SDRIVE_TELEMETRY_INF("Coalescing 0x%x with 0x%x\n", entry, next);
-            
-            
-            SDRIVE_TELEMETRY_INF("SS------------------S SIZE: %d\n", sizeof(struct mem_alloc_heap_entry));
-            for (
-                struct mem_alloc_heap_entry* i = heap_head;
-                i != NULL;
-                i = i->next
-            ) {
-                SDRIVE_TELEMETRY_INF("Loc: 0x%x | Size: %d | Next: 0x%x\n", i, i->size, i->next);
-            }
-            SDRIVE_TELEMETRY_INF("SE------------------E\n");
-            
             // Coalesce them
             entry->next = next->next;
-            SDRIVE_TELEMETRY_INF("a\n");
             entry->size += next->size + sizeof(struct mem_alloc_heap_entry);
             next = next->next; // For the update loop
-            SDRIVE_TELEMETRY_INF("a\n");
             
-            
-            SDRIVE_TELEMETRY_INF("ES------------------S\n");
-            for (
-                struct mem_alloc_heap_entry* i = heap_head;
-                i != NULL;
-                i = i->next
-            ) {
-                SDRIVE_TELEMETRY_INF("Loc: 0x%x | Size: %d | Next: 0x%x\n", i, i->size, i->next);
-            }
-            SDRIVE_TELEMETRY_INF("EE------------------E\n");
             
             continue; // Redo that loop
         }
@@ -81,16 +53,6 @@ void* mem_alloc_malloc(size_t size) {
     if (size == 0)
         return NULL;
     
-    SDRIVE_TELEMETRY_INF("MS------------------S\n");
-    for (
-        struct mem_alloc_heap_entry* e = heap_head;
-        e != NULL;
-        e = e->next
-    ) {
-        SDRIVE_TELEMETRY_INF("Loc: 0x%x | Size: %d | Next: 0x%x\n", e, e->size, e->next);
-    }
-    SDRIVE_TELEMETRY_INF("ME------------------E\n");
-
     // First find a section of memory that can be allocated
     struct mem_alloc_heap_entry* entry;
     

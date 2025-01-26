@@ -19,7 +19,7 @@
  * Can't be defined before the file cuz its a static library :( <br>
  * A.K.A change it here
  */
-#define MEM_ALLOC_FREES_BEFORE_COALESCE 1
+#define MEM_ALLOC_FREES_BEFORE_COALESCE 3
 
 /**
  * @brief Inits the heap
