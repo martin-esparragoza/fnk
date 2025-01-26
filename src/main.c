@@ -44,9 +44,14 @@ int INCLUDE_COMP_ATTR_NORETURN main() {
         errorhang();
     }
     
-    void* buf = mem_alloc_malloc(1024);
+    void* buf3 = mem_alloc_malloc(10);
+    void* buf4 = mem_alloc_malloc(10);
+    void* buf = mem_alloc_malloc(10);
     mem_alloc_free(buf);
-    void* buf2 = mem_alloc_malloc(2048);
+    void* buf2 = mem_alloc_malloc(20);
+    mem_alloc_free(buf2);
+    mem_alloc_free(buf3);
+    mem_alloc_free(buf4);
     buf = mem_alloc_malloc(1023);
     mem_alloc_malloc(100);
 

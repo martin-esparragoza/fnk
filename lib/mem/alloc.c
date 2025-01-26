@@ -1,4 +1,5 @@
 #include "include/mem/alloc.h"
+    #include "include/sdrive/telemetry.h"
 #include "alloc.h"
 #include <stddef.h>
 #include <stdint.h>
@@ -8,6 +9,7 @@ void* mem_alloc_heap_start = NULL;
 
 static void* heap_end; // Yes, there is no heap end however this is where the unlimited section begins
 static struct mem_alloc_heap_entry* heap_head;
+static unsigned char coalescing_prio = 0;
 
 
 void mem_alloc_init() {
@@ -20,6 +22,16 @@ void mem_alloc_init() {
 void* mem_alloc_malloc(size_t size) {
     if (size == 0)
         return NULL;
+    
+    SDRIVE_TELEMETRY_INF("MS------------------S\n");
+    for (
+        struct mem_alloc_heap_entry* e = heap_head;
+        e != NULL;
+        e = e->next
+    ) {
+        SDRIVE_TELEMETRY_INF("Loc: 0x%x | Size: %d | Next: 0x%x\n", e, e->size, e->next);
+    }
+    SDRIVE_TELEMETRY_INF("ME------------------E\n");
 
     // First find a section of memory that can be allocated
     struct mem_alloc_heap_entry* entry;
@@ -41,41 +53,35 @@ void* mem_alloc_malloc(size_t size) {
         // DON'T add it to the linked list. We will add it later when we FREE it
         return (void*) (((uintptr_t) new_entry) - sizeof(struct mem_alloc_heap_entry));
     } else { // Otherwise we can attempt to split it into two
-        
-        // To do this first repurpose the previous heap entry
-        uintptr_t new_entry_size = entry->size - size; // We have to add a free segment
-        entry->size = size;
-        // Don't alter next. It will be altered to be inserted to the front of the LL later
-
-        // Regardless we need to find the prev entry so we can chop this out of the LL
+        // Find the prev entry so we can chop this out of the LL
         struct mem_alloc_heap_entry* prev = NULL;
-        for (
-            struct mem_alloc_heap_entry* e = heap_head;
-            e->next != NULL;
-            prev = e, e = e->next
-        );
+        if (heap_head != NULL) {
+            for (
+                struct mem_alloc_heap_entry* e = heap_head;
+                e->next != NULL && e != entry;
+                prev = e, e = e->next
+            );
+        }
+        // Clip!
+        if (prev != NULL)
+            prev->next = entry->next;
+        else // If prev is NULL that means it was the head
+            heap_head = entry->next;
         
-        if (new_entry_size > sizeof(struct mem_alloc_heap_entry)) {
+        if (entry->size - size > sizeof(struct mem_alloc_heap_entry)) { // Splitable. Otherwise stays as entry->size
             // Create new entry
             struct mem_alloc_heap_entry* new_entry = (void*) (((uintptr_t) entry) + sizeof(struct mem_alloc_heap_entry) + size);
-            if (prev != NULL) // Chop it out of ll
-                prev->next = new_entry;
-            else
-                heap_head = new_entry;
-            new_entry->next = entry->next; // Assumes the perfect thing that entry->next must be NULL if at end
-            new_entry->size = new_entry_size - sizeof(struct mem_alloc_heap_entry);
-
-        // This thing is to chop out of ll
-        } else {
-            // We don't have enough space. Add it to the return entry
-            entry->size += new_entry_size;
-
+            new_entry->size = entry->size - size - sizeof(struct mem_alloc_heap_entry);
+            
+            // This counts as sorted insertion because prev and next should be relative
             if (prev != NULL)
-                prev->next = entry->next;
-            else // If prev is NULL that means it was the head
-                heap_head = entry->next;
+                prev->next = new_entry;
+            new_entry->next = entry->next;
+            
+            // Finally update this
+            entry->size = size;
         }
-        
+
         return (void*) (((uintptr_t) entry) - sizeof(struct mem_alloc_heap_entry));
     }
 }
@@ -87,9 +93,24 @@ void* mem_alloc_realloc(void* b, size_t size);
 void mem_alloc_free(void* ptr) {
     struct mem_alloc_heap_entry* entry = ((struct mem_alloc_heap_entry*) ptr) + 1;
     
-    entry->next = heap_head;
-    heap_head = entry;
-    
+    // This finds the in between element so we can insert it sorted
+    struct mem_alloc_heap_entry* prev = NULL;
+    if (heap_head != NULL) {
+        for (
+            struct mem_alloc_heap_entry* e = heap_head;
+            e != NULL && e > entry;
+            prev = e, e = e->next
+        );
+    }
+
+    if (prev != NULL) {
+        entry->next = prev->next;
+        prev->next = entry;
+    } else {
+        entry->next = heap_head;
+        heap_head = entry;
+    }
+        
     // TODO: Add coalescing
 }
 

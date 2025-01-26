@@ -13,6 +13,16 @@
 #include <stdint.h>
 
 /**
+ * @def MEM_ALLOC_OPS_BEFORE_COALESCE
+ * @brief Number of ops before running a coalesce on the heap
+ * 
+ * Define this before the file. Default is 5
+ */
+#ifndef MEM_ALLOC_FREES_BEFORE_COALESCE
+    #define MEM_ALLOC_FREES_BEFORE_COALESCE 5
+#endif
+
+/**
  * @brief Inits the heap
  *
  * Makes the head heap entry
