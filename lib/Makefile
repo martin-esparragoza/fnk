@@ -33,7 +33,7 @@ deps: $(DEPFILES)
 
 %.a: $(OBJFILES)
 	$(eval DIR = $(patsubst %.a,%,$@))
-	$(AR) cr $@ $(filter $(DIR)/%.o,$^)
+	$(AR) $(ARFLAGS) cr $@ $(filter $(DIR)/%.o,$^)
 	
 ifneq ($(MAKECMDGOALS),clean)
 include $(DEPFILES)

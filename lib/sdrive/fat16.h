@@ -9,8 +9,7 @@
 
 #include "include/sdrive/fat16.h"
 #include "attr.h"
-#include <stdint.h>
-#include <stddef.h>
+#include "types.h"
 
 #define SDRIVE_FAT16_DIR_ATTR_READ_ONLY      0x01
 #define SDRIVE_FAT16_DIR_ATTR_HIDDEN         0x02

@@ -8,8 +8,7 @@
 #ifndef INCLUDE_SDRIVE_FAT16_H_
 #define INCLUDE_SDRIVE_FAT16_H_
 
-#include <stdint.h>
-#include <stddef.h>
+#include "types.h"
 
 // I hate this but i need to control the type
 #define SDRIVE_FAT16_ERRC_WARN_FATSZ_TOO_LARGE 0

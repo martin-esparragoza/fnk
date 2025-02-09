@@ -14,7 +14,7 @@ clean: $(MAKEDIRS)
 	rm -rf rtfnk
 	rm -rf *.d
 
-build: deps $(OBJFILES) rtfnk
+build: deps $(OBJFILES) rtfnk_$(ARCH)
 
 deps: $(MAKEDIRS) $(DEPFILES)
 
@@ -32,11 +32,11 @@ entry/$(ARCH)/entry.d:
 
 
 # Avoid custom linker script until this thing actually has be to used. (It should be linked correctly and freestanding later)
-#rtfnk: linker.ld $(OBJFILES) $(LIBFILES)
+#rtfnk_$(ARCH): linker_$(ARCH).ld $(OBJFILES) $(LIBFILES)
 #	$(LD) -T $< -o $@ $(OBJFILES) $(LIBFILES)
 	
-rtfnk: linker.ld $(OBJFILES) $(LIBFILES)
-	$(LD) -o $@ $(OBJFILES) -e entry $(LIBFILES)
+rtfnk_$(ARCH): linker_$(ARCH).ld $(OBJFILES) $(LIBFILES)
+	$(LD) $(LDFLAGS) -o $@ $(OBJFILES) -e entry $(LIBFILES)
 
 
 $(MAKEDIRS):

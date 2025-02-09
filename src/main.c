@@ -9,9 +9,7 @@
 #include "lib/util/memdump.h"
 #include "include/mem/alloc.h"
 #include "attr.h"
-#include <stdint.h>
-#include <stdbool.h>
-#include <stddef.h>
+#include "types.h"
 
 INCLUDE_COMP_ATTR_USED INCLUDE_COMP_ATTR_SECTION(".memdump") struct util_memdump md;
 int errc = 0; // 0 Isnt standardized or anything but whatever

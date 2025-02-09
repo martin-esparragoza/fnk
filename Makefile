@@ -1,11 +1,15 @@
 # Set this yourself
 ARCH = testlinux
 
-CC = gcc
 AR = ar
+ARFLAGS =
+
 # Im using gcc here just because some stdc stuff is used for now
 LD = gcc
-CFLAGS = -Wall --freestanding -std=c99 -fno-stack-protector -g
+LDFLAGS =
+
+CC = gcc
+CFLAGS = -Wall -ffreestanding -std=c99 -fno-stack-protector -g
 CLINK =
 export
 

@@ -1,9 +1,6 @@
 #include "lib/util/ops.h"
 
-#include <stdlib.h>
-#include <stdint.h>
-#include <stdbool.h>
-#include <stddef.h>
+#include "types.h"
 
 void util_ops_bswap(uint8_t* data, size_t size) {
     for (size_t i = 0; i < size / 2; i++) {

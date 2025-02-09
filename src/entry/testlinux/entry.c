@@ -1,13 +1,13 @@
 #include "attr.h"
 #include "config.h"
+#include "types.h"
 #define _GNU_SOURCE
 #include <sys/mman.h>
 #include <ucontext.h>
-#include <stdio.h>
-#include <stdint.h>
 #include <stdlib.h>
+#include <stdio.h>
 
-#define PMEM_SIZE 1024 * 16 /* 16kb */
+#define PMEM_SIZE 1024 * 32 /* 32kb */
 #define NO_OS_ERROR() printf("Error in entry.\n")
     // Just some error that can be executed without rtfnk and other libs being loaded
 
@@ -40,7 +40,7 @@ int INCLUDE_COMP_ATTR_NORETURN entry() {
     getcontext(&context);
     
     // Stack direction down and heap direction up
-    context.uc_stack.ss_sp = (void*) (((uintptr_t) pmem) + PMEM_SIZE);
+    context.uc_stack.ss_sp = (void*) (((uintptr_t) pmem) + PMEM_SIZE) - 256; // Avoid zero page
     mem_alloc_heap_start = pmem;
 
     context.uc_stack.ss_size = PMEM_SIZE;

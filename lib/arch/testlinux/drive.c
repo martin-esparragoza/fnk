@@ -1,6 +1,6 @@
 #include "include/sdrive/drive.h"
+#include "types.h"
 #include <stdio.h>
-#include <stdint.h>
 
 static FILE* fp;
 

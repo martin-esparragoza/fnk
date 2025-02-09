@@ -6,7 +6,7 @@
 #ifndef INCLUDE_SDRIVE_DRIVE_H_
 #define INCLUDE_SDRIVE_DRIVE_H_
 
-#include <stdint.h>
+#include "types.h"
 
 /**
  * @brief Initialize driver

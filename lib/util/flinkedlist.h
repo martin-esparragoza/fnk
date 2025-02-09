@@ -8,7 +8,7 @@
 #ifndef LIB_UTIL_FLINKEDLIST_H_
 #define LIB_UTIL_FLINKEDLIST_H_
 
-#include <stddef.h>
+#include "types.h"
 
 typedef struct util_flinkedlist {
     size_t next;

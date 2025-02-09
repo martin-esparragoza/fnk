@@ -1,5 +1,5 @@
 #include "lib/util/flinkedlist.h"
-#include <stddef.h>
+#include "types.h"
 
 void util_flinkedlist_init(struct util_flinkedlist* list, size_t size) {
     if (size <= 1)

@@ -6,10 +6,7 @@
 #ifndef LIB_UTIL_OPS_H_
 #define LIB_UTIL_OPS_H_
 
-#include <stdlib.h>
-#include <stdbool.h>
-#include <stdint.h>
-#include <stddef.h>
+#include "types.h"
 
 void util_ops_bswap(uint8_t* data, size_t size);
 

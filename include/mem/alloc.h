@@ -9,8 +9,7 @@
 #ifndef INCLUDE_MEM_ALLOC_H_
 #define INCLUDE_MEM_ALLOC_H_
 
-#include <stddef.h>
-#include <stdint.h>
+#include "types.h"
 
 /**
  * @def MEM_ALLOC_OPS_BEFORE_COALESCE

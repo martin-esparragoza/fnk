@@ -7,9 +7,7 @@
 #define LIB_MEM_ALLOC_H_
 
 #include "attr.h"
-#include <stddef.h>
-#include <stdbool.h>
-#include <stdint.h>
+#include "types.h"
 
 /**
  * @brief Serves as a descriptor

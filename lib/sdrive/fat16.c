@@ -6,13 +6,11 @@
 #include "include/sdrive/telemetry.h"
 #include "config.h"
 #include "attr.h"
+#include "types.h"
 #include "lib/util/memdump.h"
 #include "lib/util/ops.h"
 #include "lib/util/flinkedlist.h"
 #include "lib/util/string.h"
-#include <stdint.h>
-#include <stddef.h>
-#include <stdbool.h>
 
 extern struct util_memdump md;
 

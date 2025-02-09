@@ -6,9 +6,7 @@
 #include "include/rtfnk/socket.h"
 #include "lib/rtfnk/socket.h"
 #include "lib/util/flinkedlist.h"
-#include <stdint.h>
-#include <stddef.h>
-#include <stdbool.h>
+#include "types.h"
 
 // TODO const char*
 const char* fnk_socket_def_errcstr[] = { ///< Default error codes to string (driver programs, reference this!)

@@ -6,8 +6,7 @@
 #ifndef INCLUDE_RTFNK_SOCKET_H_
 #define INCLUDE_RTFNK_SOCKET_H_
 
-#include <stddef.h>
-#include <stdbool.h>
+#include "types.h"
 
 // No enums, I'd like the control the type
 #define FNK_SOCKET_ERRC_DEF_OK 0

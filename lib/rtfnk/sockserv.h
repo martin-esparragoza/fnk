@@ -9,7 +9,7 @@
 #include "include/rtfnk/sockserv.h"
 #include "lib/rtfnk/socket.h"
 #include "lib/util/flinkedlist.h"
-#include <stddef.h>
+#include "types.h"
 
 #define FNK_SOCKSRV_MAXSOCKETS 256
 

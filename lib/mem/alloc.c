@@ -1,7 +1,6 @@
 #include "include/mem/alloc.h"
 #include "alloc.h"
-#include <stddef.h>
-#include <stdint.h>
+#include "types.h"
 
 // Init args set in entry
 void* mem_alloc_heap_start = NULL;
