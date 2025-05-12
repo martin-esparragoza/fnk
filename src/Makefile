@@ -1,7 +1,10 @@
 SOURCES = main.c entry/$(ARCH)/entry.c
 DEPFILES = $(patsubst %.c,%.d,$(SOURCES))
 OBJFILES = $(patsubst %.c,%.o,$(SOURCES))
-LIBFILES = $(wildcard ../lib/*.a) ../lib/arch/$(ARCH).a
+LIBFILES = ../lib/comp/$(CC).a ../lib/arch/$(ARCH).a  $(wildcard ../lib/*.a)
+# Stupid freaking hack that makes me want to die
+# Note to self idiot. Link order is first come first serve so strong definitions (user specific redefines) must come first
+LIBFILESWITHFLAGS = -Wl,--whole-archive ../lib/comp/$(CC).a ../lib/arch/$(ARCH).a -Wl,--no-whole-archive $(wildcard ../lib/*.a)
 INCFLAGS = -I../include/arch/$(ARCH) -I../include/comp/$(CC) -I ../
 MAKEDIRS = entry/$(ARCH)/
 
@@ -36,7 +39,7 @@ entry/$(ARCH)/entry.d:
 #	$(LD) -T $< -o $@ $(OBJFILES) $(LIBFILES)
 	
 rtfnk_$(ARCH): linker_$(ARCH).ld $(OBJFILES) $(LIBFILES)
-	$(LD) $(LDFLAGS) -o $@ $(OBJFILES) -e entry $(LIBFILES)
+	$(LD) $(LDFLAGS) -o $@ $(OBJFILES) -e entry $(LIBFILESWITHFLAGS)
 
 
 $(MAKEDIRS):

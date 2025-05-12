@@ -1,4 +1,4 @@
-An operating system frame. (written in C99 for GCC compiler)
+An operating system frame written in freestanding C99.
 
 !CARE
 * Unsafely written for the most part
@@ -27,6 +27,78 @@ FEATURES (atttempted)
 ## Posix deviations?
 1. You shouldn't be trying to port code over usually. Its a HOBBY RTOS, most things should be custom
 2. I disagree with some POSIX functions as they can be restrictive or hard to manage errors. I want error messages to be plentiful, easy to access, and give good information.
+
+## User Defined Files
+It is a frame so you do have to give it so elbow grease before it can run. (Remember that for the .h files make it so they can only be included once)
+### `include/arch/$(ARCH)/config.h`
+The following macros must be defined.
+* `ARCH_CONFIG_VERBOSE 0-3`
+    * 0 = No telemetry logs
+    * 1 = Error logs only
+    * 2 = Warning and error logs
+    * 3 = Informational, warning, and error logs
+* `ARCH_CONFIG_FAT16_SECTORBUFFER_SZ n` Number of sectors for the read buffer to read at a time in an operation (how much memory to allocate to internal FAT operations)
+* `ARCH_CONFIG_FAT16_FAT n` FAT number to use as primary FAT
+* `ARCH_CONFIG_FAT16_FATSZ n` How much memory to allocate for the FAT
+### `include/arch/$(ARCH)/inst.h`
+The following functions must be defined
+`void arch_inst_popa()`
+* Pops all general registers and flags off of the stack
+`void arch_inst_enter(void* sp)`
+* First pushes ip onto the stack then moves the sp register to where the parameter sp is pointing
+`void arch_inst_exit(void* sp)`
+* Moves what sp parameter points to to the sp register then pops ip off the stack
+### `include/arch/$(ARCH)/types.h`
+The following types must be defined
+`uint8_t`
+`uint16_t`
+`uint32_t`
+`uint64_t`
+`int8_t`
+`int16_t`
+`int32_t`
+`int64_t`
+`uintmax_t`
+`intmax_t`
+`intptr_t`
+`uintptr_t`
+`size_t`
+`ssize_t`
+`bool`
+The following macros must be defined properly
+`UINT8_WIDTH`
+`UINT16_WIDTH`
+`UINT32_WIDTH`
+`UINT64_WIDTH`
+`INT8_WIDTH`
+`INT16_WIDTH`
+`INT32_WIDTH`
+`INT64_WIDTH`
+`UINTMAX_WIDTH`
+`INTMAX_WIDTH`
+### Optional weak function redefinitions
+Commonly, a compiler can support built-in functions that utilize system architecture. While there are functions that will run fine freestanding, you might want to get a bit more performance by redefining these functions using builtins. The following functions can be redefined through any .c file inside of the `lib/comp/` directory
+`void util_ops_bswap(void* data, size_t size)`
+`uint16_t util_ops_bswap16(uint16_t data)`
+`uint32_t util_ops_bswap32(uint32_t data)`
+`uint64_t util_ops_bswap64(uint64_t data)`
+`bool util_ops_ispowertwo(unsigned x)`
+`int util_ops_min(int a, int b)`
+`int util_ops_max(int a, int b)`
+`uintptr_t align(uintptr_t value, int toalign)`
+`void memcpy(void* dest, void* src, size_t length)`
+`void memset(void* dest, char c, size_t length)`
+### Static Drivers
+All headers inside of the `include/sdrive/` directory must be satisfied in the `arch/$(ARCH)/` directory
+### `include/comp/$(CC)`
+The following macros for attributes must be satisfied
+`COMP_ATTR_NORETURN`
+`COMP_ATTR_USED`
+`COMP_ATTR_ALIGNED(n)`
+`COMP_ATTR_PACKED`
+`COMP_ATTR_SECTION(s)`
+`COMP_ATTR_NORETURN`
+`COMP_ATTR_WEAK`
 
 TODO (FIX) LIST:
 - FAT16 Write

@@ -12,22 +12,13 @@
 #include "types.h"
 
 /**
- * @def MEM_ALLOC_OPS_BEFORE_COALESCE
- * @brief Number of ops before running a coalesce on the heap
- * 
- * Can't be defined before the file cuz its a static library :( <br>
- * A.K.A change it here
- */
-#define MEM_ALLOC_FREES_BEFORE_COALESCE 3
-
-/**
  * @brief Inits the heap
  *
  * Makes the head heap entry
  * 
- * @return Errc
+ * @param coalescing_max # of ops (free) before running a coalesce. Who came first, the chicken or the egg?
  */
-void mem_alloc_init();
+void mem_alloc_init(unsigned char coalescing_max);
 
 /**
  * @brief Allocates a portion of memory on heap
@@ -39,14 +30,14 @@ void mem_alloc_init();
 void* mem_alloc_malloc(size_t size);
 
 /**
- * @brief Allocates a portion of memory on the heap and writes a value to all of it
+ * @brief Allocates a portion of memory on the heap and writes 0 to all of it
  *
- * @param value Value to write
+ * @param nmemb Number of members
  * @param size Desired allocated length
  * 
  * @return Allocated memory
  */
-void* mem_alloc_calloc(uint64_t value, size_t size);
+void* mem_alloc_calloc(size_t nmemb, size_t size);
 
 /**
  * @brief Reallocates a portion of memory on the heap to another size

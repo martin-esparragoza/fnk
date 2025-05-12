@@ -7,6 +7,7 @@ void* mem_alloc_heap_start = NULL;
 
 static void* heap_end; // Yes, there is no heap end however this is where the unlimited section begins
 static struct mem_alloc_heap_entry* heap_head;
+static unsigned char _coalescing_max = 0;
 static unsigned char coalescing_prio = 0;
 
 static void coalesce() {
@@ -34,20 +35,21 @@ static void coalesce() {
 // Effectively lazy coalescing
 static void inc_coalesce();
 static inline void inc_coalesce() {
-    if (++coalescing_prio >= MEM_ALLOC_FREES_BEFORE_COALESCE) {
+    if (++coalescing_prio >= _coalescing_max) {
         coalesce();
         coalescing_prio = 0;
     }
 }
 
 
-void mem_alloc_init() {
+void mem_alloc_init(unsigned char coalescing_max) {
     heap_head = NULL;
     
     heap_end = mem_alloc_heap_start;
+    
+    _coalescing_max = coalescing_max;
 }
 
-// TODO: SP head check
 void* mem_alloc_malloc(size_t size) {
     if (size == 0)
         return NULL;
@@ -106,7 +108,11 @@ void* mem_alloc_malloc(size_t size) {
     }
 }
 
-void* mem_alloc_calloc(uint64_t value, size_t size);
+void* mem_alloc_calloc(size_t nmemb, size_t size) {
+    void* ret = mem_alloc_malloc(size * nmemb);
+    
+    // TODO:
+}
 
 void* mem_alloc_realloc(void* b, size_t size);
 

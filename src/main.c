@@ -11,19 +11,22 @@
 #include "attr.h"
 #include "types.h"
 
-INCLUDE_COMP_ATTR_USED INCLUDE_COMP_ATTR_SECTION(".memdump") struct util_memdump md;
+COMP_ATTR__USED__ COMP_ATTR__SECTION__(".memdump") struct util_memdump md;
 int errc = 0; // 0 Isnt standardized or anything but whatever
               // This is a reused errc variable
 
-void errorhang();
+void COMP_ATTR__NORETURN__ errorhang() {
+    SDRIVE_TELEMETRY_ERR("Hanging due to error..\n");
+    while (1);
+}
 
-int INCLUDE_COMP_ATTR_NORETURN main() {
+int COMP_ATTR__NORETURN__ main() {
     if (!(md.telemetry_init_status = sdrive_telemetry_init()))
         SDRIVE_TELEMETRY_INF("Successfully inited static telemetry driver\n");
     else
         SDRIVE_TELEMETRY_WRN("Failed to init static telemetry driver\n");
     
-    mem_alloc_init();
+    mem_alloc_init(2);
     SDRIVE_TELEMETRY_INF("Inited memory utils\n");
     
     // JANK AS HELL FIXME
@@ -52,7 +55,7 @@ int INCLUDE_COMP_ATTR_NORETURN main() {
     mem_alloc_free(buf4);
     buf = mem_alloc_malloc(1023);
     mem_alloc_malloc(100);
-
+    
     /*SDRIVE_TELEMETRY_INF("Searching root directory for directory TESTDIR\n");
     struct sdrive_fat16_dir* dir1 = __builtin_alloca(sdrive_fat16_dir_sizeof());
     if ((errc = sdrive_fat16_root_dir_open("TESTDIR", dir1)) > SDRIVE_FAT16_ERRC_OK) {
@@ -92,9 +95,4 @@ int INCLUDE_COMP_ATTR_NORETURN main() {
     );
 
     // Jump out here
-}
-
-void INCLUDE_COMP_ATTR_NORETURN errorhang() {
-    SDRIVE_TELEMETRY_ERR("Hanging due to error..\n");
-    while (1);
 }

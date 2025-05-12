@@ -3,6 +3,7 @@
  * @brief Synch static lib for fat16 driver
  * OS is only meant for 1 FS to be accesed at once (and 1 disk)
  * Partitioning unsupported
+ * This driver only includes read capabilities
  */
 
 #ifndef INCLUDE_SDRIVE_FAT16_H_

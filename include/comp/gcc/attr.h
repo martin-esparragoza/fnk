@@ -1,12 +1,16 @@
 #ifndef INCLUDE_COMP_ATTR_H_
 #define INCLUDE_COMP_ATTR_H_
 
+#include <stdio.h>
+#include "types.h"
+
+
 // Do it yourself file
-#define INCLUDE_COMP_ATTR_NORETURN __attribute__((noreturn))
-#define INCLUDE_COMP_ATTR_USED __attribute__((__used__))
-#define INCLUDE_COMP_ATTR_ALIGNED(n) __attribute__((aligned(n)))
-#define INCLUDE_COMP_ATTR_PACKED __attribute__((packed))
-#define INCLUDE_COMP_ATTR_SECTION(s) __attribute__((section(s)))
-#define INCLUDE_COMP_ATTR_NORETURN __attribute__((noreturn))
+#define COMP_ATTR__USED__       __attribute__((__used__))
+#define COMP_ATTR__ALIGNED__(n) __attribute__((aligned(n)))
+#define COMP_ATTR__PACKED__     __attribute__((packed))
+#define COMP_ATTR__SECTION__(s) __attribute__((section(s)))
+#define COMP_ATTR__NORETURN__   __attribute__((noreturn))
+#define COMP_ATTR__WEAK__       __attribute__((weak))
 
 #endif

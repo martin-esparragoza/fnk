@@ -6,13 +6,3 @@
 #include <stdbool.h>
 
 #endif
-
-/* Things that need to be defined:
- * uintN_t
- * intN_t
- * intptr_t
- * uintptr_t
- * size_t
- * ssize_t
- * bool
- */

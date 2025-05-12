@@ -33,7 +33,7 @@ static const char* sdrive_fat16_errcstr[] = {
 
 static uint_fast32_t fatstart, fatsize, rootstart, rootsize, datastart, datasize, numclusters;
 static uint_fast16_t bytespersector, sectorspercluster;
-static INCLUDE_COMP_ATTR_ALIGNED(8) uint16_t fat[ARCH_CONFIG_FAT16_FATSZ / 2]; // Divided by 2 because FATSZ is supposed to be in bytes
+static COMP_ATTR__ALIGNED__(8) uint16_t fat[ARCH_CONFIG_FAT16_FATSZ / 2]; // Divided by 2 because FATSZ is supposed to be in bytes
 
 const char* sdrive_fat16_errctostr(int errc) {
     if (errc < sizeof(sdrive_fat16_errcstr) / sizeof(sdrive_fat16_errcstr[0]) && errc > 0)
@@ -53,20 +53,20 @@ int sdrive_fat16_init(unsigned lba_bootsector) {
 #ifdef ARCH_CONFIG_BIG_ENDIAN
     util_ops_bswap(bs->jmpboot, sizeof(bs->jmpboot));
     util_ops_bswap(bs->oemname, sizeof(bs->oemname));
-    bs->bytespersector = INCLUDE_COMP_BUILTIN_BSWAP16(bs->bytespersector);
-    bs->reservedsectors = INCLUDE_COMP_BUILTIN_BSWAP16(bs->reservedsectors);
-    bs->rootentrycount = INCLUDE_COMP_BUILTIN_BSWAP16(bs->rootentrycount);
-    bs->totalsectors16 = INCLUDE_COMP_BUILTIN_BSWAP16(bs->totalsectors16);
-    bs->fatsize16 = INCLUDE_COMP_BUILTIN_BSWAP16(bs->fatsize16);
-    bs->sectorspertrack = INCLUDE_COMP_BUILTIN_BSWAP16(bs->sectorspertrack);
-    bs->numheads = INCLUDE_COMP_BUILTIN_BSWAP16(bs->numheads);
-    bs->hiddensectors = INCLUDE_COMP_BUILTIN_BSWAP32(bs->hiddensectors);
-    bs->totalsectors32 = INCLUDE_COMP_BUILTIN_BSWAP32(bs->totalsectors32);
-    bs->id = INCLUDE_COMP_BUILTIN_BSWAP32(bs->id);
+    bs->bytespersector = util_ops_bswap16(bs->bytespersector);
+    bs->reservedsectors = util_ops_bswap16(bs->reservedsectors);
+    bs->rootentrycount = util_ops_bswap16(bs->rootentrycount);
+    bs->totalsectors16 = util_ops_bswap16(bs->totalsectors16);
+    bs->fatsize16 = util_ops_bswap16(bs->fatsize16);
+    bs->sectorspertrack = util_ops_bswap16(bs->sectorspertrack);
+    bs->numheads = util_ops_bswap16(bs->numheads);
+    bs->hiddensectors = util_ops_bswap32(bs->hiddensectors);
+    bs->totalsectors32 = util_ops_bswap32(bs->totalsectors32);
+    bs->id = util_ops_bswap32(bs->id);
     util_ops_bswap(bs->label, sizeof(bs->label));
     util_ops_bswap(bs->strfattype, sizeof(bs->strfattype));
     // Boot code is boot code. It doesn't need to be interprited by us and its endianness should be the systems
-    bs->signature = INCLUDE_COMP_BUILTIN_BSWAP16(bs->signature);
+    bs->signature = util_ops_bswap16(bs->signature);
 #endif
 
     // Param setting
@@ -293,8 +293,8 @@ int sdrive_fat16_root_open(const char* file, struct sdrive_fat16_dir_sfn* sfn) {
 
 int sdrive_fat16_createfpfromsfn(struct sdrive_fat16_file* fp, struct sdrive_fat16_dir_sfn* sfn) {
 #ifdef ARCH_CONFIG_BIG_ENDIAN
-    sfn->firstclusterlo = INCLUDE_COMP_BUILTIN_BSWAP16(sfn->firstclusterlo);
-    sfn->filesize = INCLUDE_COMP_BUILTIN_BSWAP32(sfn->filesize);
+    sfn->firstclusterlo = util_ops_bswap16(sfn->firstclusterlo);
+    sfn->filesize = util_ops_bswap32(sfn->filesize);
 #endif
 
     if (sfn->attr & SDRIVE_FAT16_DIR_ATTR_DIRECTORY)
@@ -317,7 +317,7 @@ int sdrive_fat16_createfpfromsfn(struct sdrive_fat16_file* fp, struct sdrive_fat
 
 int sdrive_fat16_createdpfromsfn(struct sdrive_fat16_dir* dp, struct sdrive_fat16_dir_sfn* sfn) {
 #ifdef ARCH_CONFIG_BIG_ENDIAN
-    sfn->firstclusterlo = INCLUDE_COMP_BUILTIN_BSWAP16(sfn->firstclusterlo);
+    sfn->firstclusterlo = util_ops_bswap16(sfn->firstclusterlo);
 #endif
 
     if (!(sfn->attr & SDRIVE_FAT16_DIR_ATTR_DIRECTORY))
@@ -349,7 +349,7 @@ int sdrive_fat16_root_dir_open(const char* file, struct sdrive_fat16_dir* dp) {
     if ((errc = sdrive_fat16_root_open(file, &sfn)) > SDRIVE_FAT16_ERRC_OK)
         return errc;
 #ifdef ARCH_CONFIG_BIG_ENDIAN
-    sfn.firstclusterlo = INCLUDE_COMP_BUILTIN_BSWAP16(sfn.firstclusterlo);
+    sfn.firstclusterlo = util_ops_bswap16(sfn.firstclusterlo);
 #endif
 
     if (!(sfn.attr & SDRIVE_FAT16_DIR_ATTR_DIRECTORY))

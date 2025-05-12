@@ -3,7 +3,7 @@
 
 #include "attr.h"
 
-struct INCLUDE_COMP_ATTR_PACKED util_memdump { ///< Debug information memdump
+struct COMP_ATTR__PACKED__ util_memdump { ///< Debug information memdump
     unsigned char telemetry_init_status;
     unsigned char mem_init_status;
     unsigned char drive_init_status;
