@@ -1,4 +1,4 @@
-An operating system frame written in freestanding C99.
+A (SINGLE THREADED) operating system frame written in freestanding C99.
 
 !CARE
 * Unsafely written for the most part
@@ -76,7 +76,7 @@ The following macros must be defined properly
 `INT64_WIDTH`  
 `UINTMAX_WIDTH`  
 `INTMAX_WIDTH`  
-### Optional weak function redefinitions
+### Optional weak method redefinitions
 Commonly, a compiler can support built-in functions that utilize system architecture. While there are functions that will run fine freestanding, you might want to get a bit more performance by redefining these functions using builtins. The following functions can be redefined through any .c file inside of the `lib/comp/` directory
 `void util_ops_bswap(void* data, size_t size)`  
 `uint16_t util_ops_bswap16(uint16_t data)`  
@@ -87,7 +87,8 @@ Commonly, a compiler can support built-in functions that utilize system architec
 `int util_ops_max(int a, int b)`  
 `uintptr_t align(uintptr_t value, int toalign)`  
 `void memcpy(void* dest, void* src, size_t length)`  
-`void memset(void* dest, char c, size_t length)`  
+`void memset(void* dest, int val, size_t length)`  
+`void memcmp(void* ptr0, void* ptr1, size_t length)`
 ### Static Drivers
 All headers inside of the `include/sdrive/` directory must be satisfied in the `arch/$(ARCH)/` directory
 ### `include/comp/$(CC)`

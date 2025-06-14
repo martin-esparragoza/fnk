@@ -2,7 +2,7 @@ SOURCES = main.c entry/$(ARCH)/entry.c
 DEPFILES = $(patsubst %.c,%.d,$(SOURCES))
 OBJFILES = $(patsubst %.c,%.o,$(SOURCES))
 LIBFILES = ../lib/comp/$(CC).a ../lib/arch/$(ARCH).a  $(wildcard ../lib/*.a)
-# Stupid freaking hack that makes me want to die
+# Stupid hack
 # Note to self idiot. Link order is first come first serve so strong definitions (user specific redefines) must come first
 LIBFILESWITHFLAGS = -Wl,--whole-archive ../lib/comp/$(CC).a ../lib/arch/$(ARCH).a -Wl,--no-whole-archive $(wildcard ../lib/*.a)
 INCFLAGS = -I../include/arch/$(ARCH) -I../include/comp/$(CC) -I ../

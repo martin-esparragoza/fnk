@@ -1,4 +1,5 @@
 #include "include/mem/alloc.h"
+#include "lib/util/ops.c"
 #include "alloc.h"
 #include "types.h"
 
@@ -110,7 +111,7 @@ void* mem_alloc_malloc(size_t size) {
 
 void* mem_alloc_calloc(size_t nmemb, size_t size) {
     void* ret = mem_alloc_malloc(size * nmemb);
-    
+
     // TODO:
 }
 

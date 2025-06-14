@@ -6,6 +6,7 @@
 #include <ucontext.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #define PMEM_SIZE 1024 * 32 /* 32kb */
 #define NO_OS_ERROR() printf("Error in entry.\n")

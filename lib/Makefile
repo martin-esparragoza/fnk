@@ -31,6 +31,7 @@ deps: $(DEPFILES)
 %.o: %.c
 	$(CC) $(CFLAGS) $(INCFLAGS) -c $< -o $@ $(CLINK)
 
+# TODO: Fix this stupid ahh building
 %.a: $(OBJFILES)
 	$(eval DIR = $(patsubst %.a,%,$@))
 	$(AR) $(ARFLAGS) cr $@ $(filter $(DIR)/%.o,$^)

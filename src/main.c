@@ -10,6 +10,7 @@
 #include "include/mem/alloc.h"
 #include "attr.h"
 #include "types.h"
+    #include "lib/util/ops.h"
 
 COMP_ATTR__USED__ COMP_ATTR__SECTION__(".memdump") struct util_memdump md;
 int errc = 0; // 0 Isnt standardized or anything but whatever
@@ -28,7 +29,7 @@ int COMP_ATTR__NORETURN__ main() {
     
     mem_alloc_init(2);
     SDRIVE_TELEMETRY_INF("Inited memory utils\n");
-    
+        
     // JANK AS HELL FIXME
     md.drive_init_status = sdrive_drive_init();
     for (unsigned char i = 0; i < 3 && md.drive_init_status; i++) {
@@ -36,6 +37,14 @@ int COMP_ATTR__NORETURN__ main() {
 
         md.drive_init_status = sdrive_drive_init();
     }
+    
+    uint8_t a[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
+    for (unsigned i = 0; i < sizeof(a) / sizeof(a[0]); i++)
+        SDRIVE_TELEMETRY_INF("a | %d : %d", i, a[i]);
+    
+    util_mem_memset(a, 0, sizeof(a) / sizeof(a[0]));
+    for (unsigned i = 0; i < sizeof(a) / sizeof(a[0]); i++)
+        SDRIVE_TELEMETRY_INF("a | %d : %d", i, a[i]);
 
     if (md.drive_init_status)
         errorhang();
