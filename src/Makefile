@@ -8,7 +8,7 @@ LIBFILESWITHFLAGS = -Wl,--whole-archive ../lib/comp/$(CC).a ../lib/arch/$(ARCH).
 INCFLAGS = -I../include/arch/$(ARCH) -I../include/comp/$(CC) -I ../
 MAKEDIRS = entry/$(ARCH)/
 
-.PHONY: all deps build clean $(MAKEDIRS)
+.PHONY: all build clean $(MAKEDIRS)
 
 all: build
 
@@ -17,22 +17,13 @@ clean: $(MAKEDIRS)
 	rm -rf rtfnk
 	rm -rf *.d
 
-build: deps $(OBJFILES) rtfnk_$(ARCH)
+build: $(MAKEDIRS) $(OBJFILES) rtfnk_$(ARCH)
 
-deps: $(MAKEDIRS) $(DEPFILES)
-
-%.d: %.c
-	$(CC) -MM $(INCFLAGS) $< -MF $@
-	
 %.o: %.c
-	$(CC) $(CFLAGS) $(INCFLAGS) -c $< -o $@ $(CLINK)
+	$(CC) $(CFLAGS) -MMD -MP $(INCFLAGS) -c $< -o $@ $(CLINK)
 	
 entry/$(ARCH)/entry.o: # We want our custom makefile to link this instead (but keep it as a dep)
 	@:
-
-entry/$(ARCH)/entry.d:
-	@:
-
 
 # Avoid custom linker script until this thing actually has be to used. (It should be linked correctly and freestanding later)
 #rtfnk_$(ARCH): linker_$(ARCH).ld $(OBJFILES) $(LIBFILES)
@@ -41,10 +32,9 @@ entry/$(ARCH)/entry.d:
 rtfnk_$(ARCH): linker_$(ARCH).ld $(OBJFILES) $(LIBFILES)
 	$(LD) $(LDFLAGS) -o $@ $(OBJFILES) -e entry $(LIBFILESWITHFLAGS)
 
-
 $(MAKEDIRS):
 	$(MAKE) -C $@ $(MAKECMDGOALS)
 
 ifneq ($(MAKECMDGOALS),clean)
-include $(DEPFILES)
+-include $(DEPFILES)
 endif

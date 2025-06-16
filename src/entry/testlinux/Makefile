@@ -6,7 +6,7 @@ OBJFILES = $(patsubst %.c,%.o,$(SOURCES))
 # Not allowed to access libs
 INCFLAGS = -I../../../include/arch/$(ARCH) -I../../../include/comp/$(CC)
 
-.PHONY: all deps build clean
+.PHONY: all build clean
 
 all: build
 
@@ -14,16 +14,11 @@ clean:
 	rm -rf *.o
 	rm -rf *.d
 	
-build: deps $(OBJFILES)
-	
-deps: $(DEPFILES)
-	
-%.d: %.c
-	$(CC) -MM $(INCFLAGS) $< -MF $@
+build: $(OBJFILES)
 	
 %.o: %.c
-	$(CC) $(CFLAGS) $(INCFLAGS) -c $< -o $@ $(CLINK)
+	$(CC) $(CFLAGS) -MMD -MP $(INCFLAGS) -c $< -o $@ $(CLINK)
 	
 ifneq ($(MAKECMDGOALS),clean)
-include $(DEPFILES)
+-include $(DEPFILES)
 endif

@@ -1,7 +1,7 @@
 # This makefile is responsible for the compilation of all libraries (situated in folders)
 
-MAKEDIRS = rtfnk/ arch/$(ARCH) sdrive/ util/ comp/$(CC)/ mem/
-$(eval MAKEDIRS = $(filter %/,$(MAKEDIRS)))
+MAKEDIRS = rtfnk/ arch/$(ARCH)/ sdrive/ util/ comp/$(CC)/ mem/
+$(eval MAKEDIRS = $(filter %/,$(MAKEDIRS))) # Future martin here. Why does this exist?
 SOURCES = $(wildcard */*.c) $(wildcard arch/$(ARCH)/*.c $(wildcard comp/$(CC)/*.c))
 
 DEPFILES = $(patsubst %.c,%.d,$(SOURCES))
@@ -9,7 +9,7 @@ OBJFILES = $(patsubst %.c,%.o,$(SOURCES))
 LIBFILES = $(patsubst %/,%.a,$(MAKEDIRS))
 INCFLAGS = -I ../include/arch/$(ARCH) -I ../include/comp/$(CC) -I ../
 
-.PHONY: all deps build clean
+.PHONY: all build clean
 
 all: build
 
@@ -19,17 +19,11 @@ clean:
 	rm -rf arch/$(ARCH)/*.a
 	rm -rf *.a
 
-build: deps $(OBJFILES) $(LIBFILES)
+build: $(OBJFILES) $(LIBFILES)
 
-deps: $(DEPFILES)
-	
-# Yeah idk why deps sometimes doesnt work
-
-%.d: %.c
-	$(CC) -MM $(INCFLAGS) $< -MF $@
-
+# This creates .d but the compiler will handle all shenanigans for me :)
 %.o: %.c
-	$(CC) $(CFLAGS) $(INCFLAGS) -c $< -o $@ $(CLINK)
+	$(CC) $(CFLAGS) -MMD -MP $(INCFLAGS) -c $< -o $@ $(CLINK)
 
 # TODO: Fix this stupid ahh building
 %.a: $(OBJFILES)
@@ -37,5 +31,5 @@ deps: $(DEPFILES)
 	$(AR) $(ARFLAGS) cr $@ $(filter $(DIR)/%.o,$^)
 	
 ifneq ($(MAKECMDGOALS),clean)
-include $(DEPFILES)
+-include $(DEPFILES)
 endif
