@@ -9,7 +9,6 @@
 #include "types.h"
 #include "lib/util/memdump.h"
 #include "lib/util/ops.h"
-#include "lib/util/flinkedlist.h"
 #include "lib/util/string.h"
 
 extern struct util_memdump md;
@@ -51,22 +50,22 @@ int sdrive_fat16_init(unsigned lba_bootsector) {
 
     // Painful endian conversion...
 #ifdef ARCH_CONFIG_BIG_ENDIAN
-    util_ops_bswap(bs->jmpboot, sizeof(bs->jmpboot));
-    util_ops_bswap(bs->oemname, sizeof(bs->oemname));
-    bs->bytespersector = util_ops_bswap16(bs->bytespersector);
-    bs->reservedsectors = util_ops_bswap16(bs->reservedsectors);
-    bs->rootentrycount = util_ops_bswap16(bs->rootentrycount);
-    bs->totalsectors16 = util_ops_bswap16(bs->totalsectors16);
-    bs->fatsize16 = util_ops_bswap16(bs->fatsize16);
-    bs->sectorspertrack = util_ops_bswap16(bs->sectorspertrack);
-    bs->numheads = util_ops_bswap16(bs->numheads);
-    bs->hiddensectors = util_ops_bswap32(bs->hiddensectors);
-    bs->totalsectors32 = util_ops_bswap32(bs->totalsectors32);
-    bs->id = util_ops_bswap32(bs->id);
-    util_ops_bswap(bs->label, sizeof(bs->label));
-    util_ops_bswap(bs->strfattype, sizeof(bs->strfattype));
+    util_mem_bswap(bs->jmpboot, sizeof(bs->jmpboot));
+    util_mem_bswap(bs->oemname, sizeof(bs->oemname));
+    bs->bytespersector = util_mem_bswap16(bs->bytespersector);
+    bs->reservedsectors = util_mem_bswap16(bs->reservedsectors);
+    bs->rootentrycount = util_mem_bswap16(bs->rootentrycount);
+    bs->totalsectors16 = util_mem_bswap16(bs->totalsectors16);
+    bs->fatsize16 = util_mem_bswap16(bs->fatsize16);
+    bs->sectorspertrack = util_mem_bswap16(bs->sectorspertrack);
+    bs->numheads = util_mem_bswap16(bs->numheads);
+    bs->hiddensectors = util_mem_bswap32(bs->hiddensectors);
+    bs->totalsectors32 = util_mem_bswap32(bs->totalsectors32);
+    bs->id = util_mem_bswap32(bs->id);
+    util_mem_bswap(bs->label, sizeof(bs->label));
+    util_mem_bswap(bs->strfattype, sizeof(bs->strfattype));
     // Boot code is boot code. It doesn't need to be interprited by us and its endianness should be the systems
-    bs->signature = util_ops_bswap16(bs->signature);
+    bs->signature = util_mem_bswap16(bs->signature);
 #endif
 
     // Param setting

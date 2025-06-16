@@ -10,7 +10,6 @@
 #include "include/mem/alloc.h"
 #include "attr.h"
 #include "types.h"
-    #include "lib/util/ops.h"
 
 COMP_ATTR__USED__ COMP_ATTR__SECTION__(".memdump") struct util_memdump md;
 int errc = 0; // 0 Isnt standardized or anything but whatever
@@ -22,7 +21,9 @@ void COMP_ATTR__NORETURN__ errorhang() {
 }
 
 int COMP_ATTR__NORETURN__ main() {
-    if (!(md.telemetry_init_status = sdrive_telemetry_init()))
+    // First course of action is to get journal/telemetry up
+
+    /*if (!(md.telemetry_init_status = sdrive_telemetry_init()))
         SDRIVE_TELEMETRY_INF("Successfully inited static telemetry driver\n");
     else
         SDRIVE_TELEMETRY_WRN("Failed to init static telemetry driver\n");
@@ -63,7 +64,7 @@ int COMP_ATTR__NORETURN__ main() {
     mem_alloc_free(buf3);
     mem_alloc_free(buf4);
     buf = mem_alloc_malloc(1023);
-    mem_alloc_malloc(100);
+    mem_alloc_malloc(100);*/
     
     /*SDRIVE_TELEMETRY_INF("Searching root directory for directory TESTDIR\n");
     struct sdrive_fat16_dir* dir1 = __builtin_alloca(sdrive_fat16_dir_sizeof());

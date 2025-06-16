@@ -2,6 +2,7 @@
  * @file flinkedlist.h
  * @brief Fixed size linked list
  * This means that the linked list relies on the fact of the linked list already being fully assembled and then rearrangeable
+ * One direction and linear
  * Doubly linked
  */
 
@@ -29,7 +30,7 @@ void util_flinkedlist_init(struct util_flinkedlist* list, size_t size);
  *
  * @return Next available node 0 if can't insert one
  */
-size_t util_flinkedlist_insert(struct util_flinkedlist* list, size_t node);
+size_t util_flinkedlist_push(struct util_flinkedlist* list, size_t node);
 
 /**
  * @brief Remove that node
@@ -40,9 +41,8 @@ size_t util_flinkedlist_insert(struct util_flinkedlist* list, size_t node);
  */
 size_t util_flinkedlist_remove(struct util_flinkedlist* list, size_t node, size_t target);
 
-/**
- * @brief Used to recur through
- */
 size_t util_flinkedlist_getnext(struct util_flinkedlist* list, size_t node);
+
+size_t util_flinkedlist_getprev(struct util_flinkedlist* list, size_t node);
 
 #endif

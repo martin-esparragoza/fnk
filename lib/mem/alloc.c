@@ -1,21 +1,21 @@
 #include "include/mem/alloc.h"
+#include "include/rtfnk/memops.h"
 #include "lib/util/ops.c"
 #include "alloc.h"
 #include "types.h"
+#include "config.h"
 
 // Init args set in entry
 void* mem_alloc_heap_start = NULL;
 
-static void* heap_end; // Yes, there is no heap end however this is where the unlimited section begins
+static void* heap_end; // Yes, there is no heap end however this is where the unlimited section begins SO TECHNICALLY ITS A HEAP START????? HUHHHHH
 static struct mem_alloc_heap_entry* heap_head;
 static unsigned char _coalescing_max = 0;
 static unsigned char coalescing_prio = 0;
 
 static void coalesce() {
     // O(n)
-    // TODO: 1 line variable decleration. I'm on a plane flight and forgot how to do it
-    struct mem_alloc_heap_entry* next = NULL;
-    struct mem_alloc_heap_entry* entry = heap_head;
+    struct mem_alloc_heap_entry* next = NULL, * entry = heap_head;
     while (entry->next != NULL) {
         // Check if on the same bounds
         if (((uintptr_t) entry) - entry->size - sizeof(struct mem_alloc_heap_entry) == (uintptr_t) next) {
@@ -23,7 +23,6 @@ static void coalesce() {
             entry->next = next->next;
             entry->size += next->size + sizeof(struct mem_alloc_heap_entry);
             next = next->next; // For the update loop
-            
             
             continue; // Redo that loop
         }
@@ -46,6 +45,7 @@ static inline void inc_coalesce() {
 void mem_alloc_init(unsigned char coalescing_max) {
     heap_head = NULL;
     
+    // If you do not pass this as an aligned value you are being STUPID
     heap_end = mem_alloc_heap_start;
     
     _coalescing_max = coalescing_max;
@@ -54,6 +54,9 @@ void mem_alloc_init(unsigned char coalescing_max) {
 void* mem_alloc_malloc(size_t size) {
     if (size == 0)
         return NULL;
+    
+    // Ok it is weird to do this but it geuinely just works...
+    size = rtfnk_memops_align(size, sizeof(uintptr_t));
     
     // First find a section of memory that can be allocated
     struct mem_alloc_heap_entry* entry;
@@ -65,7 +68,6 @@ void* mem_alloc_malloc(size_t size) {
         entry = entry->next
     );
     
-    // TODO: Alignment shenanigans
     if (entry == NULL) { // No section found; allocate in unlimited land!
         // Increase the size of the heap and add our new element. This descriptor data will be invisible
         heap_end += sizeof(struct mem_alloc_heap_entry) + size;
@@ -111,11 +113,16 @@ void* mem_alloc_malloc(size_t size) {
 
 void* mem_alloc_calloc(size_t nmemb, size_t size) {
     void* ret = mem_alloc_malloc(size * nmemb);
-
-    // TODO:
+    rtfnk_memops_memset(ret, 0, size * nmemb);
+    return ret;
 }
 
-void* mem_alloc_realloc(void* b, size_t size);
+void* mem_alloc_realloc(void* b, size_t size) {
+    // This is all one continuous operation so we can just do a memcpy on the zombie memory
+    void* ret = mem_alloc_malloc(size);
+    rtfnk_memops_memcpy(ret, b, size);
+    return ret;
+}
 
 void mem_alloc_free(void* ptr) {
     struct mem_alloc_heap_entry* entry = ((struct mem_alloc_heap_entry*) ptr) + 1;

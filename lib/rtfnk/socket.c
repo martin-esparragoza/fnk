@@ -24,6 +24,7 @@ const char* fnk_socket_errctostr_def(int errc) {
     return NULL;
 }
 
+// TODO: Memcpy
 int fnk_socket_write(struct fnk_socket* self, unsigned char* buf, size_t len) {
     if (len + self->writep > self->writelen)
         return FNK_SOCKET_ERRC_DEF_RW_WOULDOVERFLOW;
