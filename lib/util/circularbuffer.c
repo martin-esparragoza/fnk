@@ -65,24 +65,13 @@ int util_circularbuffer_read(struct util_circularbuffer* buf, unsigned char* des
     }
     buf->readi = (buf->readi + length) % buf->len;
 
-    // Same sort of thing
     return 0;
 }
 
-/**
- * @brief Checks if the circular buffer is empty
- *
- * @param buf Object
- *
- * @return 1 if empty
- */
-bool util_circularbuffer_isempty(struct util_circularbuffer* buf);
+inline bool util_circularbuffer_isempty(struct util_circularbuffer* buf) {
+    return buf->readi == buf->writei;
+}
 
-/**
- * @brief Checks if the circular buffer is full
- *
- * @param buf Object
- *
- * @return 1 if full
- */
-bool util_circularbuffer_isfull(struct util_circularbuffer* buf);
+inline bool util_circularbuffer_isfull(struct util_circularbuffer* buf) {
+    return ((buf->writei + 1) % buf->len) == buf->readi;
+}
