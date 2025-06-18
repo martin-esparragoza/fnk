@@ -56,7 +56,7 @@ void* mem_alloc_malloc(size_t size) {
         return NULL;
     
     // Ok it is weird to do this but it geuinely just works...
-    size = rtfnk_memops_align(size, sizeof(uintptr_t));
+    size = fnk_memops_align(size, sizeof(uintptr_t));
     
     // First find a section of memory that can be allocated
     struct mem_alloc_heap_entry* entry;
@@ -113,14 +113,14 @@ void* mem_alloc_malloc(size_t size) {
 
 void* mem_alloc_calloc(size_t nmemb, size_t size) {
     void* ret = mem_alloc_malloc(size * nmemb);
-    rtfnk_memops_memset(ret, 0, size * nmemb);
+    fnk_memops_memset(ret, 0, size * nmemb);
     return ret;
 }
 
 void* mem_alloc_realloc(void* b, size_t size) {
     // This is all one continuous operation so we can just do a memcpy on the zombie memory
     void* ret = mem_alloc_malloc(size);
-    rtfnk_memops_memcpy(ret, b, size);
+    fnk_memops_memcpy(ret, b, size);
     return ret;
 }
 

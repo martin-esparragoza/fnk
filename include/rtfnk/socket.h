@@ -10,11 +10,21 @@
 
 // No enums, I'd like the control the type
 #define FNK_SOCKET_ERRC_DEF_OK 0
-#define FNK_SOCKET_ERRC_DEF_BIND_WOULDOVERFLOW 1
-#define FNK_SOCKET_ERRC_DEF_RW_WOULDOVERFLOW 2
+#define FNK_SOCKET_ERRC_DEF_RW_WOULDOVERFLOW 1
 
 struct fnk_socket;
 typedef struct fnk_socket fnk_socket_t;
+
+/**
+ * @brief Create a new socket (unbinded)
+ *
+ * @param socket Object
+ * @param readb Pointer to read buffer
+ * @param readlen Length of read buffer
+ * @param writeb Pointer to write buffer
+ * @param writelen Length of write buffer
+ */
+void fnk_socket_init(struct fnk_socket* socket, void* readb, size_t readlen, void* writeb, size_t writelen);
 
 /**
  * @brief Convert errc to string
@@ -31,23 +41,23 @@ const char* fnk_socket_errctostr_def(int errc);
  *
  * Used in native endianness
  *
- * @param self Socket
- * @param buf  Buffer to read from
- * @param len  # of bytes to read
- * @return # of bytes written
+ * @param socket Socket
+ * @param buf   Buffer to read from
+ * @param len   # of bytes to read
+ * @return      # of bytes written
  */
-int fnk_socket_write(struct fnk_socket* self, unsigned char* buf, size_t len);
+int fnk_socket_write(struct fnk_socket* socket, unsigned char* buf, size_t len);
 
 /**
  * @brief Read content from buffer
  *
  * Used in native endianness
  *
- * @param self Socket
- * @param buf Buffer to write to
- * @param len  # of bytes to write
- * @return # of bytes read
+ * @param socket Socket
+ * @param buf   Buffer to write to
+ * @param len   # of bytes to write
+ * @return      # of bytes read
  */
-int fnk_socket_read(struct fnk_socket* self, unsigned char* buf, size_t len);
+int fnk_socket_read(struct fnk_socket* socket, unsigned char* buf, size_t len);
 
 #endif

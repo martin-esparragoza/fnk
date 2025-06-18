@@ -7,15 +7,12 @@
 #define LIB_RTFNK_SOCKET_H_
 
 #include "include/rtfnk/socket.h"
+#include "lib/util/circularbuffer.h"
+#include "types.h"
 
 struct fnk_socket {
-    unsigned char *const writebuffer; ///< Information that is to be written
-    unsigned char *const readbuffer; ///< Information that has been read and is stored
-    size_t writelen;
-    size_t readlen;
-    size_t writep; ///< P is for position
-    size_t readp;
-    size_t node;
+    struct util_circularbuffer writeb;
+    struct util_circularbuffer readb;
 };
 
 #endif

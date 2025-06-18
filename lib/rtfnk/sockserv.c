@@ -3,7 +3,7 @@
 #include "lib/rtfnk/socket.h"
 #include "lib/util/flinkedlist.h"
 
-void fnk_sockserv_init(struct fnk_sockserv* self) {
+/*void fnk_sockserv_init(struct fnk_sockserv* self) {
     util_flinkedlist_init(self->ll, FNK_SOCKSRV_MAXSOCKETS);
     self->node = 0;
 }
@@ -20,4 +20,4 @@ int fnk_sockserv_bind(struct fnk_sockserv* self, struct fnk_socket* socket) {
 
 void fnk_sockserv_remove(struct fnk_sockserv* self, struct fnk_socket* socket) {
     util_flinkedlist_remove(self->ll, self->node, socket->node);
-}
+}*/

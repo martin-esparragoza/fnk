@@ -172,7 +172,7 @@ int sdrive_fat16_open(const char* file, struct sdrive_fat16_dir_sfn* outsfn, voi
     // Read all directories loop (by SFNs first)
     uint_fast8_t state = sdrive_fat16_open_STATE_READING_SFN;
     uint_fast8_t lfnindex = filenamelen; // The LFNs are the end of the string -> the start of the string
-    bool lfnbad = false; // Set to true when lfn is found to be invalid
+    bool lfnbad = 0; // Set to true when lfn is found to be invalid
     bool lfnpaddingused = false; // There could be some of the text not being used
 
     for (struct sdrive_fat16_dir_sfn* sfn = buffer; ((uintptr_t) sfn) < ((uintptr_t) buffer) + bufferlen; sfn++) {
@@ -230,12 +230,12 @@ int sdrive_fat16_open(const char* file, struct sdrive_fat16_dir_sfn* outsfn, voi
                     char c = (const char) val;
                     
                     if (!(c == 0 || c == (char) 255) && !lfnpaddingused) {
-                        lfnpaddingused = true;
+                        lfnpaddingused = 1;
                     }
 
                     if (lfnpaddingused) {
                         if (c != file[lfnindex]) {
-                            lfnbad = true;
+                            lfnbad = 1;
                             break;
                         } else {
                             lfnindex--;
