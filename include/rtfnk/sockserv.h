@@ -7,16 +7,12 @@
 #define INCLUDE_RTFNK_SOCKSRV_H_
 
 #include "include/rtfnk/socket.h"
-#include "types.h"
 
-/**
- * 
- */
 struct fnk_sockserv;
 typedef struct fnk_sockserv fnk_sockserv_t;
 
 /**
- * @brief Sets information to be proper
+ * @brief Constructor
  */
 void fnk_sockserv_init(struct fnk_sockserv* self);
 
