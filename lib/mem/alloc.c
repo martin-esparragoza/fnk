@@ -73,7 +73,7 @@ void* mem_alloc_malloc(size_t size) {
         // Increase the size of the heap and add our new element. This descriptor data will be invisible
         struct mem_alloc_heap_entry* new_entry = heap_end;
         (new_entry++)->size = size; // We're done with new entry so now we just want the return buffer
-        heap_ead += size + sizeof(mem_alloc_heap_entry);
+        heap_end += size + sizeof(struct mem_alloc_heap_entry);
 
         // DON'T add it to the linked list. We will add it later when we FREE it
         return (void*) new_entry;
