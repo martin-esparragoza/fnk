@@ -13,6 +13,7 @@
 struct fnk_socket {
     struct util_circularbuffer writeb;
     struct util_circularbuffer readb;
+    struct fnk_socket* next;
 };
 
 #endif

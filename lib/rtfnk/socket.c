@@ -19,7 +19,7 @@ void fnk_socket_init(struct fnk_socket* socket, void* readb, size_t readlen, voi
 }
 
 const char* fnk_socket_errctostr_def(int errc) {
-    if (errc < sizeof(fnk_socket_def_errcstr) / sizeof(fnk_socket_def_errcstr[0]) && errc > 0)
+    if (errc < sizeof(fnk_socket_def_errcstr) / sizeof(fnk_socket_def_errcstr[0]) && errc >= 0)
         return fnk_socket_def_errcstr[errc];
 
     // Default errc not found

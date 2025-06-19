@@ -35,7 +35,7 @@ static uint_fast16_t bytespersector, sectorspercluster;
 static COMP_ATTR__ALIGNED__(8) uint16_t fat[ARCH_CONFIG_FAT16_FATSZ / 2]; // Divided by 2 because FATSZ is supposed to be in bytes
 
 const char* sdrive_fat16_errctostr(int errc) {
-    if (errc < sizeof(sdrive_fat16_errcstr) / sizeof(sdrive_fat16_errcstr[0]) && errc > 0)
+    if (errc < sizeof(sdrive_fat16_errcstr) / sizeof(sdrive_fat16_errcstr[0]) && errc >= 0)
         return sdrive_fat16_errcstr[errc];
 
     // Default errc not found

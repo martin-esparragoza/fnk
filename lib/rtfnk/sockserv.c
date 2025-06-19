@@ -1,23 +1,72 @@
 #include "lib/rtfnk/sockserv.h"
-#include "include/rtfnk/sockserv.h"
 #include "lib/rtfnk/socket.h"
-#include "lib/util/flinkedlist.h"
+#include "include/rtfnk/sockserv.h"
+#include "include/rtfnk/socket.h"
+#include "types.h"
 
-/*void fnk_sockserv_init(struct fnk_sockserv* self) {
-    util_flinkedlist_init(self->ll, FNK_SOCKSRV_MAXSOCKETS);
-    self->node = 0;
+static const char* fnk_sockserv_errcstr[] = {
+    [FNK_SOCKSERV_ERRC_OK] = "Ok",
+    [FNK_SOCKSERV_ERRC_NO_SOCKETS_BOUND] = "No sockets are bound to the server",
+    [FNK_SOCKSERV_ERRC_COULD_NOT_REMOVE_SOCKET] = "Can't remove a socket that is not bound",
+    [FNK_SOCKSERV_ERRC_RW_WOULDOVERFLOW] = "Attempted to write/read outside buffer"
+};
+
+void fnk_sockserv_init(struct fnk_sockserv* serv) {
+    serv->head = serv->tail = 0;
 }
 
-int fnk_sockserv_bind(struct fnk_sockserv* self, struct fnk_socket* socket) {
-    size_t node = util_flinkedlist_insert(self->ll, self->node);
-    // BAD.
-    if (!node)
-        return FNK_SOCKET_ERRC_DEF_BIND_WOULDOVERFLOW;
-    self->sockets[node] = socket;
-    self->node = socket->node = node;
-    return FNK_SOCKET_ERRC_DEF_OK;
+const char* fnk_sockserv_errctostr(int errc) {
+    if (errc < sizeof(fnk_sockserv_errcstr) / sizeof(fnk_sockserv_errcstr[0]) && errc >= 0)
+        return fnk_sockserv_errcstr[errc];
+
+    return NULL;
 }
 
-void fnk_sockserv_remove(struct fnk_sockserv* self, struct fnk_socket* socket) {
-    util_flinkedlist_remove(self->ll, self->node, socket->node);
-}*/
+int fnk_sockserv_getnextinqueue(struct fnk_sockserv* serv, struct fnk_socket** socket) {
+    if (serv->tail == 0)
+        return FNK_SOCKSERV_ERRC_NO_SOCKETS_BOUND;
+    serv->tail->next = serv->head;
+    serv->tail = serv->tail->next;
+    serv->tail->next = 0;
+    *socket = serv->tail;
+    return FNK_SOCKSERV_ERRC_OK;
+}
+
+void fnk_sockserv_bind(struct fnk_sockserv* serv, struct fnk_socket* socket) {
+    if (serv->tail == 0) {
+        serv->head = serv->tail = socket;
+    } else {
+        serv->tail->next = socket;
+        socket->next = 0;
+        serv->tail = socket;
+    }
+}
+
+int fnk_sockserv_remove(struct fnk_sockserv* serv, struct fnk_socket* socket) {
+    if (socket == serv->head)
+        serv->head = socket->next;
+
+    // Iterate and remove (tail edge case works
+    struct fnk_socket* prev = serv->head;
+    for (struct fnk_socket* i = prev->next; i->next != 0; prev = i, i = i->next) {
+        if (i == socket) { // Pop ts
+            prev->next = i->next;
+            return FNK_SOCKSERV_ERRC_OK;
+        }
+    }
+    return FNK_SOCKSERV_ERRC_COULD_NOT_REMOVE_SOCKET;
+}
+
+int fnk_sockserv_readwritebuffer(struct fnk_socket* socket, unsigned char* dest, size_t len) {
+    if (util_circularbuffer_read(&socket->readb, dest, len)) {
+        return FNK_SOCKSERV_ERRC_RW_WOULDOVERFLOW;
+    }
+    return FNK_SOCKSERV_ERRC_OK;
+}
+
+int fnk_sockserv_writereadbuffer(struct fnk_socket* socket, unsigned char* src, size_t len) {
+    if (util_circularbuffer_write(&socket->writeb, src, len)) {
+        return FNK_SOCKSERV_ERRC_RW_WOULDOVERFLOW;
+    }
+    return FNK_SOCKSERV_ERRC_OK;
+}
