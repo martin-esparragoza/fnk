@@ -52,11 +52,12 @@ void mem_alloc_init(unsigned char coalescing_max) {
 }
 
 void* mem_alloc_malloc(size_t size) {
-    if (size == 0)
+    if (!size)
         return NULL;
     
     // Ok it is weird to do this but it geuinely just works...
-    size = fnk_memops_align(size, sizeof(uintptr_t));
+    size = fnk_memops_align(size + (sizeof(struct mem_alloc_heap_entry) % sizeof(uintptr_t)) + 1, sizeof(uintptr_t));
+    // We need to add 1 because we need to not use 1 byte in order to not have buffers write over itself
     
     // First find a section of memory that can be allocated
     struct mem_alloc_heap_entry* entry;
@@ -70,22 +71,22 @@ void* mem_alloc_malloc(size_t size) {
     
     if (entry == NULL) { // No section found; allocate in unlimited land!
         // Increase the size of the heap and add our new element. This descriptor data will be invisible
-        heap_end += sizeof(struct mem_alloc_heap_entry) + size;
         struct mem_alloc_heap_entry* new_entry = heap_end;
-        new_entry->size = size;
+        (new_entry++)->size = size; // We're done with new entry so now we just want the return buffer
+        heap_ead += size + sizeof(mem_alloc_heap_entry);
 
         // DON'T add it to the linked list. We will add it later when we FREE it
-        return (void*) (((uintptr_t) new_entry) - sizeof(struct mem_alloc_heap_entry));
+        return (void*) new_entry;
     } else { // Otherwise we can attempt to split it into two
         // Find the prev entry so we can chop this out of the LL
         struct mem_alloc_heap_entry* prev = NULL;
-        if (heap_head != NULL) {
-            for (
-                struct mem_alloc_heap_entry* e = heap_head;
-                e->next != NULL && e != entry;
-                prev = e, e = e->next
-            );
-        }
+        // Previous if already checked if heap_head == NULL
+        for (
+            struct mem_alloc_heap_entry* e = heap_head;
+            e->next != NULL && e != entry;
+            prev = e, e = e->next
+        );
+
         // Clip!
         if (prev != NULL)
             prev->next = entry->next;
@@ -94,7 +95,7 @@ void* mem_alloc_malloc(size_t size) {
         
         if (entry->size - size > sizeof(struct mem_alloc_heap_entry)) { // Splitable. Otherwise stays as entry->size
             // Create new entry
-            struct mem_alloc_heap_entry* new_entry = (void*) (((uintptr_t) entry) + sizeof(struct mem_alloc_heap_entry) + size);
+            struct mem_alloc_heap_entry* new_entry = (void*) (((uintptr_t) (entry + 1)) + size);
             new_entry->size = entry->size - size - sizeof(struct mem_alloc_heap_entry);
             
             // This counts as sorted insertion because prev and next should be relative
@@ -107,7 +108,7 @@ void* mem_alloc_malloc(size_t size) {
         }
         
 
-        return (void*) (((uintptr_t) entry) - sizeof(struct mem_alloc_heap_entry));
+        return (void*) (entry + 1);
     }
 }
 
@@ -125,7 +126,7 @@ void* mem_alloc_realloc(void* b, size_t size) {
 }
 
 void mem_alloc_free(void* ptr) {
-    struct mem_alloc_heap_entry* entry = ((struct mem_alloc_heap_entry*) ptr) + 1;
+    struct mem_alloc_heap_entry* entry = ((struct mem_alloc_heap_entry*) ptr) - 1;
     
     // This finds the in between element so we can insert it sorted
     struct mem_alloc_heap_entry* prev = NULL;
