@@ -20,8 +20,8 @@ void COMP_ATTR__NORETURN__ errorhang() {
     while (1);
 }
 
-
 int COMP_ATTR__NORETURN__ main() {
-    mem_alloc_init(2);
+    mem_alloc_init(3);
+
     errorhang();
 }
