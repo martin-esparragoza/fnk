@@ -1,7 +1,8 @@
 #include "lib/util/dlinkedlist.h"
+#include "types.h"
 
 inline void util_dlinkedlist_init(struct util_dlinkedlist* elem) {
-    elem->prev = elem->next = elem->data = 0;
+    elem->prev = elem->next = elem->data = NULL;
 }
 
 void util_dlinkedlist_append(struct util_dlinkedlist* elem, struct util_dlinkedlist* newel) {

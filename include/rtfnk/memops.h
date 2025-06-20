@@ -17,7 +17,10 @@ uint32_t fnk_memops_bswap32(uint32_t data);
 
 uint64_t fnk_memops_bswap64(uint64_t data);
 
-uintptr_t fnk_memops_align(uintptr_t value, int toalign);
+/**
+ * @brief Aligns along power of 2 boundry
+ */
+uintptr_t fnk_memops_alignp2(uintptr_t value, int toalign);
 
 void fnk_memops_memcpy(void* dest, void* src, size_t length);
 

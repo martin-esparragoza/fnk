@@ -12,7 +12,7 @@ static const char* fnk_sockserv_errcstr[] = {
 };
 
 void fnk_sockserv_init(struct fnk_sockserv* serv) {
-    serv->head = serv->tail = 0;
+    serv->head = serv->tail = NULL;
 }
 
 const char* fnk_sockserv_errctostr(int errc) {
@@ -23,21 +23,21 @@ const char* fnk_sockserv_errctostr(int errc) {
 }
 
 int fnk_sockserv_getnextinqueue(struct fnk_sockserv* serv, struct fnk_socket** socket) {
-    if (serv->tail == 0)
+    if (serv->tail == NULL)
         return FNK_SOCKSERV_ERRC_NO_SOCKETS_BOUND;
     serv->tail->next = serv->head;
     serv->tail = serv->tail->next;
-    serv->tail->next = 0;
+    serv->tail->next = NULL;
     *socket = serv->tail;
     return FNK_SOCKSERV_ERRC_OK;
 }
 
 void fnk_sockserv_bind(struct fnk_sockserv* serv, struct fnk_socket* socket) {
-    if (serv->tail == 0) {
+    if (serv->tail == NULL) {
         serv->head = serv->tail = socket;
     } else {
         serv->tail->next = socket;
-        socket->next = 0;
+        socket->next = NULL;
         serv->tail = socket;
     }
 }

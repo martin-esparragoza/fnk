@@ -27,8 +27,8 @@ uint64_t COMP_ATTR__WEAK__ fnk_memops_bswap64(uint64_t data) {
     return data;
 }
 
-uintptr_t COMP_ATTR__WEAK__ fnk_memops_align(uintptr_t value, int toalign) {
-    return toalign - (value % toalign) + value;
+inline uintptr_t COMP_ATTR__WEAK__ fnk_memops_alignp2(uintptr_t value, int toalign) {
+    return (value + toalign - 1) & ~(toalign - 1);
 }
 
 void COMP_ATTR__WEAK__ fnk_memops_memcpy(void* dest, void* src, size_t length) {

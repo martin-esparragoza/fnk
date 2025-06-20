@@ -76,6 +76,9 @@ The following macros must be defined properly
 `INT64_WIDTH`  
 `UINTMAX_WIDTH`  
 `INTMAX_WIDTH`  
+`true`  
+`false`  
+`NULL`  
 ### Optional weak method redefinitions
 Commonly, a compiler can support built-in functions that utilize system architecture. While there are functions that will run fine freestanding, you might want to get a bit more performance by redefining these functions using builtins. The following functions can be redefined through any .c file inside of the `lib/comp/` directory
 `void util_ops_bswap(void* data, size_t size)`  

@@ -56,8 +56,8 @@ void* mem_alloc_malloc(size_t size) {
         return NULL;
     
     // Ok it is weird to do this but it geuinely just works...
-    size = fnk_memops_align(size + (sizeof(struct mem_alloc_heap_entry) % sizeof(uintptr_t)) + 1, sizeof(uintptr_t));
-    // We need to add 1 because we need to not use 1 byte in order to not have buffers write over itself
+    size = fnk_memops_alignp2(size, sizeof(uintptr_t));
+    size += fnk_memops_alignp2(sizeof(struct mem_alloc_heap_entry), sizeof(uintptr_t)) - sizeof(struct mem_alloc_heap_entry);
     
     // First find a section of memory that can be allocated
     struct mem_alloc_heap_entry* entry;
@@ -101,6 +101,8 @@ void* mem_alloc_malloc(size_t size) {
             // This counts as sorted insertion because prev and next should be relative
             if (prev != NULL)
                 prev->next = new_entry;
+            else // At the head
+                heap_head = new_entry;
             new_entry->next = entry->next;
             
             // Finally update this
