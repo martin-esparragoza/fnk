@@ -17,7 +17,7 @@ typedef struct util_circularbuffer {
  * @param allocated Reserved section of memory for the circular buffer
  * @param length The entire length of the buffer. 1 byte is reserved so your TRUE buffer length is length - 1
  */
-void util_circularbuffer_init(struct util_circularbuffer* buf, unsigned char* allocated, size_t length);
+void util_circularbuffer_init(struct util_circularbuffer* buf, void* allocated, size_t length);
 
 /**
  * @brief Write bytes from buf into the circular buffer
@@ -28,7 +28,7 @@ void util_circularbuffer_init(struct util_circularbuffer* buf, unsigned char* al
  *
  * @return -1 if buffer would overflow
  */
-int util_circularbuffer_write(struct util_circularbuffer* buf, unsigned char* src, size_t length);
+int util_circularbuffer_write(struct util_circularbuffer* buf, void* src, size_t length);
 
 /**
  * @brief Read bytes from buf into the dest ptr
@@ -39,7 +39,7 @@ int util_circularbuffer_write(struct util_circularbuffer* buf, unsigned char* sr
  *
  * @return -1 if buffer would overflow
  */
-int util_circularbuffer_read(struct util_circularbuffer* buf, unsigned char* dest, size_t length);
+int util_circularbuffer_read(struct util_circularbuffer* buf, void* dest, size_t length);
 
 /**
  * @brief Checks if the circular buffer is empty

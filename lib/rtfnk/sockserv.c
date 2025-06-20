@@ -57,14 +57,14 @@ int fnk_sockserv_remove(struct fnk_sockserv* serv, struct fnk_socket* socket) {
     return FNK_SOCKSERV_ERRC_COULD_NOT_REMOVE_SOCKET;
 }
 
-int fnk_sockserv_readwritebuffer(struct fnk_socket* socket, unsigned char* dest, size_t len) {
+int fnk_sockserv_readwritebuffer(struct fnk_socket* socket, void* dest, size_t len) {
     if (util_circularbuffer_read(&socket->readb, dest, len)) {
         return FNK_SOCKSERV_ERRC_RW_WOULDOVERFLOW;
     }
     return FNK_SOCKSERV_ERRC_OK;
 }
 
-int fnk_sockserv_writereadbuffer(struct fnk_socket* socket, unsigned char* src, size_t len) {
+int fnk_sockserv_writereadbuffer(struct fnk_socket* socket, void* src, size_t len) {
     if (util_circularbuffer_write(&socket->writeb, src, len)) {
         return FNK_SOCKSERV_ERRC_RW_WOULDOVERFLOW;
     }

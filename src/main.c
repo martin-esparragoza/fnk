@@ -4,8 +4,6 @@
 */
 
 #include "include/sdrive/telemetry.h"
-#include "include/sdrive/drive.h"
-#include "include/sdrive/fat16.h"
 #include "lib/util/memdump.h"
 #include "include/mem/alloc.h"
 #include "attr.h"

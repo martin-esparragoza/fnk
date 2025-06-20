@@ -26,7 +26,7 @@ const char* fnk_socket_errctostr_def(int errc) {
     return NULL;
 }
 
-int fnk_socket_write(struct fnk_socket* socket, unsigned char* buf, size_t len) {
+int fnk_socket_write(struct fnk_socket* socket, void* buf, size_t len) {
     if (util_circularbuffer_write(&socket->writeb, buf, len)) {
         return FNK_SOCKET_ERRC_DEF_RW_WOULDOVERFLOW;
     }
@@ -34,7 +34,7 @@ int fnk_socket_write(struct fnk_socket* socket, unsigned char* buf, size_t len) 
 }
 
 // Implementation wise yeah I guess you do want to kind of spam this until you have necessary data. Yield if you're in userland ya stupid idiot
-int fnk_socket_read(struct fnk_socket* socket, unsigned char* buf, size_t len) {
+int fnk_socket_read(struct fnk_socket* socket, void* buf, size_t len) {
     if (util_circularbuffer_read(&socket->readb, buf, len)) {
         return FNK_SOCKET_ERRC_DEF_RW_WOULDOVERFLOW;
     }

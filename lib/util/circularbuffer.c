@@ -2,13 +2,14 @@
 #include "include/rtfnk/memops.h"
 #include "types.h"
 
-void util_circularbuffer_init(struct util_circularbuffer* buf, unsigned char* allocated, size_t length) {
+
+void util_circularbuffer_init(struct util_circularbuffer* buf, void* allocated, size_t length) {
     buf->buffer = allocated;
     buf->len = length;
     buf->writei = buf->readi = 0;
 }
 
-int util_circularbuffer_write(struct util_circularbuffer* buf, unsigned char* src, size_t length) {
+int util_circularbuffer_write(struct util_circularbuffer* buf, void* src, size_t length) {
     // First we need to check if we can hold the required buffer
     
     // Space variables..
@@ -30,17 +31,17 @@ int util_circularbuffer_write(struct util_circularbuffer* buf, unsigned char* sr
     if (length >= free_until_wrap) {
         fnk_memops_memcpy(buf->buffer + buf->writei, src, free_until_wrap);
         src += free_until_wrap;
-        buf->writei = 0;
-        fnk_memops_memcpy(buf->buffer, src, length - free_until_wrap);
+        buf->writei = length - free_until_wrap;
+        fnk_memops_memcpy(buf->buffer, src, buf->writei);
     } else {
         fnk_memops_memcpy(buf->buffer + buf->writei, src, length);
+        buf->writei += length;
     }
-    buf->writei = (buf->writei + length) % buf->len;
 
     return 0;
 }
 
-int util_circularbuffer_read(struct util_circularbuffer* buf, unsigned char* dest, size_t length) {
+int util_circularbuffer_read(struct util_circularbuffer* buf, void* dest, size_t length) {
     // Sort of the same thing as the last function
 
     // Yet again define some space variables
@@ -55,7 +56,7 @@ int util_circularbuffer_read(struct util_circularbuffer* buf, unsigned char* des
     if (used < length)
         return -1;
 
-    if (length >= used_until_wrap) {
+    if (length > used_until_wrap) {
         fnk_memops_memcpy(dest, buf->buffer + buf->readi, used_until_wrap);
         dest += used_until_wrap;
         buf->readi = 0;

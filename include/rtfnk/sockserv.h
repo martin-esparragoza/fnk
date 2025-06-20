@@ -47,7 +47,7 @@ int fnk_sockserv_remove(struct fnk_sockserv* serv, struct fnk_socket* socket);
  * @param dest Buffer to write into
  * @param len # of bytes to read
  */
-int fnk_sockserv_readwritebuffer(struct fnk_socket* socket, unsigned char* dest, size_t len);
+int fnk_sockserv_readwritebuffer(struct fnk_socket* socket, void* dest, size_t len);
 
 /**
  * @brief Server level writing to the read buffer
@@ -55,6 +55,6 @@ int fnk_sockserv_readwritebuffer(struct fnk_socket* socket, unsigned char* dest,
  * @param dest Buffer to read from
  * @param len # of bytes to write
  */
- int fnk_sockserv_writereadbuffer(struct fnk_socket* socket, unsigned char* src, size_t len);
+ int fnk_sockserv_writereadbuffer(struct fnk_socket* socket, void* src, size_t len);
 
 #endif
