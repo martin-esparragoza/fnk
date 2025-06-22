@@ -27,13 +27,13 @@ uint64_t COMP_ATTR__WEAK__ fnk_memops_bswap64(uint64_t data) {
     return data;
 }
 
-inline uintptr_t COMP_ATTR__WEAK__ fnk_memops_alignp2(uintptr_t value, int toalign) {
+uintptr_t COMP_ATTR__WEAK__ fnk_memops_alignp2(uintptr_t value, int toalign) {
     return (value + toalign - 1) & ~(toalign - 1);
 }
 
-void COMP_ATTR__WEAK__ fnk_memops_memcpy(void* dest, void* src, size_t length) {
+void COMP_ATTR__WEAK__ fnk_memops_memcpy(void* dest, const void* src, size_t length) {
     uintptr_t* dw = dest;
-    uintptr_t* sw = src;
+    const uintptr_t* sw = src;
     
     for (; length >= sizeof(uintptr_t); length -= sizeof(uintptr_t))
         *(dw++) = *(sw++);
@@ -56,3 +56,5 @@ void COMP_ATTR__WEAK__ fnk_memops_memset(void* dest, uint8_t val, size_t length)
     for (uint8_t* db = (void*) dw; length > 0; length--)
         *(db++) = val;
 }
+
+// TODO: Memcmp

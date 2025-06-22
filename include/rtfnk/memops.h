@@ -22,10 +22,10 @@ uint64_t fnk_memops_bswap64(uint64_t data);
  */
 uintptr_t fnk_memops_alignp2(uintptr_t value, int toalign);
 
-void fnk_memops_memcpy(void* dest, void* src, size_t length);
+void fnk_memops_memcpy(void* dest, const void* src, size_t length);
 
 void fnk_memops_memset(void* dest, uint8_t val, size_t length);
 
-void fnk_memops_memcmp(void* ptr0, void* ptr1, size_t length);
+void fnk_memops_memcmp(const void* ptr0, const void* ptr1, size_t length);
 
 #endif

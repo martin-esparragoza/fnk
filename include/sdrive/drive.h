@@ -37,7 +37,7 @@ int_fast8_t sdrive_drive_readblock(void* data, unsigned lba);
  * @param lba Address
  * @return # of blocks read (0 OR -1 if error)
  */
-int_fast8_t sdrive_drive_writeblock(void* data, unsigned lba);
+int_fast8_t sdrive_drive_writeblock(const void* data, unsigned lba);
 
 /**
  * @brief Read num # of blocks and copy it to data
@@ -51,6 +51,6 @@ int sdrive_drive_readmultiblock(void* data, unsigned lba, uint_fast16_t num);
  * 
  * @return # of blocks read (-1 if error)
  */
-int sdrive_drive_writemultiblock(void* data, unsigned lba, uint_fast16_t num);
+int sdrive_drive_writemultiblock(const void* data, unsigned lba, uint_fast16_t num);
 
 #endif

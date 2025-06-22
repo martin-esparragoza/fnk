@@ -13,9 +13,10 @@ void util_dlinkedlist_append(struct util_dlinkedlist* elem, struct util_dlinkedl
 struct util_dlinkedlist* util_dlinkedlist_remove(struct util_dlinkedlist* elem) {
     elem->prev->next = elem->next;
     elem->next->prev = elem->prev;
+    return elem;
 }
 
-inline void* util_dlinkedlist_getdata(struct util_dlinkedlist* elem) {
+inline void* util_dlinkedlist_getdata(const struct util_dlinkedlist* elem) {
     return elem->data;
 }
 

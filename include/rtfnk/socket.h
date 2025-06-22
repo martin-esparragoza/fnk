@@ -46,7 +46,7 @@ const char* fnk_socket_errctostr_def(int errc);
  * @param len   # of bytes to read
  * @return      # of bytes written
  */
-int fnk_socket_write(struct fnk_socket* socket, void* buf, size_t len);
+int fnk_socket_write(struct fnk_socket* socket, const void* buf, size_t len);
 
 /**
  * @brief Read content from buffer

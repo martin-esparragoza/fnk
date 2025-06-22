@@ -9,7 +9,7 @@ void util_circularbuffer_init(struct util_circularbuffer* buf, void* allocated, 
     buf->writei = buf->readi = 0;
 }
 
-int util_circularbuffer_write(struct util_circularbuffer* buf, void* src, size_t length) {
+int util_circularbuffer_write(struct util_circularbuffer* buf, const void* src, size_t length) {
     // First we need to check if we can hold the required buffer
     
     // Space variables..
@@ -69,14 +69,14 @@ int util_circularbuffer_read(struct util_circularbuffer* buf, void* dest, size_t
     return 0;
 }
 
-inline bool util_circularbuffer_isempty(struct util_circularbuffer* buf) {
+inline bool util_circularbuffer_isempty(const struct util_circularbuffer* buf) {
     return buf->readi == buf->writei;
 }
 
-inline bool util_circularbuffer_isfull(struct util_circularbuffer* buf) {
+inline bool util_circularbuffer_isfull(const struct util_circularbuffer* buf) {
     return ((buf->writei + 1) % buf->len) == buf->readi;
 }
 
-inline size_t util_circularbuffer_getlen(struct util_circularbuffer* buf) {
+inline size_t util_circularbuffer_getlen(const struct util_circularbuffer* buf) {
     return buf->len;
 }

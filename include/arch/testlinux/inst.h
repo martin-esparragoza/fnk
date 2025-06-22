@@ -22,13 +22,13 @@ void arch_inst_popa();
  * First pushes ip onto the stack
  * Then moves current sp to where the parameter sp is pointing
  */
-void arch_inst_enter(void* sp);
+void arch_inst_enter(const void* sp);
 
 /**
  * Pretty much the inverse of the enter function.
  * sp points to -> sp register
  * Then pops ip off the stack in order to return control to the process
  */
-void arch_inst_exit(void* sp);
+void arch_inst_exit(const void* sp);
 
 #endif

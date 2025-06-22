@@ -28,10 +28,12 @@ void util_dlinkedlist_append(struct util_dlinkedlist* elem, struct util_dlinkedl
 
 /**
  * @brief Remove that element from the dll
+ *
+ * @return The element that was removed
  */
 struct util_dlinkedlist* util_dlinkedlist_remove(struct util_dlinkedlist* elem);
 
-void* util_dlinkedlist_getdata(struct util_dlinkedlist* elem);
+void* util_dlinkedlist_getdata(const struct util_dlinkedlist* elem);
 
 void util_dlinkedlist_setdata(struct util_dlinkedlist* elem, void* data);
 

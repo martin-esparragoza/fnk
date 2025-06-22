@@ -55,6 +55,6 @@ int fnk_sockserv_readwritebuffer(struct fnk_socket* socket, void* dest, size_t l
  * @param dest Buffer to read from
  * @param len # of bytes to write
  */
- int fnk_sockserv_writereadbuffer(struct fnk_socket* socket, void* src, size_t len);
+ int fnk_sockserv_writereadbuffer(struct fnk_socket* socket, const void* src, size_t len);
 
 #endif

@@ -28,7 +28,7 @@ void util_circularbuffer_init(struct util_circularbuffer* buf, void* allocated, 
  *
  * @return -1 if buffer would overflow
  */
-int util_circularbuffer_write(struct util_circularbuffer* buf, void* src, size_t length);
+int util_circularbuffer_write(struct util_circularbuffer* buf, const void* src, size_t length);
 
 /**
  * @brief Read bytes from buf into the dest ptr
@@ -48,7 +48,7 @@ int util_circularbuffer_read(struct util_circularbuffer* buf, void* dest, size_t
  *
  * @return 1 if empty
  */
-bool util_circularbuffer_isempty(struct util_circularbuffer* buf);
+bool util_circularbuffer_isempty(const struct util_circularbuffer* buf);
 
 /**
  * @brief Checks if the circular buffer is full
@@ -57,8 +57,8 @@ bool util_circularbuffer_isempty(struct util_circularbuffer* buf);
  *
  * @return 1 if full
  */
-bool util_circularbuffer_isfull(struct util_circularbuffer* buf);
+bool util_circularbuffer_isfull(const struct util_circularbuffer* buf);
 
-size_t util_circularbuffer_getlen(struct util_circularbuffer* buf);
+size_t util_circularbuffer_getlen(const struct util_circularbuffer* buf);
 
 #endif

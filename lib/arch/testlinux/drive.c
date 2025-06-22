@@ -24,7 +24,7 @@ int_fast8_t sdrive_drive_readblock(void* data, unsigned lba) {
     return fread(data, sdrive_drive_getblocksize(), 1, fp);
 }
 
-int_fast8_t sdrive_drive_writeblock(void* data, unsigned lba) {
+int_fast8_t sdrive_drive_writeblock(const void* data, unsigned lba) {
     fseek(fp, lba * sdrive_drive_getblocksize(), SEEK_SET);
     return fwrite(data, sdrive_drive_getblocksize(), 1, fp);
 }
@@ -34,7 +34,7 @@ int sdrive_drive_readmultiblock(void* data, unsigned lba, size_t num) {
     return fread(data, sdrive_drive_getblocksize(), num, fp);
 }
 
-int sdrive_drive_writemultiblock(void* data, unsigned lba, size_t num) {
+int sdrive_drive_writemultiblock(const void* data, unsigned lba, size_t num) {
     fseek(fp, lba * sdrive_drive_getblocksize(), SEEK_SET);
     return fwrite(data, sdrive_drive_getblocksize(), num, fp);
 }
