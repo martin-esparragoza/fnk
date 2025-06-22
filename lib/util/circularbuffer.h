@@ -59,4 +59,6 @@ bool util_circularbuffer_isempty(struct util_circularbuffer* buf);
  */
 bool util_circularbuffer_isfull(struct util_circularbuffer* buf);
 
+size_t util_circularbuffer_getlen(struct util_circularbuffer* buf);
+
 #endif

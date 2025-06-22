@@ -20,6 +20,5 @@ void COMP_ATTR__NORETURN__ errorhang() {
 
 int COMP_ATTR__NORETURN__ main() {
     mem_alloc_init(3);
-
     errorhang();
 }

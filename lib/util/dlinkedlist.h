@@ -31,4 +31,8 @@ void util_dlinkedlist_append(struct util_dlinkedlist* elem, struct util_dlinkedl
  */
 struct util_dlinkedlist* util_dlinkedlist_remove(struct util_dlinkedlist* elem);
 
+void* util_dlinkedlist_getdata(struct util_dlinkedlist* elem);
+
+void util_dlinkedlist_setdata(struct util_dlinkedlist* elem, void* data);
+
 #endif

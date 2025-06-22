@@ -76,3 +76,7 @@ inline bool util_circularbuffer_isempty(struct util_circularbuffer* buf) {
 inline bool util_circularbuffer_isfull(struct util_circularbuffer* buf) {
     return ((buf->writei + 1) % buf->len) == buf->readi;
 }
+
+inline size_t util_circularbuffer_getlen(struct util_circularbuffer* buf) {
+    return buf->len;
+}

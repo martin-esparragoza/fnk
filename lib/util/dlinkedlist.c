@@ -14,3 +14,11 @@ struct util_dlinkedlist* util_dlinkedlist_remove(struct util_dlinkedlist* elem) 
     elem->prev->next = elem->next;
     elem->next->prev = elem->prev;
 }
+
+inline void* util_dlinkedlist_getdata(struct util_dlinkedlist* elem) {
+    return elem->data;
+}
+
+inline void util_dlinkedlist_setdata(struct util_dlinkedlist* elem, void* data) {
+    elem->data = data;
+}

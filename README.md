@@ -76,6 +76,10 @@ The following macros must be defined properly
 `INT64_WIDTH`  
 `UINTMAX_WIDTH`  
 `INTMAX_WIDTH`  
+`SIZE_T_WIDTH`
+`SSIZE_T_WIDTH`
+`SIZE_MAX`
+`SSIZE_MAX`
 `true`  
 `false`  
 `NULL`  
