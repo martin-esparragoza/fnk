@@ -15,7 +15,7 @@ int sdrive_drive_fini() {
     return fclose(fp);
 }
 
-inline int_fast16_t sdrive_drive_getblocksize() {
+int_fast16_t sdrive_drive_getblocksize() {
     return 512;
 }
 

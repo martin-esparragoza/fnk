@@ -18,6 +18,10 @@ void fnk_socket_init(struct fnk_socket* socket, void* readb, size_t readlen, voi
     util_circularbuffer_init(&socket->writeb, writeb, writelen);
 }
 
+inline size_t fnk_socket_sizeof() {
+    return sizeof(struct fnk_socket);
+}
+
 const char* fnk_socket_errctostr_def(int errc) {
     if (errc < sizeof(fnk_socket_def_errcstr) / sizeof(fnk_socket_def_errcstr[0]) && errc >= 0)
         return fnk_socket_def_errcstr[errc];
@@ -39,4 +43,12 @@ int fnk_socket_read(struct fnk_socket* socket, void* buf, size_t len) {
         return FNK_SOCKET_ERRC_DEF_RW_WOULDOVERFLOW;
     }
     return FNK_SOCKET_ERRC_DEF_OK;
+}
+
+inline size_t fnk_socket_getreadlen(struct fnk_socket* socket) {
+    return util_circularbuffer_getused(&socket->readb);
+}
+
+inline size_t fnk_socket_getwritelen(struct fnk_socket* socket) {
+    return util_circularbuffer_getused(&socket->writeb);
 }

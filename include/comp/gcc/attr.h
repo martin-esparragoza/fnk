@@ -1,10 +1,6 @@
 #ifndef INCLUDE_COMP_ATTR_H_
 #define INCLUDE_COMP_ATTR_H_
 
-#include <stdio.h>
-#include "types.h"
-
-
 // Do it yourself file
 #define COMP_ATTR__USED__       __attribute__((__used__))
 #define COMP_ATTR__ALIGNED__(n) __attribute__((aligned(n)))

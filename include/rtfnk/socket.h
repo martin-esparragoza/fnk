@@ -27,6 +27,11 @@ typedef struct fnk_socket fnk_socket_t;
 void fnk_socket_init(struct fnk_socket* socket, void* readb, size_t readlen, void* writeb, size_t writelen);
 
 /**
+ * @brief To allocate the element
+ */
+size_t fnk_socket_sizeof();
+
+/**
  * @brief Convert errc to string
  *
  * Must be a DEFAULT error code otherwise will return NULL
@@ -59,5 +64,9 @@ int fnk_socket_write(struct fnk_socket* socket, const void* buf, size_t len);
  * @return      # of bytes read
  */
 int fnk_socket_read(struct fnk_socket* socket, void* buf, size_t len);
+
+size_t fnk_socket_getreadlen(struct fnk_socket* socket);
+
+size_t fnk_socket_getwritelen(struct fnk_socket* socket);
 
 #endif

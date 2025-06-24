@@ -9,7 +9,7 @@ LD = gcc
 LDFLAGS =
 
 CC = gcc
-CFLAGS = -Wall -ffreestanding -std=c99 -fno-stack-protector -g
+CFLAGS = -Wall -ffreestanding -std=c99 -fno-stack-protector -flto
 CLINK =
 export
 

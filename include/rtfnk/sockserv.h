@@ -23,6 +23,11 @@ typedef struct fnk_sockserv fnk_sockserv_t;
 void fnk_sockserv_init(struct fnk_sockserv* serv);
 
 /**
+ * @brief To allocate the element
+ */
+size_t fnk_sockserv_sizeof();
+
+/**
  * @brief Gets the next socket in queue (and puts it at the back)
  *
  * @param serv Server
@@ -55,6 +60,6 @@ int fnk_sockserv_readwritebuffer(struct fnk_socket* socket, void* dest, size_t l
  * @param dest Buffer to read from
  * @param len # of bytes to write
  */
- int fnk_sockserv_writereadbuffer(struct fnk_socket* socket, const void* src, size_t len);
+int fnk_sockserv_writereadbuffer(struct fnk_socket* socket, const void* src, size_t len);
 
 #endif

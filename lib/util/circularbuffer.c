@@ -80,3 +80,7 @@ inline bool util_circularbuffer_isfull(const struct util_circularbuffer* buf) {
 inline size_t util_circularbuffer_getlen(const struct util_circularbuffer* buf) {
     return buf->len;
 }
+
+inline size_t util_circularbuffer_getused(const struct util_circularbuffer* buf) {
+    return buf->writei >= buf->readi ? buf->writei - buf->readi : buf->len - buf->readi + buf->writei;
+}

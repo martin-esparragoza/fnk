@@ -15,6 +15,10 @@ void fnk_sockserv_init(struct fnk_sockserv* serv) {
     serv->head = serv->tail = NULL;
 }
 
+inline size_t fnk_sockserv_sizeof() {
+    return sizeof(struct fnk_sockserv);
+}
+
 const char* fnk_sockserv_errctostr(int errc) {
     if (errc < sizeof(fnk_sockserv_errcstr) / sizeof(fnk_sockserv_errcstr[0]) && errc >= 0)
         return fnk_sockserv_errcstr[errc];
@@ -25,10 +29,10 @@ const char* fnk_sockserv_errctostr(int errc) {
 int fnk_sockserv_getnextinqueue(struct fnk_sockserv* serv, struct fnk_socket** socket) {
     if (serv->tail == NULL)
         return FNK_SOCKSERV_ERRC_NO_SOCKETS_BOUND;
-    serv->tail->next = serv->head;
-    serv->tail = serv->tail->next;
+    *socket = serv->tail->next = serv->head;
+    serv->tail = serv->head; // Oder of opps
+    serv->head = serv->head->next;
     serv->tail->next = NULL;
-    *socket = serv->tail;
     return FNK_SOCKSERV_ERRC_OK;
 }
 
@@ -58,14 +62,14 @@ int fnk_sockserv_remove(struct fnk_sockserv* serv, struct fnk_socket* socket) {
 }
 
 int fnk_sockserv_readwritebuffer(struct fnk_socket* socket, void* dest, size_t len) {
-    if (util_circularbuffer_read(&socket->readb, dest, len)) {
+    if (util_circularbuffer_read(&socket->writeb, dest, len)) {
         return FNK_SOCKSERV_ERRC_RW_WOULDOVERFLOW;
     }
     return FNK_SOCKSERV_ERRC_OK;
 }
 
 int fnk_sockserv_writereadbuffer(struct fnk_socket* socket, const void* src, size_t len) {
-    if (util_circularbuffer_write(&socket->writeb, src, len)) {
+    if (util_circularbuffer_write(&socket->readb, src, len)) {
         return FNK_SOCKSERV_ERRC_RW_WOULDOVERFLOW;
     }
     return FNK_SOCKSERV_ERRC_OK;
