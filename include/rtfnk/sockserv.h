@@ -23,6 +23,14 @@ typedef struct fnk_sockserv fnk_sockserv_t;
 void fnk_sockserv_init(struct fnk_sockserv* serv);
 
 /**
+ * @brief Convert errc to string
+ *
+ * @param errc Error code
+ * @return String and if cannot find returns NULL
+ */
+const char* fnk_sockserv_errctostr(int errc);
+
+/**
  * @brief To allocate the element
  */
 size_t fnk_sockserv_sizeof();

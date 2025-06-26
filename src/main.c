@@ -22,3 +22,5 @@ int COMP_ATTR__NORETURN__ main() {
     mem_alloc_init(3);
     errorhang();
 }
+
+// TODO: -Wl,-z,-now makes it so you only need .got.plt
