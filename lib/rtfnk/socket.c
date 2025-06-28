@@ -8,7 +8,7 @@
 #include "lib/util/circularbuffer.h"
 #include "types.h"
 
-static const char* fnk_socket_def_errcstr[] = { ///< Default error codes to string (driver programs, reference this!)
+static const char* def_errcstr[] = { ///< Default error codes to string (driver programs, reference this!)
     [FNK_SOCKET_ERRC_DEF_OK] = "Ok",
     [FNK_SOCKET_ERRC_DEF_RW_WOULDOVERFLOW] = "Attempted to write/read outside buffer",
 };
@@ -16,15 +16,20 @@ static const char* fnk_socket_def_errcstr[] = { ///< Default error codes to stri
 void fnk_socket_init(struct fnk_socket* socket, void* readb, size_t readlen, void* writeb, size_t writelen) {
     util_circularbuffer_init(&socket->readb, readb, readlen);
     util_circularbuffer_init(&socket->writeb, writeb, writelen);
+    socket->next = socket->ctx = NULL;
 }
 
 inline size_t fnk_socket_sizeof() {
     return sizeof(struct fnk_socket);
 }
 
+void fnk_socket_attachctx(struct fnk_socket* socket, void* ctx) {
+    socket->ctx = ctx;
+}
+
 const char* fnk_socket_errctostr_def(int errc) {
-    if (errc < sizeof(fnk_socket_def_errcstr) / sizeof(fnk_socket_def_errcstr[0]) && errc >= 0)
-        return fnk_socket_def_errcstr[errc];
+    if (errc < sizeof(def_errcstr) / sizeof(def_errcstr[0]) && errc >= 0)
+        return def_errcstr[errc];
 
     // Default errc not found
     return NULL;
@@ -51,4 +56,8 @@ inline size_t fnk_socket_getreadlen(struct fnk_socket* socket) {
 
 inline size_t fnk_socket_getwritelen(struct fnk_socket* socket) {
     return util_circularbuffer_getused(&socket->writeb);
+}
+
+inline void* fnk_socket_getctx(struct fnk_socket* socket) {
+    return socket->ctx;
 }

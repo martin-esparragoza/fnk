@@ -27,11 +27,6 @@ typedef struct fnk_socket fnk_socket_t;
 void fnk_socket_init(struct fnk_socket* socket, void* readb, size_t readlen, void* writeb, size_t writelen);
 
 /**
- * @brief To allocate the element
- */
-size_t fnk_socket_sizeof();
-
-/**
  * @brief Convert errc to string
  *
  * Must be a DEFAULT error code otherwise will return NULL
@@ -40,6 +35,16 @@ size_t fnk_socket_sizeof();
  * @return String and if cannot find returns NULL
  */
 const char* fnk_socket_errctostr_def(int errc);
+
+/**
+ * @brief To allocate the element
+ */
+size_t fnk_socket_sizeof();
+
+/**
+ * @brief Sets the context of a socket (a lot of drivers need this)
+ */
+void fnk_socket_attachctx(struct fnk_socket* socket, void* ctx);
 
 /**
  * @brief Write content to buffer
@@ -68,5 +73,7 @@ int fnk_socket_read(struct fnk_socket* socket, void* buf, size_t len);
 size_t fnk_socket_getreadlen(struct fnk_socket* socket);
 
 size_t fnk_socket_getwritelen(struct fnk_socket* socket);
+
+void* fnk_socket_getctx(struct fnk_socket* socket);
 
 #endif

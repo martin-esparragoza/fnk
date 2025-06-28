@@ -14,6 +14,7 @@ struct fnk_socket {
     struct util_circularbuffer writeb;
     struct util_circularbuffer readb;
     struct fnk_socket* next;
+    void* ctx; // Unique variable that allows for a driver to keep track of necessary information
 };
 
 #endif

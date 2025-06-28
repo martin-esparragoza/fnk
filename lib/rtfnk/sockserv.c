@@ -4,7 +4,7 @@
 #include "include/rtfnk/socket.h"
 #include "types.h"
 
-static const char* fnk_sockserv_errcstr[] = {
+static const char* errcstr[] = {
     [FNK_SOCKSERV_ERRC_OK] = "Ok",
     [FNK_SOCKSERV_ERRC_NO_SOCKETS_BOUND] = "No sockets are bound to the server",
     [FNK_SOCKSERV_ERRC_COULD_NOT_REMOVE_SOCKET] = "Can't remove a socket that is not bound",
@@ -20,8 +20,8 @@ inline size_t fnk_sockserv_sizeof() {
 }
 
 const char* fnk_sockserv_errctostr(int errc) {
-    if (errc < sizeof(fnk_sockserv_errcstr) / sizeof(fnk_sockserv_errcstr[0]) && errc >= 0)
-        return fnk_sockserv_errcstr[errc];
+    if (errc < sizeof(errcstr) / sizeof(errcstr[0]) && errc >= 0)
+        return errcstr[errc];
 
     return NULL;
 }
