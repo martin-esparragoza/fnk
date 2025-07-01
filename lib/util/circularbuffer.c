@@ -1,7 +1,7 @@
 // TODO: This file needs to incorporate direct memory transfers to do stuff faster if necessary
 
 #include "lib/util/circularbuffer.h"
-#include "include/rtfnk/memops.h"
+#include "include/rtfnk/memopsf.h"
 #include "types.h"
 
 

@@ -1,21 +1,15 @@
 /**
  * @file sockserv.h
  * @brief Socket server for driver processes
+ * Only the functions (statically linked)
  */
 
-#ifndef INCLUDE_RTFNK_SOCKSERV_H_
-#define INCLUDE_RTFNK_SOCKSERV_H_
+#ifndef INCLUDE_RTFNK_SOCKSERVF_H_
+#define INCLUDE_RTFNK_SOCKSERVF_H_
 
-#include "include/rtfnk/socket.h"
 #include "types.h"
-
-#define FNK_SOCKSERV_ERRC_OK 0
-#define FNK_SOCKSERV_ERRC_COULD_NOT_REMOVE_SOCKET 1
-#define FNK_SOCKSERV_ERRC_RW_WOULDOVERFLOW 2
-#define FNK_SOCKSERV_ERRC_NO_SOCKETS_BOUND 3
-
-struct fnk_sockserv;
-typedef struct fnk_sockserv fnk_sockserv_t;
+#include "include/rtfnk/sockservd.h"
+#include "include/rtfnk/socketd.h"
 
 /**
  * @brief Constructor

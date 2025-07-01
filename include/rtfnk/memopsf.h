@@ -1,10 +1,11 @@
 /**
  * @file memops.h
  * @brief Memory operations
+ * Functions
  */
 
-#ifndef INCLUDE_RTFNK_MEMOPS_H_
-#define INCLUDE_RTFNK_MEMOPS_H_
+#ifndef INCLUDE_RTFNK_MEMOPSD_H_
+#define INCLUDE_RTFNK_MEMOPSD_H_
 
 #include "types.h"
 #include "attr.h"
@@ -19,6 +20,8 @@ uint64_t fnk_memops_bswap64(uint64_t data);
 
 /**
  * @brief Aligns along power of 2 boundry
+ *
+ * @return Unexpeceted behavior if toalign is not a power of 2 otherwise the right value
  */
 uintptr_t fnk_memops_alignp2(uintptr_t value, int toalign);
 

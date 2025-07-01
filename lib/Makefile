@@ -21,11 +21,9 @@ clean:
 
 build: $(OBJFILES) $(LIBFILES)
 
-# This creates .d but the compiler will handle all shenanigans for me :)
 %.o: %.c
 	$(CC) $(CFLAGS) -MMD -MP $(INCFLAGS) -c $< -o $@ $(CLINK)
 
-# TODO: Fix this stupid ahh building
 %.a: $(OBJFILES)
 	$(eval DIR = $(patsubst %.a,%,$@))
 	$(AR) $(ARFLAGS) cr $@ $(filter $(DIR)/%.o,$^)

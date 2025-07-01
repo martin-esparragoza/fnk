@@ -3,7 +3,8 @@
  * @brief Buffer read/write handler
  */
 
-#include "include/rtfnk/socket.h"
+#include "include/rtfnk/socketf.h"
+#include "include/rtfnk/socketd.h"
 #include "lib/rtfnk/socket.h"
 #include "lib/util/circularbuffer.h"
 #include "types.h"

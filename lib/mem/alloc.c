@@ -1,5 +1,5 @@
 #include "include/mem/alloc.h"
-#include "include/rtfnk/memops.h"
+#include "include/rtfnk/memopsf.h"
 #include "lib/util/ops.c"
 #include "alloc.h"
 #include "types.h"

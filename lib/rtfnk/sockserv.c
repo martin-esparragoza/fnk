@@ -1,7 +1,9 @@
 #include "lib/rtfnk/sockserv.h"
 #include "lib/rtfnk/socket.h"
-#include "include/rtfnk/sockserv.h"
-#include "include/rtfnk/socket.h"
+#include "include/rtfnk/sockservf.h"
+#include "include/rtfnk/sockservd.h"
+#include "include/rtfnk/socketf.h"
+#include "include/rtfnk/socketd.h"
 #include "types.h"
 
 static const char* errcstr[] = {

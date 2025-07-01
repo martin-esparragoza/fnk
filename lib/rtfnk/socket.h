@@ -6,7 +6,7 @@
 #ifndef LIB_RTFNK_SOCKET_H_
 #define LIB_RTFNK_SOCKET_H_
 
-#include "include/rtfnk/socket.h"
+#include "include/rtfnk/socketd.h"
 #include "lib/util/circularbuffer.h"
 #include "types.h"
 

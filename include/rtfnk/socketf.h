@@ -1,19 +1,14 @@
 /**
  * @file socket.h
  * @brief Buffer read/write handler
+ * Only the functions
  */
 
-#ifndef INCLUDE_RTFNK_SOCKET_H_
-#define INCLUDE_RTFNK_SOCKET_H_
+#ifndef INCLUDE_RTFNK_SOCKETF_H_
+#define INCLUDE_RTFNK_SOCKETF_H_
 
 #include "types.h"
-
-// No enums, I'd like the control the type
-#define FNK_SOCKET_ERRC_DEF_OK 0
-#define FNK_SOCKET_ERRC_DEF_RW_WOULDOVERFLOW 1
-
-struct fnk_socket;
-typedef struct fnk_socket fnk_socket_t;
+#include "include/rtfnk/socketd.h"
 
 /**
  * @brief Create a new socket (unbinded)
@@ -75,5 +70,6 @@ size_t fnk_socket_getreadlen(struct fnk_socket* socket);
 size_t fnk_socket_getwritelen(struct fnk_socket* socket);
 
 void* fnk_socket_getctx(struct fnk_socket* socket);
+
 
 #endif

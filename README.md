@@ -112,3 +112,5 @@ TODO (FIX) LIST:
 - FAT16 Write
 - FAT16 Allow for smaller than actual FAT size
 - Telemetry actual error handling (error codes + error strings that are implemented in the .c file)
+
+lib* directories will be preserved post-bootloader
