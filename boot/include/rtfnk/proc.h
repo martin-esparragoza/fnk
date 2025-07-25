@@ -4,7 +4,9 @@
  */
 #ifndef INCLUDE_RTFNK_PROCF_H
 #define INCLUDE_RTFNK_PROCF_H
-#include "include/rtfnk/procd.h"
+
+struct fnk_proc;
+typedef struct fnk_proc fnk_proc_t;
 
 /**
  * @brief Yield

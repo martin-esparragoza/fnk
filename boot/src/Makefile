@@ -1,26 +1,28 @@
+# We have to get the stuff in lib/ so we can assemble everything here
+
 SOURCES = main.c entry/$(ARCH)/entry.c
 DEPFILES = $(patsubst %.c,%.d,$(SOURCES))
 OBJFILES = $(patsubst %.c,%.o,$(SOURCES))
-LIBFILES = ../lib/comp/$(CC).a ../lib/arch/$(ARCH).a  $(wildcard ../lib/*.a)
-INCFLAGS = -I../include/arch/$(ARCH) -I../include/comp/$(CC) -I ../
 MAKEDIRS = entry/$(ARCH)/
 
-.PHONY: all build clean $(MAKEDIRS)
+.PHONY: all build boot clean $(MAKEDIRS)
 
 all: build
 
+build: boot
+
+boot: $(MAKEDIRS) $(OBJFILES)
+
 clean: $(MAKEDIRS)
-	rm -rf *.o
-	rm -rf rtfnk
-	rm -rf *.d
+	rm -rf $(OBJFILES)
+	rm -rf $(DEPFILES)
 
-build: $(MAKEDIRS) $(OBJFILES) rtfnk_$(ARCH)
-
-%.o: %.c
-	$(CC) $(CFLAGS) -MMD -MP $(INCFLAGS) -c $< -o $@ $(CLINK)
+include ../../rules.mk
 	
 entry/$(ARCH)/entry.o: # We want our custom makefile to link this instead (but keep it as a dep)
 	@:
+
+OUT: linker_$(ARCH).ld $(OBJFILES)
 
 # Avoid custom linker script until this thing actually has be to used. (It should be linked correctly and freestanding later)
 #rtfnk_$(ARCH): linker_$(ARCH).ld $(OBJFILES) $(LIBFILES)
@@ -29,9 +31,6 @@ entry/$(ARCH)/entry.o: # We want our custom makefile to link this instead (but k
 rtfnk_$(ARCH): linker_$(ARCH).ld $(OBJFILES) $(LIBFILES)
 	$(LD) $(LDFLAGS) -o $@ $(OBJFILES) -e entry -Wl,--start-group $(LIBFILES) -Wl,--end-group
 
-$(MAKEDIRS):
-	$(MAKE) -C $@ $(MAKECMDGOALS)
+include ../../makedirs.h
 
-ifneq ($(MAKECMDGOALS),clean)
--include $(DEPFILES)
-endif
+include ../../depsgrab.mk

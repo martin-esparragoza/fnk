@@ -8,7 +8,12 @@
 #define INCLUDE_RTFNK_SOCKETF_H_
 
 #include "types.h"
-#include "include/rtfnk/socketd.h"
+
+#define FNK_SOCKET_ERRC_DEF_OK 0
+#define FNK_SOCKET_ERRC_DEF_RW_WOULDOVERFLOW 1
+
+struct fnk_socket;
+typedef struct fnk_socket fnk_socket_t;
 
 /**
  * @brief Create a new socket (unbinded)

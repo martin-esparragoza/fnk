@@ -1,0 +1,5 @@
+# MUST DEFINE DEPFILES BEFORE INCLUDING
+
+ifneq ($(MAKECMDGOALS),clean)
+-include $(DEPFILES)
+endif

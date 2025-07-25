@@ -1,3 +1,24 @@
+A simple operating system framework witten in C99
+
+# About
+This is a single threaded operating system frame with cooperative scheduling. It does not implement things such as memory protection or segmentation.
+It is meant for things such as gaming consoles (or other devices with plug-and-play medias). Because of this libraries are strictly OS-packaged,
+meaning that dynamic linkage is still possible, but only for OS packaged binaries. It has a microkernel and drivers are implemented through programs
+and DLLs that interact with those programs. It is meant to be a heavily underprotected system.
+
+### Note
+* Currently this respository is configured for linux emulation, meaning that linkage and the whole shabang is broken and not happening
+
+# Boot Process
+1. User defined entry.o is where you start
+    1. The goal of this process is to load in the bootloader
+    2. Sections should also be set up
+    3. It also must set up the heap
+    4. Finally it will call main()
+2. Bootloder
+    1. Bootloader essentially just loads in the kernel (user configured static driver solely for kernel loading)
+    2. 
+
 A (SINGLE THREADED) operating system frame written in freestanding C99.
 
 !CARE
