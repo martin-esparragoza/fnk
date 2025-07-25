@@ -6,19 +6,18 @@ OBJFILES = $(patsubst %.c,%.o,$(SOURCES))
 # Not allowed to access libs
 INCFLAGS = -I../../../include/arch/$(ARCH) -I../../../include/comp/$(CC)
 
-.PHONY: all build clean
+.PHONY: all build boot clean
 
 all: build
 
+build: boot
+
+boot: $(OBJFILES)
+
 clean:
-	rm -rf *.o
-	rm -rf *.d
+	rm -rf $(DEPFILES)
+	rm -rf $(OBJFILES)
 	
-build: $(OBJFILES)
+include ../../../rules.mk
 	
-%.o: %.c
-	$(CC) $(CFLAGS) -MMD -MP $(INCFLAGS) -c $< -o $@ $(CLINK)
-	
-ifneq ($(MAKECMDGOALS),clean)
--include $(DEPFILES)
-endif
+include ../../../depsgrab.mk
