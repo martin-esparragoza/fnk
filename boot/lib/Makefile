@@ -21,4 +21,4 @@ clean:
 
 include ../../rules.mk
 
-include ../../depsgrab.h
+include ../../depsgrab.mk

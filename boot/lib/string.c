@@ -1,4 +1,4 @@
-#include "lib/util/string.h"
+#include "boot/include/string.h"
 #include "types.h"
 
 size_t util_strlen(const char* str) {

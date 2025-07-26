@@ -4,8 +4,8 @@
  * Functions
  */
 
-#ifndef INCLUDE_RTFNK_MEMOPSD_H_
-#define INCLUDE_RTFNK_MEMOPSD_H_
+#ifndef BOOT_INCLUDE_MEMOPS_H_
+#define BOOT_INCLUDE_MEMOPS_H_
 
 #include "types.h"
 #include "attr.h"

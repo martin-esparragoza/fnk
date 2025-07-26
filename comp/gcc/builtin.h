@@ -1,5 +1,5 @@
-#ifndef INCLUDE_COMP_BUILTIN_H_
-#define INCLUDE_COMP_BUILDIN_H_
+#ifndef BOOT_INCLUDE_COMP_BUILTIN_H_
+#define BOOT_INCLUDE_COMP_BUILDIN_H_
 
 #include "types.h"
 

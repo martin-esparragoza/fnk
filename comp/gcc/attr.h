@@ -1,5 +1,5 @@
-#ifndef INCLUDE_COMP_ATTR_H_
-#define INCLUDE_COMP_ATTR_H_
+#ifndef BOOT_INCLUDE_COMP_ATTR_H_
+#define BOOT_INCLUDE_COMP_ATTR_H_
 
 // Do it yourself file
 #define COMP_ATTR__USED__       __attribute__((__used__))

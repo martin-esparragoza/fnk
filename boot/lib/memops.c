@@ -1,4 +1,4 @@
-#include "include/rtfnk/memopsf.h"
+#include "boot/include/memops.h"
 #include "types.h"
 #include "attr.h"
 

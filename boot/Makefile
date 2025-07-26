@@ -1,4 +1,4 @@
-INCFLAGS = -I../include/arch/$(ARCH) -I -I ../../
+INCFLAGS = -I../../arch/$(ARCH)/ -I../../comp/$(CC)/ -I ../../
 export
 
 MAKEDIRS = lib/ src/

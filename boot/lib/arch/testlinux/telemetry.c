@@ -1,4 +1,4 @@
-#include "include/sdrive/telemetry.h"
+#include "boot/include/sdrive/telemetry.h"
 #include <stdio.h>
 #include <stdarg.h>
 
