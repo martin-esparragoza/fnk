@@ -6,15 +6,15 @@
  * BUT STRING IS FOR STRINGS.
  */
 
-#ifndef LIB_UTIL_OPS_H_
-#define LIB_UTIL_OPS_H_
+#ifndef COMMON_INCLUDE_OPS_H_
+#define COMMON_INCLUDE_OPS_H_
 
 #include "types.h"
 
-bool util_ops_ispowertwo(unsigned x);
+bool common_ops_ispowertwo(unsigned x);
 
-int util_ops_min(int a, int b);
+int common_ops_min(int a, int b);
 
-int util_ops_max(int a, int b);
+int common_ops_max(int a, int b);
 
 #endif

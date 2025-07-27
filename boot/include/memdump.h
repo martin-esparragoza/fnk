@@ -1,9 +1,17 @@
-#ifndef LIB_UTIL_MEMDUMP_H_
-#define LIB_UTIL_MEMDUMP_H_
+/**
+ * @file memdump.h
+ * @brief Memdump that you can see on error. Discarded after boot sequence
+ */
+
+#ifndef BOOT_INCLUDE_MEMDUMP_H_
+#define BOOT_INCLUDE_MEMDUMP_H_
 
 #include "attr.h"
 
-struct COMP_ATTR__PACKED__ util_memdump { ///< Debug information memdump
+/**
+ * @brief Just something a person can grab if something went wrong
+ */
+struct COMP_ATTR__PACKED__ boot_memdump { ///< Debug information memdump
     unsigned char telemetry_init_status;
     unsigned char mem_init_status;
     unsigned char drive_init_status;

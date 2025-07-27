@@ -3,10 +3,10 @@
  * @brief Static telemetry driver. You can just not implement this as well and things will go fine
  */
 
-#ifndef INCLUDE_SDRIVE_TELEMETRY_H_
-#define INCLUDE_SDRIVE_TELEMETRY_H_
+#ifndef BOOT_INCLUDE_TELEMETRY_H_
+#define BOOT_INCLUDE_TELEMETRY_H_
 
-#include "config.h"
+#include "common/include/config.h"
 
 /**
  * @brief Init telemetry before sending anything
@@ -14,47 +14,47 @@
  *
  * If this fails the code should still be able to run
  */
-int sdrive_telemetry_init();
+int boot_telemetry_init();
 
 /**
  * @brief Remove telemetry stream
  */
-int sdrive_telemetry_fini();
+int boot_telemetry_fini();
 
 /**
  * @brief Put string
  */
-int sdrive_telemetry_puts(const char* str);
+int boot_telemetry_puts(const char* str);
 
 /**
  * @brief Put character
  */
-int sdrive_telemetry_putc(char c);
+int boot_telemetry_putc(char c);
 
 /**
  * @brief Put string to telemetry
  * @return Error code
  */
-int sdrive_telemetry_printf(const char* format, ...);
+int boot_telemetry_printf(const char* format, ...);
 
-#define SDRIVE_TELEMETRY_LOG(format, ...) sdrive_telemetry_printf("[%s:%d]" format, __FILE__, __LINE__, ## __VA_ARGS__)
+#define BOOT_TELEMETRY_LOG(format, ...) boot_telemetry_printf("[%s:%d]" format, __FILE__, __LINE__, ## __VA_ARGS__)
 
-#if ARCH_CONFIG_VERBOSE >= 3
-#define SDRIVE_TELEMETRY_INF(format, ...) sdrive_telemetry_printf("[INF %s:%d]" format, __FILE__, __LINE__, ## __VA_ARGS__)
+#if COMMON_CONFIG_VERBOSE_LEVEL >= 3
+#define BOOT_TELEMETRY_INF(format, ...) boot_telemetry_printf("[INF %s:%d]" format, __FILE__, __LINE__, ## __VA_ARGS__)
 #else
-#define SDRIVE_TELEMETRY_INF(format, ...)
+#define BOOT_TELEMETRY_INF(format, ...)
 #endif
 
-#if ARCH_CONFIG_VERBOSE >= 2
-#define SDRIVE_TELEMETRY_WRN(format, ...) sdrive_telemetry_printf("[WRN %s:%d]" format, __FILE__, __LINE__, ## __VA_ARGS__)
+#if COMMON_CONFIG_VERBOSE_LEVEL >= 2
+#define BOOT_TELEMETRY_WRN(format, ...) boot_telemetry_printf("[WRN %s:%d]" format, __FILE__, __LINE__, ## __VA_ARGS__)
 #else
-#define SDRIVE_TELEMETRY_WRN(format, ...)
+#define BOOT_TELEMETRY_WRN(format, ...)
 #endif
 
-#if ARCH_CONFIG_VERBOSE >= 1
-#define SDRIVE_TELEMETRY_ERR(format, ...) sdrive_telemetry_printf("[ERR %s:%d]" format, __FILE__, __LINE__, ## __VA_ARGS__)
+#if COMMON_CONFIG_VERBOSE_LEVEL >= 1
+#define BOOT_TELEMETRY_ERR(format, ...) boot_telemetry_printf("[ERR %s:%d]" format, __FILE__, __LINE__, ## __VA_ARGS__)
 #else
-#define SDRIVE_TELEMETRY_ERR(format, ...)
+#define BOOT_TELEMETRY_ERR(format, ...)
 #endif
 
 #endif

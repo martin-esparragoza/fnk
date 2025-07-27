@@ -2,7 +2,7 @@
 #include "types.h"
 #include "attr.h"
 
-void COMP_ATTR__WEAK__ fnk_memops_bswap(void* data, size_t size) {
+void COMP_ATTR__WEAK__ common_memops_bswap(void* data, size_t size) {
     uint8_t* p = data;
 
     for (size_t i = 0; i < size / 2; i++) {
@@ -12,26 +12,26 @@ void COMP_ATTR__WEAK__ fnk_memops_bswap(void* data, size_t size) {
     }
 }
 
-uint16_t COMP_ATTR__WEAK__ fnk_memops_bswap16(uint16_t data) {
-    fnk_memops_bswap(&data, 2);
+uint16_t COMP_ATTR__WEAK__ common_memops_bswap16(uint16_t data) {
+    common_memops_bswap(&data, 2);
     return data;
 }
 
-uint32_t COMP_ATTR__WEAK__ fnk_memops_bswap32(uint32_t data) {
-    fnk_memops_bswap(&data, 4);
+uint32_t COMP_ATTR__WEAK__ common_memops_bswap32(uint32_t data) {
+    common_memops_bswap(&data, 4);
     return data;
 }
 
-uint64_t COMP_ATTR__WEAK__ fnk_memops_bswap64(uint64_t data) {
-    fnk_memops_bswap(&data, 8);
+uint64_t COMP_ATTR__WEAK__ common_memops_bswap64(uint64_t data) {
+    common_memops_bswap(&data, 8);
     return data;
 }
 
-uintptr_t COMP_ATTR__WEAK__ fnk_memops_alignp2(uintptr_t value, int toalign) {
+uintptr_t COMP_ATTR__WEAK__ common_memops_alignp2(uintptr_t value, int toalign) {
     return (value + toalign - 1) & ~(toalign - 1);
 }
 
-void COMP_ATTR__WEAK__ fnk_memops_memcpy(void* dest, const void* src, size_t length) {
+void COMP_ATTR__WEAK__ common_memops_memcpy(void* dest, const void* src, size_t length) {
     uintptr_t* dw = dest;
     const uintptr_t* sw = src;
     
@@ -42,7 +42,7 @@ void COMP_ATTR__WEAK__ fnk_memops_memcpy(void* dest, const void* src, size_t len
         *(db++) = *(sb++);
 }
 
-void COMP_ATTR__WEAK__ fnk_memops_memset(void* dest, uint8_t val, size_t length) {
+void COMP_ATTR__WEAK__ common_memops_memset(void* dest, uint8_t val, size_t length) {
     uintptr_t* dw = dest;
     
     // Create the val that is equivalent to multiple vals

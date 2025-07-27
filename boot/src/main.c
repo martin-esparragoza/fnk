@@ -1,19 +1,16 @@
-/**
- * @file main.c
- * Entry point of the bootloder code
-*/
+// What entry should jump to. Main bootloader code
 
 #include "boot/include/telemetry.h"
 #include "boot/include/memdump.h"
 #include "attr.h"
 #include "types.h"
 
-COMP_ATTR__USED__ COMP_ATTR__SECTION__(".memdump") struct util_memdump md;
+COMP_ATTR__USED__ COMP_ATTR__SECTION__(".memdump") struct boot_memdump md;
 static int errc = 0; // 0 Isnt standardized or anything but whatever
               // This is a reused errc variable
 
 void COMP_ATTR__NORETURN__ errorhang() {
-    SDRIVE_TELEMETRY_ERR("Hanging due to error..\n");
+    BOOT_TELEMETRY_ERR("Hanging due to error..\n");
     while (1);
 }
 

@@ -1,6 +1,0 @@
-#ifndef COMP_INCLUDE_CONFIG_H_
-#define COMP_INCLUDE_CONFIG_H_
-
-#define VERBOSE_LEVEL 3
-
-#endif
