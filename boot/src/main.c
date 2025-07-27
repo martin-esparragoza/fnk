@@ -9,11 +9,12 @@ COMP_ATTR__USED__ COMP_ATTR__SECTION__(".memdump") struct boot_memdump md;
 static int errc = 0; // 0 Isnt standardized or anything but whatever
               // This is a reused errc variable
 
-void COMP_ATTR__NORETURN__ errorhang() {
+void COMP_ATTR__NORETURN__ errorhang(void) {
     BOOT_TELEMETRY_ERR("Hanging due to error..\n");
     while (1);
 }
 
-int COMP_ATTR__NORETURN__ main() {
+int COMP_ATTR__NORETURN__ main(void) {
+    BOOT_TELEMETRY_INF("Hello\n");
     errorhang();
 }

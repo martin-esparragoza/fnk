@@ -16,15 +16,15 @@
 
 // All of these are just implemented in main
 // I don't want to create a header because that's just odd
-extern COMP_ATTR__NORETURN__ void main();
-extern COMP_ATTR__NORETURN__ void errorhang();
+extern COMP_ATTR__NORETURN__ void main(void);
+extern COMP_ATTR__NORETURN__ void errorhang(void);
 
 // extern void* mem_alloc_heap_start;
 
 // Ideally linking allows you to link this file together with the rest of the bootloader
 // This then allows for these addreses above to resolve properly
 
-int COMP_ATTR__NORETURN__ entry() {
+int COMP_ATTR__NORETURN__ entry(void) {
     // Allocate a large block of memory for heap/stack
     //void* pmem = mmap(NULL, PMEM_SIZE, PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE, /* discardable values */ -1, 0);
     

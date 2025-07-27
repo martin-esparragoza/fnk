@@ -14,12 +14,12 @@
  *
  * If this fails the code should still be able to run
  */
-int boot_telemetry_init();
+int boot_telemetry_init(void);
 
 /**
  * @brief Remove telemetry stream
  */
-int boot_telemetry_fini();
+int boot_telemetry_fini(void);
 
 /**
  * @brief Put string

@@ -9,12 +9,12 @@
 /**
  * @brief Push all general registers onto the stack
  */
-void arch_inst_pusha() {;}
+void arch_inst_pusha(void) {;}
 
 /**
  * @brief Pop all general registers onto the stack
  */
-void arch_inst_popa() {;}
+void arch_inst_popa(void) {;}
 
 /**
  * @brief Push ip to stack and move sp when the parameter sp is pointing

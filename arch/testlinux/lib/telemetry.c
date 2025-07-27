@@ -2,11 +2,11 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-int boot_telemetry_init() {
+int boot_telemetry_init(void) {
     return 0;
 }
 
-int boot_telemetry_fini() {
+int boot_telemetry_fini(void) {
     return 0;
 }
 
