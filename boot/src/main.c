@@ -3,9 +3,8 @@
  * Entry point of the bootloder code
 */
 
-#include "include/sdrive/telemetry.h"
-#include "lib/util/memdump.h"
-#include "include/mem/alloc.h"
+#include "boot/include/telemetry.h"
+#include "boot/include/memdump.h"
 #include "attr.h"
 #include "types.h"
 

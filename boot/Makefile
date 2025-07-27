@@ -1,30 +1,18 @@
-# A bit misleading bc this is not the current context and instead the subdirectory context
-INCFLAGS := -I../../arch/$(ARCH)/include/ -I../../comp/$(CC)/include/ -I ../../
-export
+BINARY := boot/boot_$(ARCH)
 
-SOURCES = $(wildcard lib/*.c) src/main.c
-OBJFILES = $(patsubst %.c,%.o,$(SOURCES))
+SOURCES := $(wildcard boot/lib/*.c)
+OBJFILES := $(patsubst %.c,%.o,$(SOURCES))
+DEPFILES := $(patsubst %.c,%.o,$(SOURCES))
+TARGETS := $(BINARY)
 
-boot_$(ARCH): linked_$(ARCH).ld $(OBJFILES)
+# Yes, we want the objfiles from the upper level make but we don't want make clean to double trigger
+# These are always expected to be defined. Constants
+UPPEROBJS := boot/src/main.o boot/src/entry/$(ARCH)/entry.o
+LIBFILES := arch/$(ARCH).o comp/$(CC).o common/common.o
 
-MAKEDIRS = lib/ src/
+$(UPPEROBJS) $(LIBFILES):
+	@
 
-SOURCES = $(wildcard lib/*.c) src/main.c src/entry/$(ARCH)/entry.c
-OBJFILES = $(patsubst %.c,%.o,$(SOURCES))
-LIBFILES = ../arch/$(ARCH).a ../comp/$(CC).a ../common/common.a
-
-.PHONY: clean $(MAKEDIRS)
-
-all: build
-
-build: $(MAKEDIRS) $(OUT)
-
-clean: $(MAKEDIRS)
-
-$(OUT): linker_$(ARCH).ld $(OBJFILES)
-	$(LD) $(LDFLAGS) -o $@ -T $< -Wl,--start-group $(OBJFILES) $(LIBFILES) -Wl,--end-group
-#rtfnk_$(ARCH): linker_$(ARCH).ld $(OBJFILES) $(LIBFILES)
-#	$(LD) $(LDFLAGS) -o $@ $(OBJFILES) -e entry -Wl,--start-group $(LIBFILES) -Wl,--end-group
-
-# Just for clean
-include ../makedirs.mk
+$(BINARY): boot/linker_$(ARCH).ld $(OBJFILES) $(UPPEROBJS)
+#	$(LD) $(LDFLAGS) -o $@ -T $< -Wl,--start-group $(OBJFILES) $(LIBFILES) $(UPPEROBJS) -Wl,--end-group
+	$(LD) $(LDFLAGS) -o $@ -Wl,--start-group $(OBJFILES) $(LIBFILES) $(UPPEROBJS) -Wl,--end-group

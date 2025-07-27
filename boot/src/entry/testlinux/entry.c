@@ -19,7 +19,7 @@
 extern COMP_ATTR__NORETURN__ void main();
 extern COMP_ATTR__NORETURN__ void errorhang();
 
-extern void* mem_alloc_heap_start;
+// extern void* mem_alloc_heap_start;
 
 // Ideally linking allows you to link this file together with the rest of the bootloader
 // This then allows for these addreses above to resolve properly
@@ -42,7 +42,7 @@ int COMP_ATTR__NORETURN__ entry() {
     
     // Stack direction down and heap direction up
     context.uc_stack.ss_sp = (void*) (((uintptr_t) pmem) + PMEM_SIZE) - 256; // Avoid zero page
-    mem_alloc_heap_start = pmem;
+    // mem_alloc_heap_start = pmem;
 
     context.uc_stack.ss_size = PMEM_SIZE;
     context.uc_stack.ss_flags = 0; // Use ss stack

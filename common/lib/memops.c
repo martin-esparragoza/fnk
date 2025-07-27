@@ -1,4 +1,4 @@
-#include "boot/include/memops.h"
+#include "common/include/memops.h"
 #include "types.h"
 #include "attr.h"
 

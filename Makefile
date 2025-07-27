@@ -6,7 +6,7 @@
 # Set this yourself
 ARCH := testlinux
 
-LD := ld
+LD := gcc
 LDFLAGS :=
 
 CC := gcc
@@ -16,7 +16,12 @@ CLINK :=
 INCFLAGS := -I ./ -I arch/$(ARCH)/include/ -I comp/$(CC)/include/
 
 
-MAKEDIRS := arch/
+MAKEDIRS := arch/ \
+			comp/ \
+			common/ \
+			boot/src/entry/$(ARCH)/ \
+			boot/src/ \
+			boot/
 #comp/ common/ boot/ dll/ kernel/
 .PHONY: all clean $(MAKEDIRS)
 all: $(MAKEDIRS)
@@ -42,35 +47,3 @@ clean:
 	rm -rf $(OBJFILES)
 	rm -rf $(DEPFILES)
 endif
-
-
-#ARCH_O := arch/$(ARCH)/$(ARCH).o
-#COMP_O := comp/$(CC)/$(CC).o
-#COMMON_O := common/common.o
-#BOOT := boot_$(ARCH)
-#MAKEDIRS := arch/ comp/ common/ boot/
-
-#.PHONY: all build clean $(ARCH_O) $(COMP_O) $(COMMON_O) $(BOOT) $(MAKEDIRS)
-	
-# TODO: All assemble
-#all: build
-
-# TODO: add dll/ and kernel/
-#build: $(ARCH_A) $(COMP_A) $(COMMON_A) $(BOOT)
-
-#clean: $(MAKEDIRS) 
-	
-#$(ARCH_A):
-#	$(MAKE) -C arch $(notdir $@)
-
-#$(COMP_A):
-#	$(MAKE) -C comp $(notdir $@)
-
-#$(COMMON_A):
-#	$(MAKE) -C common $(notdir $@)
-
-#$(BOOT):
-#	$(MAKE) -C boot $@
-
-# This is for make clean so it passes through
-#include makedirs.mk

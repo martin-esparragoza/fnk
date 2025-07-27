@@ -1,3 +1,5 @@
+/* TODO: Finish and stuff.. */
+
 ENTRY(entry);
 WORDSIZE = 8; /* bytes */
 
