@@ -1,6 +1,6 @@
 /**
  * @file telemetry.h
- * @brief Telemetry output (implementation of this can be skipped if desired)
+ * @brief Static telemetry driver. You can just not implement this as well and things will go fine
  */
 
 #ifndef INCLUDE_SDRIVE_TELEMETRY_H_

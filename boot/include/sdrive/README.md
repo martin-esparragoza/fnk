@@ -1,1 +1,0 @@
-Static drivers used before driver loading

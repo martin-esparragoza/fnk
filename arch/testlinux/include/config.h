@@ -7,7 +7,6 @@
 #ifndef BOOT_INCLUDE_ARCH_CONFIG_H_
 #define BOOT_INCLUDE_ARCH_CONFIG_H_
 
-#define ARCH_CONFIG_VERBOSE 3
 // #define ARCH_CONFIG_BIG_ENDIAN ///< Define this to big or dont to make it little
 
 #endif

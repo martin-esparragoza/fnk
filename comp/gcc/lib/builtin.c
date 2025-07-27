@@ -1,5 +1,5 @@
 #include "types.h"
-#include "include/rtfnk/memopsf.h"
+#include "common/include/memops.h"
 
 // STRONG
 uint16_t fnk_memops_bswap16(uint16_t data) {
