@@ -10,32 +10,43 @@
 
 /**
  * @brief Init telemetry before sending anything
+ * @retval 0 on OK
  * @return Error code
  *
  * If this fails the code should still be able to run
  */
-int boot_telemetry_init(void);
+unsigned boot_telemetry_init(void);
 
 /**
  * @brief Remove telemetry stream
+ * @retval 0 on OK
+ * @return Error code
  */
-int boot_telemetry_fini(void);
+unsigned boot_telemetry_fini(void);
 
 /**
  * @brief Put string
+ * @note Should do nothing if failed telemetry initialization
+ * @retval 0 on OK
+ * @return Error code
  */
-int boot_telemetry_puts(const char* str);
+unsigned boot_telemetry_puts(const char* str);
 
 /**
  * @brief Put character
- */
-int boot_telemetry_putc(char c);
-
-/**
- * @brief Put string to telemetry
+ * @note Should do nothing if failed telemetry initialization
+ * @retval 0 on OK
  * @return Error code
  */
-int boot_telemetry_printf(const char* format, ...);
+unsigned boot_telemetry_putc(char c);
+
+/**
+ * @brief Put string to telemetry with printf things
+ * @note Should do nothing if failed telemetry initialization
+ * @retval 0 on OK
+ * @return Error code
+ */
+unsigned boot_telemetry_printf(const char* format, ...);
 
 #define BOOT_TELEMETRY_LOG(format, ...) boot_telemetry_printf("[%s:%d]" format, __FILE__, __LINE__, ## __VA_ARGS__)
 

@@ -11,6 +11,6 @@ extern const size_t boot_vfs_errcstr_alt_sizeof;
  * @return ptr
  * Add your own error codes who cares
  */
-const char* boot_vfs_errctostr_alt(int errc);
+const char* boot_vfs_errctostr_alt(unsigned errc);
 
 #endif
