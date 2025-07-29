@@ -1,7 +1,7 @@
 BINARY := boot/boot_$(ARCH)
 
 SOURCES := $(wildcard boot/lib/*.c)
-OBJFILES := $(patsubst %.c,%.d,$(SOURCES))
+OBJFILES := $(patsubst %.c,%.o,$(SOURCES))
 # Depfiles is nothing because we're effectively resolving our deps ourselves (becuse its the final build)
 DEPFILES :=
 TARGETS := $(BINARY)
