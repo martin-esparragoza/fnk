@@ -33,7 +33,7 @@ $(MAKEDIRS):
 clean:
 	$(foreach d,$(MAKEDIRS),$(MAKE) BUILDTARGET=$d clean;)
 else
-# Defines all of our variables like TARGETS, DEPFILES, and OBJFILES
+# Defines all of our variables like TARGETS and DEPFILES
 include $(BUILDTARGET)/Makefile
 
 # Now we are in the process of building. Lets turn this build target into its requirements
@@ -44,6 +44,5 @@ inc-depfiles:
 -include $(DEPFILES)
 clean:
 	rm -rf $(TARGETS)
-	rm -rf $(OBJFILES)
 	rm -rf $(DEPFILES)
 endif

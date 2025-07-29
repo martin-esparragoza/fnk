@@ -21,7 +21,7 @@ const char* boot_vfs_errctostr(int errc) {
 
 const char* boot_vfs_errctostr_alt(int errc) {
     errc -= BOOT_VFS_ERRC_DEF_END;
-    if (errc < sizeof(boot_vfs_errcstr_alt) / sizeof(boot_vfs_errcstr_alt[0]) && errc >= 0)
-        return boot_vfs_errcstr[errc];
+    if (errc < boot_vfs_errcstr_alt_sizeof && errc >= 0)
+        return boot_vfs_errcstr_alt[errc];
     return NULL;
 }

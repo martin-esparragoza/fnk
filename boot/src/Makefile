@@ -1,4 +1,3 @@
-SOURCES = boot/src/main.c
+SOURCES = boot/src/main.c $(wildcard boot/lib/*.c)
 DEPFILES := $(patsubst %.c,%.d,$(SOURCES))
-OBJFILES := $(patsubst %.c,%.o,$(SOURCES))
-TARGETS := $(OBJFILES)
+TARGETS := $(patsubst %.c,%.o,$(SOURCES))

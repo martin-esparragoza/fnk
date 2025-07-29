@@ -68,7 +68,7 @@ int boot_vfs_dir_enumerate(struct boot_vfs_dir* dir);
 
 /**
  * @brief Gets the next file in the directory (iteration)
- * @note Requires enumeration before this can happen. Opens a file so it must be later losed
+ * @note Requires enumeration before this can happen. Opens a file so it must be later losed. File position indicator must start at the 0th byte.
  * @param [in] dir Directory to target
  * @param [out] file New file pointer to set
  * @retval BOOT_VFS_ERRC_OK If everything went good
@@ -84,6 +84,7 @@ size_t boot_vfs_dir_sizeof(void);
 
 /**
  * @brief Set a file to be referencing whatever is at path
+ * @note File position indicator must start at the 0th byte.
  * @param [out] file Modified file structure
  * @param [in] path Absolute file path
  * @retval BOOT_VFS_ERRC_OK If everything went good
@@ -100,16 +101,7 @@ int boot_vfs_file_open(struct boot_vfs_file* file, const char* path);
 int boot_vfs_file_close(struct boot_vfs_file* file);
 
 /**
- * @brief Gets the name of the file
- * @param [in] file File target
- * @param [out] name Output pointer to name. Remains valid until file is closed
- * @retval BOOT_VFS_ERRC_OK If everything went good
- * @return Value that is not OK if failed
- */
-int boot_vfs_file_getfilename(struct boot_vfs_file* file, const char** name);
-
-/**
- * @brief Reads some amount of data
+ * @brief Reads some amount of data starting from internally tracked file location
  * @note It is the implementation's job to cache and stuff. Check your readbytes value!!
  * @param [in] file File target
  * @param [out] buffer Your buffer to write to
@@ -119,6 +111,15 @@ int boot_vfs_file_getfilename(struct boot_vfs_file* file, const char** name);
  * @return Value that is not OK if something bad happened or failed
  */
 int boot_vfs_file_read(struct boot_vfs_file* file, void* buffer, size_t size, size_t* readbytes);
+
+/**
+ * @brief Move internally tracked file location
+ * @param [in] file File target
+ * @param [in] offset New location
+ * @retval BOOT_VFS_ERRC_OK If everything went good
+ * @return Value that isnot OK if somethign bad happened or failed
+ */
+int boot_vfs_file_seek(struct boot_vfs_file* file, uint64_t offset);
 
 /**
  * @brief Sizeof the data structure
