@@ -6,8 +6,9 @@
 # Set this yourself
 ARCH := testlinux
 
-LD := gcc
+LD := ld
 LDFLAGS :=
+LDLINK :=
 
 CC := gcc
 CFLAGS := -Wall -ffreestanding -std=c99 -fno-stack-protector -flto
@@ -21,7 +22,8 @@ MAKEDIRS := arch/ \
 			common/ \
 			boot/src/entry/$(ARCH)/ \
 			boot/src/ \
-			boot/
+			boot/ \
+			dll/fnk
 #comp/ common/ boot/ dll/ kernel/
 .PHONY: all clean $(MAKEDIRS)
 all: $(MAKEDIRS)

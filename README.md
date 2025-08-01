@@ -42,7 +42,7 @@ FEATURES (atttempted)
     2. Load in dynamic linker.
     3. Link dynamic linker to the staying static drivers (static drivers in the staying section)
     4. Load in dynamically linked drivers
-    5. Load in librtfnk so it can also be linked as well as other libs
+    5. Load in libfnk so it can also be linked as well as other libs
     6. Load in kernel and now execute it
 
 ## Posix deviations?

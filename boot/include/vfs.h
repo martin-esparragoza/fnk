@@ -32,7 +32,7 @@ typedef struct boot_vfs_file boot_vfs_file_t;
 unsigned boot_vfs_init(void);
 
 /**
- * @brief Convert returned error code to string
+ * @brief Convert error code to string
  * @note Implementers! You must create the boot_vfs_errctostr_alt array! (see boot/lib/vfs.h for details)
  * @param [in] errc Error code from vfs function
  * @retval NULL if no error code found

@@ -14,6 +14,7 @@ LIBFILES := arch/$(ARCH).o comp/$(CC).o common/common.o
 $(UPPEROBJS) $(LIBFILES) $(OBJFILES):
 	@
 
-$(BINARY): boot/linker_$(ARCH).ld $(OBJFILES) $(UPPEROBJS)
+$(BINARY): boot/linker_$(ARCH).ld $(OBJFILES) $(UPPEROBJS) $(LIBFILES)
 #	$(LD) $(LDFLAGS) -o $@ -T $< -Wl,--start-group $(OBJFILES) $(LIBFILES) $(UPPEROBJS) -Wl,--end-group
-	$(LD) $(LDFLAGS) -o $@ -Wl,--start-group $(OBJFILES) $(LIBFILES) $(UPPEROBJS) -Wl,--end-group
+# Funky stuff so it can run silly goose
+	gcc $(LDFLAGS) -o $@ -Wl,--start-group $(OBJFILES) $(LIBFILES) $(UPPEROBJS) -Wl,--end-group

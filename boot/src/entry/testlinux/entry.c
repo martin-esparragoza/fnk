@@ -10,7 +10,7 @@
 
 #define PMEM_SIZE 1024 * 32 /* 32kb */
 #define NO_OS_ERROR() printf("Error in entry.\n")
-    // Just some error that can be executed without rtfnk and other libs being loaded
+    // Just some error that can be executed without fnk and other libs being loaded
 
 // Why externs to essentially pass function args? Because an entry that is able to include and call libraries is morally wrong
 

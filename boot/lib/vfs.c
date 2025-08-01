@@ -13,7 +13,7 @@ static const char* errcstr_def[] = {
 const char* boot_vfs_errctostr(unsigned errc) {
     if (errc > 0) {
         errc -= COMMON_ERRC_BASE;
-        if (errc < sizeof(errcstr_def) / sizeof(errcstr_def[0]) && errc >= 0)
+        if (errc < sizeof(errcstr_def) / sizeof(errcstr_def[0]))
             return errcstr_def[errc];
         return boot_vfs_errctostr_alt(errc);
     }
@@ -22,7 +22,7 @@ const char* boot_vfs_errctostr(unsigned errc) {
 
 const char* boot_vfs_errctostr_alt(unsigned errc) {
     errc -= BOOT_VFS_ERRC_DEF_BASE;
-    if (errc < boot_vfs_errcstr_alt_sizeof && errc >= 0)
+    if (errc < boot_vfs_errcstr_alt_sizeof)
         return boot_vfs_errcstr_alt[errc];
     return NULL;
 }

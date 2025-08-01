@@ -3,10 +3,10 @@
  * @brief Internal sockserv things
  */
 
-#ifndef LIB_RTFNK_SOCKSERV_H_
-#define LIB_RTFNK_SOCKSERV_H_
+#ifndef DLL_FNK_LIB_SOCKSERV_H_
+#define DLL_FNK_LIB_SOCKSERV_H_
 
-#include "include/rtfnk/socketd.h"
+#include "dll/fnk/include/socketd.h"
 
 typedef struct fnk_sockserv {
     // Each socket is serviced by popping it off the queue and then appending it to the back
