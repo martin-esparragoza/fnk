@@ -11,7 +11,7 @@ LDFLAGS :=
 LDLINK :=
 
 CC := gcc
-CFLAGS := -Wall -ffreestanding -std=c99 -fno-stack-protector -flto
+CFLAGS := -Wall -ffreestanding -std=c99 -fno-stack-protector -flto -fpermissive
 CLINK :=
 
 INCFLAGS := -I ./ -I arch/$(ARCH)/include/ -I comp/$(CC)/include/

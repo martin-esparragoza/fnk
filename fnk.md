@@ -41,7 +41,7 @@ following is in chronological order.
 
 Do not touch during exection.
 
-### ljd
+### .ljd
 Library jump descriptor section. This tells the operating
 system where the functions you want to expose are. It is
 simply defined as a list of addresses defined like so
@@ -50,7 +50,7 @@ simply defined as a list of addresses defined like so
 #include "attr.h"
 #include "types.h"
 
-COMP_ATTR__SECTION__(".text") static uintptr_t ljd[] = {
+COMP_ATTR__USED__ COMP_ATTR__SECTION__(".ljd") static uintptr_t ljd[] = {
    (uintptr_t) function_one,
    (uintptr_t) function_two,
    (uintptr_t) function_three
@@ -66,21 +66,12 @@ order to resolve the linking. Here is a sample pjd for the
 previous ljd
 ```c
 // mylibrarynamepjddef.h
-{
+// Remember to set your defines
+#include "common/include/pjd.h"
+
+COMP_ATTR__USED__ COMP_ATTR__SECTION__(".pjds") static struct common_pjd mylibraryname_pjd {
    .name = "mylibraryname"
 };
 ```
-```c
-// programthatwantstoincludethis.c
-#include "common/include/pjd.h"
-#include "attr.h"
-
-COMP_ATTR__SECTION__(".text") static struct pjd pjds[] = {
-   #include "mylibrarynamepjddef.h" ,
-   #include "myotherlibrarynamepjddef.h"
-};
-```
 With this, a memcpy will be done, moving the ljd to the pjd
-before your program executes. This must be in `.text` to
-encourage the program to not use absolute addressing. Do not
-touch during execution.
+before your program executes.Do not touch during execution.
