@@ -4,24 +4,17 @@ WORDSIZE = 16 /* Define this to your desired word size */
 OUTPUT_FORMAT(binary);
 
 SECTIONS {
-    .progh : ALIGN(WORDSIZE) {
-        KEEP(*( .progh ));
+    .desc : ALIGN(WORDSIZE) {
+        KEEP(*( .desc ));
     }
 
-    /* Library jump table */
-    .ljt : ALIGN(WORDSIZE) {
-        KEEP(*( .ljt ));
+    /* Library jump descriptor */
+    .ljd : ALIGN(WORDSIZE) {
+        KEEP(*( .ljd ));
     }
 
-    /* Program jump table */
-    .pjt : ALIGN(WORDSIZE) {
-        KEEP(*( .pjt ));
-    }
-    
     .text : ALIGN(WORDSIZE) {
         __linker_text_start = .;
-        /* The good thing about using this is that you don't have to include a blank entry function if you dont want to */
-        *( .entry ); /* We have to place this at the top of the thing. There should only be one function here */
         *( .text .text.* );
         __linker_text_end = .;
     }

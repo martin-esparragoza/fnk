@@ -9,12 +9,12 @@
 #include "dll/fnk/include/socketd.h"
 #include "dll/fnk/lib/circularbuffer.h"
 
-struct fnk_socket {
+typedef struct fnk_socket {
     struct fnk_circularbuffer writeb;
     struct fnk_circularbuffer readb;
     unsigned mbox[FNK_SOCKET_MAILBOX_COUNT];
     struct fnk_socket* next;
     void* ctx; // Unique variable that allows for a driver to keep track of necessary information
-};
+} fnk_socket_t;
 
 #endif
