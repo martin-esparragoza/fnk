@@ -17,29 +17,23 @@ SECTIONS {
     .pjt : ALIGN(WORDSIZE) {
         KEEP(*( .pjt ));
     }
-
+    
     .text : ALIGN(WORDSIZE) {
         __linker_text_start = .;
+        /* The good thing about using this is that you don't have to include a blank entry function if you dont want to */
         *( .entry ); /* We have to place this at the top of the thing. There should only be one function here */
         *( .text .text.* );
         __linker_text_end = .;
     }
-
-    .rodata : ALIGN(WORDSIZE) {
-        __linker_rodata_start = .;
-        *( .rodata .rodata.* );
-        __linker_rodata_end = .;
-    }
-
-    .data : ALIGN(WORDSIZE) {
-        __linker_data_start = .;
-        *( .data .data.* );
-        __linker_data_end = .;
-    }
-
-    .bss : ALIGN(WORDSIZE) {
-        __linker_bss_start = .;
-        *( .bss .bss.* COMMON );
-        __linker_bss_end = .;
-    }
+    
+    /**
+     * Yes, we did discard .data, .rodata, .bss . This is because GCC is very
+     * happy to use absolute addressing on these sections and we can't support
+     * that without doing different things for different architectures.
+     * I don't want to write a giant dynamic linker so because of that we're just
+     * going to attempt to put everything inside of .text and the rest will be
+     * dynamically allocated. Yes, it sucks. Also, you should probably compile
+     * the object file for yourself as something that isnt .fnk so you can check
+     * if gcc is going to generate something in a section you don't want it to.
+     */
 }

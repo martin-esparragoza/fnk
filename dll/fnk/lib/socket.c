@@ -4,8 +4,10 @@
 #include "dll/fnk/lib/circularbuffer.h"
 #include "common/include/errc.h"
 #include "types.h"
+#include "attr.h"
 
-static const char* errcstr[] = {
+// So it doesn't get put into .data because .data is discarded
+COMP_ATTR__SECTION__(".text") static const char* errcstr[] = {
     [FNK_SOCKET_ERRC_DEF_RW_WOULDOVERFLOW - COMMON_ERRC_BASE] = "Attempted to write/read outside buffer",
     [FNK_SOCKET_ERRC_NO_FREE_MAILBOXES - COMMON_ERRC_BASE] = "No space to add mailbox entry"
 };
