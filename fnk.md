@@ -12,18 +12,9 @@ GOT data is a pain. Espescially when I'm targeting "light"
 and old processors (like the 68000).
 
 ## Restrictions
-You may NOT use the `.data` `.rodata` `.bss` or any other
-sections besides `.entry` and .`text` during program
-execution. This is because we cannot afford to deal with
-absolute addressing. To verify that the program you wrote is
-valid and will not have errors PLEASE compile to .elf or
-something like that and do an objdump. The objdump will reveal
-if your program is attempting to create things in sections
-it shouldn't be. **YOU HAVE TO USE THE SAME COMPILATION FLAGS
-JUST NOT THE LINKER** If you must create global variables and
-constants, please use the `COMP_ATTR__SECTION__(".text")`
-from `"alloc.h"` to specify to the compiler that your constant
-is allocated there. **All is in the target endianness.**
+Remember not to do anything stupid like try to use .so files
+or something like that. Please be smart with it all. **All is
+in the target endianness.**
 
 ### .desc
 The descriptor data of your program. This tells the operating

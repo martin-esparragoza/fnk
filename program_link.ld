@@ -5,28 +5,37 @@ OUTPUT_FORMAT(binary);
 
 SECTIONS {
     .desc : ALIGN(WORDSIZE) {
+        __linker_desc_start = .;
         KEEP(*( .desc ));
+        __linker_desc_end = .;
     }
 
     /* Library jump descriptor */
     .ljd : ALIGN(WORDSIZE) {
+        __linker_ljd_start = .;
         KEEP(*( .ljd ));
+        __linker_ljd_end = .;
     }
 
     .text : ALIGN(WORDSIZE) {
         __linker_text_start = .;
-        *( .text .text.* );
+        *( .text* );
         __linker_text_end = .;
+
+        __linker_data_start = .;
+        *( .data* );
+        __linker_data_end = .;
+        
+        __linker_rodata_start = .;
+        *( .rodata* );
+        __linker_rodata_end = .;
+
+        __linker_pjds_start = .;
+        *( .pjds );
+        __linker_pjds_end = .;
+        
+        __linker_bss_start = .;
+        *( .bss* );
+        __linker_bss_end = .;
     }
-    
-    /**
-     * Yes, we did discard .data, .rodata, .bss . This is because GCC is very
-     * happy to use absolute addressing on these sections and we can't support
-     * that without doing different things for different architectures.
-     * I don't want to write a giant dynamic linker so because of that we're just
-     * going to attempt to put everything inside of .text and the rest will be
-     * dynamically allocated. Yes, it sucks. Also, you should probably compile
-     * the object file for yourself as something that isnt .fnk so you can check
-     * if gcc is going to generate something in a section you don't want it to.
-     */
 }
