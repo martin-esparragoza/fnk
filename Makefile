@@ -10,21 +10,27 @@ LD := ld
 LDFLAGS :=
 LDLINK :=
 
+CCNATIVE := gcc
+CNATIVEFLAGS :=
+CNATIVELINK :=
+
 CC := gcc
-CFLAGS := -Wall -ffreestanding -std=c99 -fno-stack-protector -flto -fpermissive
+CFLAGS := -Wall -ffreestanding -std=c99 -fno-stack-protector
 CLINK :=
+
+OBJCOPY := objcopy
 
 INCFLAGS := -I ./ -I arch/$(ARCH)/include/ -I comp/$(CC)/include/
 
 
 MAKEDIRS := arch/ \
 			comp/ \
+			tool/ \
 			common/ \
 			boot/src/entry/$(ARCH)/ \
 			boot/src/ \
 			boot/ \
 			dll/fnk
-#comp/ common/ boot/ dll/ kernel/
 .PHONY: all clean $(MAKEDIRS)
 all: $(MAKEDIRS)
 
@@ -40,7 +46,8 @@ include $(BUILDTARGET)/Makefile
 
 # Now we are in the process of building. Lets turn this build target into its requirements
 include rules.mk
-.PHONY: all inc-depfiles clean
+-include $(BUILDTARGET)/ruleoverride.mk # This is specifically so they can override stuff defined in rules.mk like %.o
+.PHONY: all inc-depfiles clean # inc-depfiles because we need the depfiles to be included before we build anything
 all: inc-depfiles $(TARGETS) # Attempt to make them
 inc-depfiles:
 -include $(DEPFILES)

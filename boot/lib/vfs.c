@@ -1,5 +1,6 @@
 #include "boot/include/vfs.h"
 #include "boot/lib/vfs.h"
+#include "common/include/config.h"
 #include "common/include/errc.h"
 
 static const char* errcstr_def[] = {

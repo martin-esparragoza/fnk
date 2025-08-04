@@ -11,6 +11,13 @@ sections due to the fact that supporting cross architecture
 GOT data is a pain. Espescially when I'm targeting "light"
 and old processors (like the 68000).
 
+### Compilation Flags
+Here are some compilation flags for gcc that allow you to
+generate your binary without it possibly breaking
+`-fno-pic -fno-pie -fno-asynchronous-unwind-tables`
+Inside your makefile make sure to add these to cflags and
+ldflags
+
 ## Restrictions
 Remember not to do anything stupid like try to use .so files
 or something like that. Please be smart with it all. **All is

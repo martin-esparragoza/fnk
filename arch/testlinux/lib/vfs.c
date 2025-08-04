@@ -70,7 +70,7 @@ unsigned boot_vfs_dir_getnextfile(struct boot_vfs_dir* dir, struct boot_vfs_file
     return BOOT_VFS_ERRC_DIR_NO_NEXT;
 }
 
-inline size_t boot_vfs_dir_sizeof(void) {
+size_t boot_vfs_dir_sizeof(void) {
     return sizeof(struct boot_vfs_dir);
 }
 
@@ -99,7 +99,7 @@ unsigned boot_vfs_file_seek(struct boot_vfs_file* file, uint64_t offset) {
     return 0;
 }
 
-inline size_t boot_vfs_file_sizeof(void) {
+size_t boot_vfs_file_sizeof(void) {
     return sizeof(struct boot_vfs_file);
 }
 

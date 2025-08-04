@@ -15,7 +15,7 @@
 #define FNK_SOCKET_MBOX_STATUS_FREE 0
 #define FNK_SOCKET_MBOX_STATUS_WORKING 1
 
-#define FNK_SOCKET_MAILBOX_COUNT 5
+#define FNK_SOCKET_MBOX_COUNT 5
 
 struct fnk_socket;
 typedef struct fnk_socket fnk_socket_t;

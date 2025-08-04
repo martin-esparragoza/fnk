@@ -7,7 +7,7 @@
 #ifndef DLL_FNK_INCLUDE_SOCKETF_H_
 #define DLL_FNK_INCLUDE_SOCKETF_H_
 
-#include "dll/fnk/socketd.h"
+#include "dll/fnk/include/socketd.h"
 #include "types.h"
 
 /**
@@ -56,7 +56,7 @@ void fnk_socket_attachctx(struct fnk_socket* socket, void* ctx);
  * of its duties by setting it to FNK_SOCKET_MBOX_STATUS_FREE which allows for
  * other processes to use it.
  */
-unsigned fnk_socket_write(struct fnk_socket* socket, const void* buf, size_t len, size_t** entry);
+unsigned fnk_socket_write(struct fnk_socket* socket, const void* buf, size_t len, unsigned** entry);
 
 /**
  * @brief Read content to buffer

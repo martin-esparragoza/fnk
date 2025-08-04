@@ -1,5 +1,8 @@
 %.o: %.c
 	$(CC) $(CFLAGS) -MMD -MP $(INCFLAGS) -c $< -o $@ $(CLINK)
 
-%.fnk: program_link.ld $(OBJFILES) $(UPPEROBJS)
-	$(LD) $(LDFLAGS) -o $@ -T $< --start-group $(OBJFILES) $(UPPEROBJS) --end-group $(LDLINK)
+lib%.o: $(OBJFILES)
+	$(LD) $(LDFLAGS) -r -o $@ $^ $(LDLINK)
+	
+%-intermediate.o: $(OBJFILES) $(LIBFILES)
+	$(LD) $(LDFLAGS) -r -o $@ $^ $(LDLINK)

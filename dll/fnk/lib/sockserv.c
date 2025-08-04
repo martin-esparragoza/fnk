@@ -1,12 +1,12 @@
 #include "dll/fnk/lib/sockserv.h"
-#include "dll/fnk/include/socketd.h"
+#include "dll/fnk/lib/socket.h"
 #include "dll/fnk/include/sockservd.h"
 #include "dll/fnk/include/sockservf.h"
 #include "common/include/errc.h"
 #include "types.h"
 #include "attr.h"
 
-COMP_ATTR__SECTION__(".text") static const char* errcstr[] = {
+const char* errcstr[] = {
     [FNK_SOCKSERV_ERRC_NO_SOCKETS_BOUND - COMMON_ERRC_BASE] = "No sockets are bound to the server",
     [FNK_SOCKSERV_ERRC_COULD_NOT_REMOVE_SOCKET - COMMON_ERRC_BASE] = "Can't remove a socket that is not bound",
     [FNK_SOCKSERV_ERRC_RW_WOULDOVERFLOW - COMMON_ERRC_BASE] = "Attempted to write/read outside buffer"
@@ -26,7 +26,7 @@ const char* fnk_sockserv_errctostr(unsigned errc) {
     return "Ok";
 }
 
-inline size_t fnk_sockserv_sizeof(void) {
+size_t fnk_sockserv_sizeof(void) {
     return sizeof(struct fnk_sockserv);
 }
 

@@ -1,8 +1,10 @@
 SOURCES := $(wildcard dll/fnk/lib/*.c)
 OBJFILES := $(patsubst %.c,%.o,$(SOURCES))
-SPECIAL_FLAGS = -fno-pic -fno-pie -fno-asynchronous-unwind-tables
-CFLAGS += $(SPECIAL_FLAGS)
-LDFLAGS += $(SPECIAL_FLAGS)
-UPPEROBJS := arch/$(ARCH).o common/common.o comp/$(CC).o
-TARGETS := $(OBJFILES) dll/fnk.fnk
+CFLAGS += -fno-pic -fno-pie
+LDFLAGS += -no-pie
+LIBFILES := arch/lib$(ARCH).o common/libcommon.o comp/lib$(CC).o
+TARGETS := $(OBJFILES) dll/fnk/fnk-intermediate.o dll/fnk.fnk
 DEPFILES := $(patsubst %.c,%.d,$(SOURCES))
+
+$(LIBFILES):
+	@

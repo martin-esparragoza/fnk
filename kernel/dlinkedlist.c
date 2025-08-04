@@ -3,7 +3,7 @@
 #include "lib/util/dlinkedlist.h"
 #include "types.h"
 
-inline void util_dlinkedlist_init(struct util_dlinkedlist* elem) {
+void util_dlinkedlist_init(struct util_dlinkedlist* elem) {
     elem->prev = elem->next = elem->data = NULL;
 }
 
@@ -18,10 +18,10 @@ struct util_dlinkedlist* util_dlinkedlist_remove(struct util_dlinkedlist* elem) 
     return elem;
 }
 
-inline void* util_dlinkedlist_getdata(const struct util_dlinkedlist* elem) {
+void* util_dlinkedlist_getdata(const struct util_dlinkedlist* elem) {
     return elem->data;
 }
 
-inline void util_dlinkedlist_setdata(struct util_dlinkedlist* elem, void* data) {
+void util_dlinkedlist_setdata(struct util_dlinkedlist* elem, void* data) {
     elem->data = data;
 }

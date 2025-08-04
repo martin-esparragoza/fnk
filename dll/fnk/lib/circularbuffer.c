@@ -33,7 +33,7 @@ unsigned fnk_circularbuffer_write(struct fnk_circularbuffer* cbuf, const void* s
     if (length >= free_until_wrap) {
         common_memops_memcpy(cbuf->buffer + cbuf->writei, src, free_until_wrap);
         src += free_until_wrap;
-        buf->writei = length - free_until_wrap;
+        cbuf->writei = length - free_until_wrap;
         common_memops_memcpy(cbuf->buffer, src, cbuf->writei);
     } else {
         common_memops_memcpy(cbuf->buffer + cbuf->writei, src, length);
@@ -61,7 +61,7 @@ unsigned fnk_circularbuffer_read(struct fnk_circularbuffer* cbuf, void* dest, si
     if (length > used_until_wrap) {
         common_memops_memcpy(dest, cbuf->buffer + cbuf->readi, used_until_wrap);
         dest += used_until_wrap;
-        buf->readi = 0;
+        cbuf->readi = 0;
         common_memops_memcpy(dest, cbuf->buffer, length - used_until_wrap);
     } else {
         common_memops_memcpy(dest, cbuf->buffer + cbuf->readi, length);
@@ -71,19 +71,19 @@ unsigned fnk_circularbuffer_read(struct fnk_circularbuffer* cbuf, void* dest, si
     return false;
 }
 
-inline bool fnk_circularbuffer_isempty(const struct fnk_circularbuffer* cbuf) {
+bool fnk_circularbuffer_isempty(const struct fnk_circularbuffer* cbuf) {
     return cbuf->readi == cbuf->writei;
 }
 
-inline bool fnk_circularbuffer_isfull(const struct fnk_circularbuffer* cbuf) {
+bool fnk_circularbuffer_isfull(const struct fnk_circularbuffer* cbuf) {
     return ((cbuf->writei + 1) % cbuf->len) == cbuf->readi;
 }
 
-inline size_t fnk_circularbuffer_getlen(const struct fnk_circularbuffer* cbuf) {
-    return circularbuffer->len;
+size_t fnk_circularbuffer_getlen(const struct fnk_circularbuffer* cbuf) {
+    return cbuf->len;
 }
 
-inline size_t fnk_circularbuffer_getused(const struct fnk_circularbuffer* cbuf) {
+size_t fnk_circularbuffer_getused(const struct fnk_circularbuffer* cbuf) {
     return cbuf->writei >= cbuf->readi ?
         cbuf->writei - cbuf->readi :
         cbuf->len - cbuf->readi + cbuf->writei;

@@ -1,6 +1,6 @@
 #include "common/include/fnkconfig.h"
-#include "socketf.h"
-#include "sockservf.h"
+#include "dll/fnk/include/socketf.h"
+#include "dll/fnk/include/sockservf.h"
 #include "attr.h"
 #include "types.h"
 

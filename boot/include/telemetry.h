@@ -1,6 +1,7 @@
 /**
  * @file telemetry.h
  * @brief Static telemetry driver. You can just not implement this as well and things will go fine
+ * TODO: Document this well
  */
 
 #ifndef BOOT_INCLUDE_TELEMETRY_H_
@@ -48,7 +49,7 @@ unsigned boot_telemetry_putc(char c);
  */
 unsigned boot_telemetry_printf(const char* format, ...);
 
-#define BOOT_TELEMETRY_LOG(format, ...) boot_telemetry_printf("[%s:%d]" format, __FILE__, __LINE__, ## __VA_ARGS__)
+#define BOOT_TELEMETRY_LOG(label, format, ...) boot_telemetry_printf("[%s:%d]" label, format, __FILE__, __LINE__, ## __VA_ARGS__)
 
 #if COMMON_CONFIG_VERBOSE_LEVEL >= 3
 #define BOOT_TELEMETRY_INF(format, ...) boot_telemetry_printf("[INF %s:%d]" format, __FILE__, __LINE__, ## __VA_ARGS__)

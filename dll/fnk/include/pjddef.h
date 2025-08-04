@@ -13,73 +13,73 @@
 #include "types.h"
 
 COMP_ATTR__USED__ COMP_ATTR__SECTION__(".pjds") struct common_pjd fnk_pjd {
-   .name = "mylibraryname",
+   .name = "fnk",
 }
 
-COMP_ATTR__SECTION__(".text") void (*fnk_socket_init)(
+void (*fnk_socket_init)(
     struct fnk_socket*,
     void*,
     size_t,
     void*,
     size_t
 ) = fnk_pjd.functions[0];
-COMP_ATTR__SECTION__(".text") const char* (*fnk_socket_errctostr)(
+const char* (*fnk_socket_errctostr)(
     unsigned
 ) = fnk_pjd.functions[1];
-COMP_ATTR__SECTION__(".text") size_t (*fnk_socket_sizeof)(
+size_t (*fnk_socket_sizeof)(
     void
 ) = fnk_pjd.functions[2];
-COMP_ATTR__SECTION__(".text") void (*fnk_socket_attachctx)(
+void (*fnk_socket_attachctx)(
     struct fnk_socket*,
     void*
 ) = fnk_pjd.functions[3];
-COMP_ATTR__SECTION__(".text") unsigned (*fnk_socket_write)(
+unsigned (*fnk_socket_write)(
     struct fnk_socket*,
     const void*,
     size_t,
     size_t**
 ) = fnk_pjd.functions[4]
-COMP_ATTR__SECTION__(".text") unsigned (*fnk_socket_read)(
+unsigned (*fnk_socket_read)(
     struct fnk_socket*,
     void*,
     size_t
 ) = fnk_pjd.functions[5];
-COMP_ATTR__SECTION__(".text") size_t (*fnk_socket_getreadlen)(
+size_t (*fnk_socket_getreadlen)(
     struct fnk_socket*
 ) = fnk_pjd.functions[6];
-COMP_ATTR__SECTION__(".text") size_t (*fnk_socket_getwritelen)(
+size_t (*fnk_socket_getwritelen)(
     struct fnk_socket*
 ) = fnk_pjd.functions[7];
-COMP_ATTR__SECTION__(".text") void* (*fnk_socket_getctx)(
+void* (*fnk_socket_getctx)(
     struct fnk_socket*
 ) = fnk_pjd.functions[8];
-COMP_ATTR__SECTION__(".text") void (*fnk_sockserv_init)(
+void (*fnk_sockserv_init)(
     struct fnk_sockserv*
 ) = fnk_pjd.functions[9];
-COMP_ATTR__SECTION__(".text") const char* (*fnk_sockserv_errctostr)(
+const char* (*fnk_sockserv_errctostr)(
     unsigned
 ) = fnk_pjd.functions[10];
-COMP_ATTR__SECTION__(".text") size_t (*fnk_sockserv_sizeof)(
+size_t (*fnk_sockserv_sizeof)(
     void
 ) = fnk_pjd.functions[11];
-COMP_ATTR__SECTION__(".text") unsigned (*fnk_sockserv_getnextinqueue)(
+unsigned (*fnk_sockserv_getnextinqueue)(
     struct fnk_sockserv*,
     struct fnk_socket**
 ) = fnk_pjd.functions[12];
-COMP_ATTR__SECTION__(".text") void (*fnk_sockserv_bind)(
+void (*fnk_sockserv_bind)(
     struct fnk_sockserv*,
     struct fnk_socket*
 ) = fnk_pjd.functions[13];
-COMP_ATTR__SECTION__(".text") unsigned (*fnk_sockserv_remove)(
+unsigned (*fnk_sockserv_remove)(
     struct fnk_sockserv*,
     struct fnk_socket*
 ) = fnk_pjd.functions[14];
-COMP_ATTR__SECTION__(".text") unsigned (*fnk_sockserv_readwritebuffer)(
+unsigned (*fnk_sockserv_readwritebuffer)(
     struct fnk_socket*,
     void*,
     size_t
 ) = fnk_pjd.functions[15];
-COMP_ATTR__SECTION__(".text") unsigned (*fnk_sockserv_writereadbuffer)(
+unsigned (*fnk_sockserv_writereadbuffer)(
     struct fnk_socket*,
     const void*,
     size_t
