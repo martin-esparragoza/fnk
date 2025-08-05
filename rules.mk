@@ -5,4 +5,4 @@ lib%.o: $(OBJFILES)
 	$(LD) $(LDFLAGS) -r -o $@ $^ $(LDLINK)
 	
 %-intermediate.o: $(OBJFILES) $(LIBFILES)
-	$(LD) $(LDFLAGS) -r -o $@ $^ $(LDLINK)
+	$(LD) -r $(LDFLAGS) -o $@ $(OBJFILES) $(LIBFILES) $(LDLINK)

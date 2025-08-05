@@ -57,11 +57,7 @@ int main(int argc, char* argv[]) {
         }
 
         const char* name = elf_strptr(ielf, shstrndx, shdr.sh_name);
-        INFO("Working on section %s\n", name);
-
-        // Okay, yes, its magic but also... ??? who the hell is renaming .text
-        if (strcmp(name, ".text") == 0)
-            INFO("Found .text\n");
+        INFO("Working on section %s with type %d\n", name, shdr.sh_type);
     }
     
     close(ifile);

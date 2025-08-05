@@ -15,7 +15,13 @@ CNATIVEFLAGS :=
 CNATIVELINK :=
 
 CC := gcc
-CFLAGS := -Wall -ffreestanding -std=c99 -fno-stack-protector
+CFLAGS := \
+	-Wall \
+	-ffreestanding \
+	-std=c99 \
+	-fno-stack-protector \
+	-fno-asynchronous-unwind-tables \
+	-fno-unwind-tables
 CLINK :=
 
 OBJCOPY := objcopy
