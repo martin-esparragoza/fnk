@@ -17,9 +17,10 @@ void fnk_sockserv_init(struct fnk_sockserv* serv) {
 }
 
 const char* fnk_sockserv_errctostr(unsigned errc) {
-    if (errc > 0) {
+    if (errc > COMMON_ERRC_BASE) {
+        errc -= COMMON_ERRC_BASE;
         if (errc < sizeof(errcstr) / sizeof(errcstr[0]))
-            return errcstr[errc - COMMON_ERRC_BASE];
+            return errcstr[errc];
         // No error code was found
         return NULL;
     }

@@ -1,2 +1,0 @@
-%.o: %.c
-	$(CCNATIVE) $(CNATIVEFLAGS) -MMD -MP $(INCFLAGS) $< -o $@ $(CNATIVELINK)

@@ -44,7 +44,7 @@ unsigned boot_vfs_dir_getnextfile(struct boot_vfs_dir* dir, struct boot_vfs_file
     // I hate this code.
     struct dirent* entry;
     struct stat st;
-    while ((entry = readdir(dir->dp)) != NULL) {
+    while ((entry = readdir(dir->dp))) {
         if (strcmp(entry->d_name, ".") == 0 ||
             strcmp(entry->d_name, "..") == 0 ||
             fstatat(dir->dfd, entry->d_name, &st, O_RDONLY) == -1 ||
@@ -76,7 +76,7 @@ size_t boot_vfs_dir_sizeof(void) {
 
 unsigned boot_vfs_file_open(struct boot_vfs_file* file, const char* path) {
     FILE* interm = fopen(path, "r");
-    if (interm != NULL) {
+    if (interm) {
         file->fp = interm;
         return 0;
     }

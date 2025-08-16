@@ -42,17 +42,8 @@ void log_logger_init(struct log_logger* logger, FILE* dest) {
 // Hack because they do the exact same thing
 #define log_logger_setdest log_logger_init
 
-/**
- * @brief Output a log message
- * @param [in] logger Logger target
- * @param [in] level Level to use. Can be user defined with alt
- * @param [in] format printf format
- */
-void log_logger_log(struct log_logger* logger, unsigned char level, const char* format, ...) {
-    va_list args;
-    va_start(args, format);
-    
-    // Get the coresponding string
+// Internal
+void log_logger_vlog(struct log_logger* logger, unsigned char level, const char* format, va_list args) {
     const char* label = log_loglevel_label_unrecognized;
     if (level < sizeof(log_loglevel_label_def) / sizeof(log_loglevel_label_def[0])) {
         label = log_loglevel_label_def[level];
@@ -62,7 +53,18 @@ void log_logger_log(struct log_logger* logger, unsigned char level, const char* 
 
     fprintf(logger->dest, "[%s] ", label);
     vfprintf(logger->dest, format, args);
+}
 
+/**
+ * @brief Output a log message
+ * @param [in] logger Logger target
+ * @param [in] level Level to use. Can be user defined with alt
+ * @param [in] format printf format
+ */
+void log_logger_log(struct log_logger* logger, unsigned char level, const char* format, ...) {
+    va_list args;
+    va_start(args, format);
+    log_logger_vlog(logger, level, format, args);
     va_end(args);
 }
 

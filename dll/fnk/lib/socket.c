@@ -19,9 +19,10 @@ void fnk_socket_init(struct fnk_socket* socket, void* readb, size_t readlen, voi
 }
 
 const char* fnk_socket_errctostr(unsigned errc) {
-    if (errc > 0) {
+    if (errc >= COMMON_ERRC_BASE) {
+        errc -= COMMON_ERRC_BASE;
         if (errc < sizeof(errcstr) / sizeof(errcstr[0]))
-            return errcstr[errc - COMMON_ERRC_BASE];
+            return errcstr[errc];
         // No error code was found
         return NULL;
     }
@@ -39,16 +40,16 @@ void fnk_socket_attachctx(struct fnk_socket* socket, void* ctx) {
 unsigned fnk_socket_write(struct fnk_socket* socket, const void* buf, size_t len, unsigned** entry) {
     // Check if we have a valid mailbox entry O(N) but N should be super small so its fine]
     // Esp. because the bulk of the processing should be copying the data
-    size_t i = 0;
-    for (; i < FNK_SOCKET_MBOX_COUNT; i++) {
-        if (socket->mbox[i] == FNK_SOCKET_MBOX_STATUS_FREE) {
-            *entry = &(socket->mbox[i]);
+    unsigned* e;
+    for (e = socket->mbox; e < (socket->mbox + FNK_SOCKET_MBOX_COUNT); e++) {
+        if (*e == FNK_SOCKET_MBOX_STATUS_FREE) {
+            *entry = e;
             break;
         }
     }
-    
+
     // There are no valid mailboxes
-    if (i == FNK_SOCKET_MBOX_COUNT)
+    if (e == (socket->mbox + FNK_SOCKET_MBOX_COUNT))
         return FNK_SOCKET_ERRC_NO_FREE_MAILBOXES;
 
     if (fnk_circularbuffer_write(&socket->writeb, buf, len))

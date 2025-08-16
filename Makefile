@@ -11,11 +11,17 @@ LDFLAGS :=
 LDLINK :=
 
 CCNATIVE := gcc
-CNATIVEFLAGS :=
+CNATIVEFLAGS := -O3 -Wall -std=c99
 CNATIVELINK :=
 
 CC := gcc
-CFLAGS := -Wall -ffreestanding -std=c99 -fno-stack-protector
+CFLAGS := \
+	-Wall \
+	-ffreestanding \
+	-std=c99 \
+	-fno-stack-protector \
+	-fno-asynchronous-unwind-tables \
+	-fno-unwind-tables
 CLINK :=
 
 OBJCOPY := objcopy

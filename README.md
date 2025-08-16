@@ -1,4 +1,4 @@
-A simple operating system framework witten in C99
+A simple operating system framework witten in C99.
 
 # About
 This is a single threaded operating system frame with cooperative scheduling. It does not implement things such as memory protection or segmentation.
@@ -17,7 +17,7 @@ and DLLs that interact with those programs. It is meant to be a heavily underpro
     4. Finally it will call main()
 2. Bootloder
     1. Bootloader essentially just loads in the kernel (user configured static driver solely for kernel loading)
-    2. 
+    2.
 
 A (SINGLE THREADED) operating system frame written in freestanding C99.
 
@@ -31,7 +31,7 @@ FEATURES (atttempted)
 * Socket API for communications (internally and externally)
 * Dynamically allocated drivers that can be updated in real time
 * Fast driver and interrupt processing
-  
+
 # "Documented" Boot Process
 1. Begin in entry.o (src/entry/\{arch\}/entry.o can be generated however you want)
     1. Load in the bootloader (rest of linked binary file)
@@ -71,63 +71,63 @@ The following functions must be defined
 * Moves what sp parameter points to to the sp register then pops ip off the stack
 ### `include/arch/$(ARCH)/types.h`
 The following types must be defined
-`uint8_t`  
-`uint16_t`  
-`uint32_t`  
-`uint64_t`  
-`int8_t`  
-`int16_t`  
-`int32_t`  
-`int64_t`  
-`uintmax_t`  
-`intmax_t`  
-`intptr_t`  
-`uintptr_t`  
-`size_t`  
-`ssize_t`  
-`bool`  
+`uint8_t`
+`uint16_t`
+`uint32_t`
+`uint64_t`
+`int8_t`
+`int16_t`
+`int32_t`
+`int64_t`
+`uintmax_t`
+`intmax_t`
+`intptr_t`
+`uintptr_t`
+`size_t`
+`ssize_t`
+`bool`
 The following macros must be defined properly
-`UINT8_WIDTH`  
-`UINT16_WIDTH`  
-`UINT32_WIDTH`  
-`UINT64_WIDTH`  
-`INT8_WIDTH`  
-`INT16_WIDTH`  
-`INT32_WIDTH`  
-`INT64_WIDTH`  
-`UINTMAX_WIDTH`  
-`INTMAX_WIDTH`  
+`UINT8_WIDTH`
+`UINT16_WIDTH`
+`UINT32_WIDTH`
+`UINT64_WIDTH`
+`INT8_WIDTH`
+`INT16_WIDTH`
+`INT32_WIDTH`
+`INT64_WIDTH`
+`UINTMAX_WIDTH`
+`INTMAX_WIDTH`
 `SIZE_T_WIDTH`
 `SSIZE_T_WIDTH`
 `SIZE_MAX`
 `SSIZE_MAX`
-`true`  
-`false`  
-`NULL`  
+`true`
+`false`
+`NULL`
 ### Optional weak method redefinitions
 Commonly, a compiler can support built-in functions that utilize system architecture. While there are functions that will run fine freestanding, you might want to get a bit more performance by redefining these functions using builtins. The following functions can be redefined through any .c file inside of the `lib/comp/` directory
-`void util_ops_bswap(void* data, size_t size)`  
-`uint16_t util_ops_bswap16(uint16_t data)`  
-`uint32_t util_ops_bswap32(uint32_t data)`  
-`uint64_t util_ops_bswap64(uint64_t data)`  
-`bool util_ops_ispowertwo(unsigned x)`  
-`int util_ops_min(int a, int b)`  
-`int util_ops_max(int a, int b)`  
-`uintptr_t align(uintptr_t value, int toalign)`  
-`void memcpy(void* dest, void* src, size_t length)`  
-`void memset(void* dest, int val, size_t length)`  
+`void util_ops_bswap(void* data, size_t size)`
+`uint16_t util_ops_bswap16(uint16_t data)`
+`uint32_t util_ops_bswap32(uint32_t data)`
+`uint64_t util_ops_bswap64(uint64_t data)`
+`bool util_ops_ispowertwo(unsigned x)`
+`int util_ops_min(int a, int b)`
+`int util_ops_max(int a, int b)`
+`uintptr_t align(uintptr_t value, int toalign)`
+`void memcpy(void* dest, void* src, size_t length)`
+`void memset(void* dest, int val, size_t length)`
 `void memcmp(void* ptr0, void* ptr1, size_t length)`
 ### Static Drivers
 All headers inside of the `include/sdrive/` directory must be satisfied in the `arch/$(ARCH)/` directory
 ### `include/comp/$(CC)`
 The following macros for attributes must be satisfied
-`COMP_ATTR__NORETURN__`  
-`COMP_ATTR__USED__`  
-`COMP_ATTR__ALIGNED__(n)`  
-`COMP_ATTR__PACKED__`  
-`COMP_ATTR__SECTION__(s)`  
-`COMP_ATTR__NORETURN__`  
-`COMP_ATTR__WEAK__`  
+`COMP_ATTR__NORETURN__`
+`COMP_ATTR__USED__`
+`COMP_ATTR__ALIGNED__(n)`
+`COMP_ATTR__PACKED__`
+`COMP_ATTR__SECTION__(s)`
+`COMP_ATTR__NORETURN__`
+`COMP_ATTR__WEAK__`
 
 TODO (FIX) LIST:
 - FAT16 Write

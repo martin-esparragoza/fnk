@@ -1,1 +1,0 @@
-// The descriptor information for the library

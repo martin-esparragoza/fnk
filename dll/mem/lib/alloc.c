@@ -17,14 +17,14 @@ static void coalesce() {
     // O(n)
 
     struct mem_alloc_heap_entry* entry = heap_head, * next = heap_head->next, * prev = NULL;
-    while (entry->next != NULL) {
+    while (entry->next) {
         // Check if on the same bounds
         if (((uintptr_t) (entry + 1)) + entry->size == (uintptr_t) next) {
             // Coalesce them
             entry->next = next->next;
             entry->size += next->size + sizeof(struct mem_alloc_heap_entry);
             next = next->next; // For the update loop
-            
+
             continue; // Redo that loop
         }
 
@@ -35,7 +35,7 @@ static void coalesce() {
 
     // Final check for heap end
     if (((uintptr_t) (entry + 1)) + entry->size == (uintptr_t) heap_end) {
-        if (prev != NULL) {
+        if (prev) {
             prev->next = NULL;
         } else {
             heap_head = NULL;
@@ -56,31 +56,31 @@ static inline void inc_coalesce() {
 
 void mem_alloc_init(unsigned char coalescing_max) {
     heap_head = NULL;
-    
+
     // If you do not pass this as an aligned value you are being STUPID
     heap_end = mem_alloc_heap_start;
-    
+
     _coalescing_max = coalescing_max;
 }
 
 void* mem_alloc_malloc(size_t size) {
     if (!size)
         return NULL;
-    
+
     // Ok it is weird to do this but it geuinely just works...
     size = fnk_memops_alignp2(size, sizeof(uintptr_t));
     size += fnk_memops_alignp2(sizeof(struct mem_alloc_heap_entry), sizeof(uintptr_t)) - sizeof(struct mem_alloc_heap_entry);
-    
+
     // First find a section of memory that can be allocated
     struct mem_alloc_heap_entry* entry;
-    
+
     // Find an entry in the list that could house it
     for (
         entry = heap_head;
-        entry != NULL && entry->size < size;
+        entry && entry->size < size;
         entry = entry->next
     );
-    
+
     if (entry == NULL) { // No section found; allocate in unlimited land!
         // Increase the size of the heap and add our new element. This descriptor data will be invisible
         struct mem_alloc_heap_entry* new_entry = heap_end;
@@ -104,16 +104,16 @@ void* mem_alloc_malloc(size_t size) {
             // Previous if already checked if heap_head == NULL
             for (
                 struct mem_alloc_heap_entry* e = heap_head;
-                e->next != NULL && e != entry;
+                e->next && e != entry;
                 prev = e, e = e->next
             );
 
             // Clip!
-            if (prev != NULL)
+            if (prev)
                 prev->next = entry->next;
             else // If prev is NULL that means it was the head
                 heap_head = entry->next;
-            
+
             return (void*) (entry + 1);
         }
     }
@@ -134,11 +134,11 @@ void* mem_alloc_realloc(void* b, size_t size) {
 
 void mem_alloc_free(void* ptr) {
     struct mem_alloc_heap_entry* entry = ((struct mem_alloc_heap_entry*) ptr) - 1;
-    
+
     struct mem_alloc_heap_entry* e = heap_head;
     for (
         ;
-        e != NULL && e > entry;
+        e && e > entry;
         e = e->next
     );
 
@@ -149,7 +149,7 @@ void mem_alloc_free(void* ptr) {
         entry->next = e->next;
         e->next = entry;
     }
-    
+
     inc_coalesce();
 }
 

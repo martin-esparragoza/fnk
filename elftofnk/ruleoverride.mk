@@ -1,0 +1,5 @@
+%.o: %.c
+	$(CCNATIVE) $(CNATIVEFLAGS) -MMD -MP $(INCFLAGS) -c $< -o $@ $(CNATIVELINK)
+
+main.o: main.c $(LIBFILES)
+	$(CCNATIVE) $(CNATIVEFLAGS) -MMD -MP $(INCFLAGS) $< -o $@ $(LIBFILES) $(CNATIVELINK)
