@@ -8,8 +8,8 @@
 #include <string.h>
 #include <libgen.h>
 #include <bfd.h>
-#include <dis-asm.h>
-#include "tool/log.h"
+#include "elftofnk/include/log.h"
+#include "elftofnk/include/mappedsection.h"
 #include "common/include/fnkconfig.h"
 #include "config.h" // Arch config sorry if this is confusing
 
@@ -23,23 +23,10 @@ static FILE* ofile = NULL;
 static asymbol** symboltable = NULL;
 static long numsymbols;
 
-#define INFO(format, ...) log_logger_log(&logger, LOG_LOGLEVEL_INFO, format, ## __VA_ARGS__)
-#define WARN(format, ...) log_logger_log(&logger, LOG_LOGLEVEL_WARNING, format, ## __VA_ARGS__)
-#define ERRR(format, ...) log_logger_log(&logger, LOG_LOGLEVEL_ERROR, format, ## __VA_ARGS__)
-
 #define PARAM_INPUTELF 1
 #define PARAM_OUTPUTFNK 2
 
 #define PARAMS_LEN 3
-
-typedef struct mappedsection {
-    const char* name;
-    asection* section;
-    arelent** reloctable;
-    long numrelocentries;
-    void* data;
-    bool required;
-} mappedsection_t;
 
 enum {
     I_LJD,
@@ -51,7 +38,7 @@ enum {
 };
 
 // This is so we can do some nice recur stuff while still being able to individually manipualte stuff too
-struct mappedsection sectionmap[] = {
+static struct elftofnk_mappedsection sectionmap[] = {
     [I_LJD] = {
         .name = ".ljd",
         .required = false
@@ -136,7 +123,7 @@ int main(int argc, char* argv[]) {
     }
 
     // Map all sections
-    for (asection* section = abfd->sections; section ; section = section->next) {
+    for (asection* section = abfd->sections; section; section = section->next) {
         const char* name = bfd_section_name(section);
         struct mappedsection* mapped;
         for (mapped = sectionmap; mapped < (sectionmap + sizeof(sectionmap) / sizeof(sectionmap[0])); mapped++) {

@@ -31,7 +31,7 @@ INCFLAGS := -I ./ -I arch/$(ARCH)/include/ -I comp/$(CC)/include/
 
 MAKEDIRS := arch/ \
 			comp/ \
-			tool/ \
+			elftofnk/ \
 			common/ \
 			boot/src/entry/$(ARCH)/ \
 			boot/src/ \

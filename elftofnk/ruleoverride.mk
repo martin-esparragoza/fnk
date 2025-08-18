@@ -1,5 +1,7 @@
-%.o: %.c
+elftofnk/lib/%.o: elftofnk/lib/%.c
+	@echo NATIVE!
 	$(CCNATIVE) $(CNATIVEFLAGS) -MMD -MP $(INCFLAGS) -c $< -o $@ $(CNATIVELINK)
 
-main.o: main.c $(LIBFILES)
-	$(CCNATIVE) $(CNATIVEFLAGS) -MMD -MP $(INCFLAGS) $< -o $@ $(LIBFILES) $(CNATIVELINK)
+elftofnk/src/%.o: elftofnk/src/%.c $(LIBOBJFILES)
+	@echo NATIVE!
+	$(CCNATIVE) $(CNATIVEFLAGS) -MMD -MP $(INCFLAGS) $< -o $@ $(LIBOBJFILES) $(CNATIVELINK)
