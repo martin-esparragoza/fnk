@@ -51,7 +51,7 @@ void fnk_sockserv_bind(struct fnk_sockserv* serv, struct fnk_socket* socket);
  * @note The socket data is still fine just it is not attached to anything
  * @param [in] serv Server the socket belongs to
  * @param [in] socket Socket to unbind
- * @retval FNK_SOCKSERV_ERRC_COULD_NOT_REMOVE_SOCKET if the socket was not in the server
+ * @retval FNK_SOCKSERV_ERRC_COULD_NOT_REMOVE_SOCKET
  * @retval 0 If everything went fine
  */
 unsigned fnk_sockserv_remove(struct fnk_sockserv* serv, struct fnk_socket* socket);
@@ -62,7 +62,7 @@ unsigned fnk_sockserv_remove(struct fnk_sockserv* serv, struct fnk_socket* socke
  * @param [in] socket Socket to read from
  * @param [out] dest Where the write buffer will be coppied to
  * @param [in] len # of bytes to read from the write buffer
- * @retval FNK_SOCKSERV_ERRC_RW_WOULDOVERFLOW If you would read too much
+ * @retval FNK_SOCKSERV_ERRC_RW_WOULDOVERFLOW
  * @retval 0 If everything went fine
  */
 unsigned fnk_sockserv_readwritebuffer(struct fnk_socket* socket, void* dest, size_t len);
@@ -73,7 +73,7 @@ unsigned fnk_sockserv_readwritebuffer(struct fnk_socket* socket, void* dest, siz
  * @param [in] socket Socket to write to
  * @param [in] dest Buffer with the target data to write
  * @param [in] len # of bytes to write to the socket
- * @retval FNK_SOCKSERV_ERRC_RW_WOULDOVERFLOW If you would cause a buffer overflow
+ * @retval FNK_SOCKSERV_ERRC_RW_WOULDOVERFLOW
  * @retval 0 If everything went fine
  */
 unsigned fnk_sockserv_writereadbuffer(struct fnk_socket* socket, const void* src, size_t len);

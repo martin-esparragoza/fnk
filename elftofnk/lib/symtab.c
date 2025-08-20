@@ -8,7 +8,8 @@
 static const char* errcstr[] = {
     [ELFTOFNK_SYMTAB_ERRC_FAILED_ALLOCATE_MEMORY - COMMON_ERRC_BASE] = "Could not allocate memory for symbol table",
     [ELFTOFNK_SYMTAB_ERRC_FAILED_PARSE - COMMON_ERRC_BASE] =           "Could not parse symbol table",
-    [ELFTOFNK_SYMTAB_ERRC_FAILED_RETRIEVE_SIZE - COMMON_ERRC_BASE] =   "Failed to retrieve symbol table size"
+    [ELFTOFNK_SYMTAB_ERRC_FAILED_RETRIEVE_SIZE - COMMON_ERRC_BASE] =   "Failed to retrieve symbol table size",
+    [ELFTOFNK_SYMTAB_ERRC_COULDNT_FREE - COMMON_ERRC_BASE] =           "Could not free symbol table (maybe it wasn't allocated in the first place?)"
 };
 
 const char* elftofnk_symtab_errctostr(unsigned errc) {
@@ -33,4 +34,13 @@ unsigned elftfonk_symtab_load(struct elftofnk_symtab* symtab, bfd* abfd) {
         return ELFTOFNK_SYMTAB_ERRC_FAILED_RETRIEVE;
     } else
         ELFTOFNK_LOG_WARN("Symbol table has no symbols\n");
+    return 0;
+}
+
+unsigned elftofnk_symtab_fini(struct elftofnk_symtab* symtab) {
+    if (symtab->data) {
+        free(symtab->data);
+        return 0;
+    }
+    return ELFTOFNK_SYMTAB_ERRC_COULDNT_FREE;
 }

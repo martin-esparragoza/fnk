@@ -2,6 +2,7 @@
  * @file vfs.h
  * @brief Static driver outline for the virtual file system
  * @note It's a given but all file paths are ABSOLUTE
+ * TODO: Document me well
  */
 
 #ifndef BOOT_INCLUDE_VFS_H_

@@ -49,7 +49,8 @@ void fnk_socket_attachctx(struct fnk_socket* socket, void* ctx);
  * @param [in] buf Pointer to data buffer (read from)
  * @param [in] len # of bytes to write
  * @param [out] entry If the write succeded, entry will be set to a new mailbox entry to reference
- * @return Error code
+ * @retval FNK_SOCKET_ERRC_RW_BUFFER_WOULD_OVERFLOW
+ * @retval FNK_SOCKET_ERRC_NO_FREE_MAILBOXES
  * @retval 0 if everything went good
  * Once you have a mailbox entry, you should only be reading it and wait for it
  * to reach your desired state or error. After that you must relieve the mailbox
@@ -64,7 +65,8 @@ unsigned fnk_socket_write(struct fnk_socket* socket, const void* buf, size_t len
  * @param [in] socket Target socket to read from
  * @param [out] buf Pointer to data buffer (written to)
  * @param [in] len # of bytes to read
- * @return Error code
+ * @retval FNK_SOCKET_ERRC_RW_BUFFER_WOULD_OVERFLOW
+ * @retval FNK_SOCKET_ERRC_NO_FREE_MAILBOXES
  * @retval 0 if everything went good
  */
 unsigned fnk_socket_read(struct fnk_socket* socket, void* buf, size_t len);

@@ -1,7 +1,7 @@
 /**
  * @file telemetry.h
  * @brief Static telemetry driver. You can just not implement this as well and things will go fine
- * TODO: Document this well
+ * TODO: Document this well + give me error codes via alt
  */
 
 #ifndef BOOT_INCLUDE_TELEMETRY_H_

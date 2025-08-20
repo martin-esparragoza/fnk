@@ -37,6 +37,15 @@ enum {
     I_BSS
 };
 
+typedef struct mappedsection {
+    const char* name;
+    asection* section;
+    arelent** reloctable;
+    long numrelocentries;
+    void* data;
+    bool required;
+} mappedsection_t;
+
 // This is so we can do some nice recur stuff while still being able to individually manipualte stuff too
 static struct elftofnk_mappedsection sectionmap[] = {
     [I_LJD] = {
