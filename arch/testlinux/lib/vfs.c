@@ -14,7 +14,7 @@
 const char* boot_vfs_errcstr_alt[] = {
     [BOOT_VFS_ERRC_DIRNEXT_FILE_FAIL_OPEN - BOOT_VFS_ERRC_DEF_BASE] = "Failed to open determined file"
 };
-const size_t boot_vfs_errcstr_alt_sizeof = sizeof(boot_vfs_errcstr_alt) / sizeof(boot_vfs_errcstr_alt);
+const size_t boot_vfs_errcstr_alt_sizeof = sizeof(boot_vfs_errcstr_alt) / sizeof(boot_vfs_errcstr_alt[0]);
 
 typedef struct boot_vfs_dir {
     int dfd;

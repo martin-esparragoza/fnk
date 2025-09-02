@@ -14,7 +14,7 @@ static const char* errcstr_def[] = {
 const char* boot_vfs_errctostr(unsigned errc) {
     if (errc >= COMMON_ERRC_BASE) {
         unsigned i = errc - COMMON_ERRC_BASE;
-        if (i < sizeof(errcstr_def) / sizeof(errcstr_def[0]))
+        if (i < (sizeof(errcstr_def) / sizeof(errcstr_def[0])))
             return errcstr_def[i];
         return boot_vfs_errctostr_alt(errc);
     }

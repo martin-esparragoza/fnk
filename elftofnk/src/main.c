@@ -7,26 +7,28 @@
 #include <stdarg.h>
 #include <string.h>
 #include <libgen.h>
+#include <bfd/config.h>
 #include <bfd.h>
 #include "elftofnk/include/log.h"
-#include "elftofnk/include/mappedsection.h"
+#include "elftofnk/include/loadf.h"
 #include "common/include/fnkconfig.h"
 #include "config.h" // Arch config sorry if this is confusing
+
+#define PARAM_INPUTELF 1
+#define PARAM_OUTPUTFNK 2
+
+#define PARAMS_LEN 3
 
 const char* log_loglevel_label_alt[0];
 size_t log_loglevel_label_alt_sizeof = 0;
 
 static struct log_logger logger;
 
-static bfd* abfd = NULL;
-static FILE* ofile = NULL;
-static asymbol** symboltable = NULL;
-static long numsymbols;
+static bfd* abfd;
+static FILE* ofile;
 
-#define PARAM_INPUTELF 1
-#define PARAM_OUTPUTFNK 2
-
-#define PARAMS_LEN 3
+static asymbol* symtab[];
+static long numsyms;
 
 enum {
     I_LJD,
@@ -38,9 +40,9 @@ enum {
 };
 
 typedef struct mappedsection {
-    const char* name;
+    const char* name; // Identifier for when we search for useful sections
     asection* section;
-    arelent** reloctable;
+    arelent* reloctable[];
     long numrelocentries;
     void* data;
     bool required;
@@ -113,11 +115,17 @@ int main(int argc, char* argv[]) {
     if (!(abfd = bfd_openr(argv[PARAM_INPUTELF], NULL)) || !bfd_check_format(abfd, bfd_object))
         kill("Failed to open file %s\n", argv[PARAM_INPUTELF]);
 
+    if (!bfd_check_format(abfd, bfd_object))
+        kill("File format not supported by libbfd (check if your version of binutils includes support for your desired target)\n");
+
     if (!(ofile = fopen(argv[PARAM_OUTPUTFNK], "wb")))
         kill("Failed to create handle to file %s\n", argv[PARAM_OUTPUTFNK]);
 
-    // Grab the symbol table
-    {
+    unsigned errc; // Just a general reused errc variable
+
+    if (!(errc = elftofnk_loadf_allocsymtabptrs(abfd, &symtab, &numsyms)))
+        kill("Failed to allocate symbol table. Errc: %s\n", elftofnk_loadf_errctostr(errc));
+    /*{
         long symboltablesize = bfd_get_symtab_upper_bound(abfd);
         if (symboltablesize >= 0) {
             if (!(symboltable = (asymbol**) malloc(symboltablesize)))
@@ -129,7 +137,7 @@ int main(int argc, char* argv[]) {
         } else {
             WARN("Symbol table has no symbols\n");
         }
-    }
+    }*/
 
     // Map all sections
     for (asection* section = abfd->sections; section; section = section->next) {

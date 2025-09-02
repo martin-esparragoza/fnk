@@ -7,7 +7,7 @@
 #define ELFTOFNK_INCLUDE_LOADF_H_
 
 #define ELFTOFNK_LOADF_ERRC_FAILED_ALLOC    COMMON_ERRC_BASE + 0
-#define ELFTOFNK_LOADF_ERRC_FAILED_PARSE    COMMON_ERRC_BASE + 1
+#define ELFTOFNK_LOADF_ERRC_FAILED_GET      COMMON_ERRC_BASE + 1
 #define ELFTOFNK_LOADF_ERRC_FAILED_GET_SIZE COMMON_ERRC_BASE + 2
 
 #include <bfd.h>
@@ -25,13 +25,13 @@ const char* elftofnk_loadf_errctostr(unsigned errc);
  * @note Will do nothing to values and return 0 if there is nothing to allocate
  * @param [in] abfd BFD
  * @param [out] symtab On success this will be set to point to heap allocated memory
- * @param [out] numsymbols On success this will be set to the # loaded in
+ * @param [out] numsyms On success this will be set to the # loaded in
  * @retval ELFTOFNK_LOADF_ERRC_FAILED_ALLOC
- * @retval ELFTOFNK_LOADF_ERRC_FAILED_PARSE
+ * @retval ELFTOFNK_LOADF_ERRC_FAILED_GET
  * @retval ELFTOFNK_LOADF_ERRC_FAILED_GET_SIZE
  * @retval 0 If everything went fine
  */
-unsigned elftofnk_loadf_allocsymtab(bfd* abfd, asymbol** symtab[], long* numsymbols);
+unsigned elftofnk_loadf_allocsymtableptrs(const bfd* abfd, asymbol** symtab[], long* numsyms);
 
 /**
  * @brief Allocate the reloctation table pointers onto the heap
@@ -42,11 +42,11 @@ unsigned elftofnk_loadf_allocsymtab(bfd* abfd, asymbol** symtab[], long* numsymb
  * @param [out] reloctable On success this will be set to point to heap allocated memory
  * @param [out] numentries On success this will be set to the # of relocation table entries
  * @retval ELFTOFNK_LOADF_ERRC_FAILED_ALLOC
- * @retval ELFTOFNK_LOADF_ERRC_FAILED_PARSE
+ * @retval ELFTOFNK_LOADF_ERRC_FAILED_GET
  * @retval ELFTOFNK_LOADF_ERRC_FAILED_GET_SIZE
  * @retval 0 If everything went fine
  */
-unsigned elftofnk_loadf_allocreloctable(bfd* abfd, asection* section, arelent** reloctable[], long* numentries);
+unsigned elftofnk_loadf_allocreloctableptrs(const bfd* abfd, const asection* section, arelent** reloctable[], long* numentries);
 
 /**
  * @brief Allocate the sections data to the heap
@@ -55,10 +55,10 @@ unsigned elftofnk_loadf_allocreloctable(bfd* abfd, asection* section, arelent** 
  * @param [in] section Section ptr
  * @param [out] data On success this will be set to point to the section data
  * @retval ELFTOFNK_LOADF_ERRC_FAILED_ALLOC
- * @retval ELFTOFNK_LOADF_ERRC_FAILED_PARSE
+ * @retval ELFTOFNK_LOADF_ERRC_FAILED_GET
  * @retval ELFTOFNK_LOADF_ERRC_FAILED_GET_SIZE
  * @retval 0 If everything went fine
  */
-unsigned elftofnk_loadf_allocsectiondata(bfd* abfd, asection* section, void** data);
+unsigned elftofnk_loadf_allocsectiondata(const bfd* abfd, const asection* section, void** data);
 
 #endif
