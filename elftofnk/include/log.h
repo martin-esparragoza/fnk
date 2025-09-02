@@ -44,7 +44,7 @@ void elftofnk_logvf(struct elftofnk_log* log, unsigned char level, const char* f
  * @param [in] level Level to use. Can be user defined with altarr
  * @param [in] format printf format
  */
-void elftofnk_logf(struct elftofnk_log_logger* logger, unsigned char level, const char* format, ...);
+void elftofnk_logf(struct elftofnk_log_log* logger, unsigned char level, const char* format, ...);
 
 #define ELFTOFNK_LOG_INFO(format, ...) elftofnk_logf(&logger, ELFTOFNK_LOG_LEVEL_INFO, format, ## __VA_ARGS__)
 #define ELFTOFNK_LOG_WARN(format, ...) elftofnk_logf(&logger, ELFTOFNK_LOG_LEVEL_WARNING, format, ## __VA_ARGS__)

@@ -1,10 +1,13 @@
+#include "elftofnk/include/libbfdcrap.h"
 #include <bfd.h>
 #include "elftofnk/include/loadf.h"
+#include <stdlib.h>
+#include "common/include/errc.h"
 
 static const char* errcstr[] = {
-    [ELFTOFNK_LOADF_ERRC_FAILED_ALLOCATE_MEMORY - COMMON_ERRC_BASE] = "Failed to allocate enough memory",
-    [ELFTOFNK_LOADF_ERRC_FAILED_GET - COMMON_ERRC_BASE] =             "Failed to get table data",
-    [ELFTOFNK_LOADF_ERRC_FAILED_RETRIEVE_SIZE - COMMON_ERRC_BASE] =   "Failed to get size of table/section (something is very wrong)",
+    [ELFTOFNK_LOADF_ERRC_FAILED_ALLOC - COMMON_ERRC_BASE] =    "Failed to allocate enough memory",
+    [ELFTOFNK_LOADF_ERRC_FAILED_GET - COMMON_ERRC_BASE] =      "Failed to get table data",
+    [ELFTOFNK_LOADF_ERRC_FAILED_GET_SIZE - COMMON_ERRC_BASE] = "Failed to get size of table/section (something is very wrong)",
 };
 
 const char* elftofnk_loadf_errctostr(unsigned errc) {
@@ -20,40 +23,40 @@ const char* elftofnk_loadf_errctostr(unsigned errc) {
 
 unsigned elftofnk_loadf_allocsymtableptrs(const bfd* abfd, asymbol** symtab[], long* numsyms) {
     // Intermediate variables so the user doesn't get their stuff broken when we break
-    asymbol* isymtab[];
+    asymbol** isymtab;
     long inumsymbols;
 
-    long symboltablesize = bfd_get_symtab_upper_bound(abfd); // In bytes
+    long symboltablesize = bfd_get_symtab_upper_bound((bfd*) abfd); // In bytes
     if (symboltablesize > 0) {
         if (!(isymtab = (asymbol**) malloc(symboltablesize)))
-            return ELFTOFNK_LOADF_ERRC_FAILED_ALLOCATE_MEMORY;
-        if ((inumsymbols = bfd_canonicalize_symtab(abfd, isymtab)) < 0)
+            return ELFTOFNK_LOADF_ERRC_FAILED_ALLOC;
+        if ((inumsymbols = bfd_canonicalize_symtab((bfd*) abfd, isymtab)) < 0)
             return ELFTOFNK_LOADF_ERRC_FAILED_GET;
         // Write the output data if all checks are passed
         *symtab = isymtab;
-        *numsymbols = inumsymbols;
+        *numsyms = inumsymbols;
     } else if (symboltablesize < 0)
-        return ELFTOFNK_LOADF_ERRC_FAILED_RETRIEVE_SIZE;
+        return ELFTOFNK_LOADF_ERRC_FAILED_GET_SIZE;
 
     return 0;
 }
 
 unsigned elftofnk_loadf_allocreloctableptrs(const bfd* abfd, const asection* section, arelent** reloctable[], long* numentries) {
     // Intermediate variables so the user doesn't get their stuff broken when we break
-    arelent* ireloctable[];
+    arelent** ireloctable;
     long inumentries;
 
-    long reloctablesize = bfd_get_reloc_upper_bound(abfd, mapped->section); // In bytes
+    long reloctablesize = bfd_get_reloc_upper_bound((bfd*) abfd, (asection*) section); // In bytes
     if (reloctablesize > 0) {
         if (!(ireloctable = (arelent**) malloc(reloctablesize)))
-            return ELFTOFNK_LOADF_ERRC_FAILED_ALLOCATE_MEMORY;
-        if ((inumsymbols = bfd_canonicalize_reloc(abfd, section, ireloctable, NULL)) < 0)
+            return ELFTOFNK_LOADF_ERRC_FAILED_ALLOC;
+        if ((inumentries = bfd_canonicalize_reloc((bfd*) abfd, (asection*) section, ireloctable, NULL)) < 0)
             return ELFTOFNK_LOADF_ERRC_FAILED_GET;
         // Write the output data if all checks are passed
         *reloctable = ireloctable;
         *numentries = inumentries;
-    } else if (symboltablesize < 0)
-        return ELFTOFNK_LOADF_ERRC_FAILED_RETRIEVE_SIZE;
+    } else if (reloctablesize < 0)
+        return ELFTOFNK_LOADF_ERRC_FAILED_GET_SIZE;
 
     return 0;
 }
@@ -66,9 +69,9 @@ unsigned elftofnk_loadf_allocsectiondata(const bfd* abfd, const asection* sectio
 
     if (sectionsize > 0) {
         if (!(idata = malloc(sectionsize)))
-            return ELFTOFNK_LOADF_ERRC_FAILED_ALLOCATE_MEMORY;
+            return ELFTOFNK_LOADF_ERRC_FAILED_ALLOC;
 
-        if (!bfd_get_section_contents(abfd, section, idata, 0 /* fp offset */, sectionsize))
+        if (!bfd_get_section_contents((bfd*) abfd, (asection*) section, idata, 0 /* fp offset */, sectionsize))
             return ELFTOFNK_LOADF_ERRC_FAILED_GET;
 
         *data  = idata;

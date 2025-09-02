@@ -7,7 +7,7 @@
 #include <stdarg.h>
 #include <string.h>
 #include <libgen.h>
-#include <bfd/config.h>
+#include "elftofnk/include/libbfdcrap.h"
 #include <bfd.h>
 #include "elftofnk/include/log.h"
 #include "elftofnk/include/loadf.h"
