@@ -1,5 +1,4 @@
 %.o: %.c
-	@echo $@
 	$(CC) $(CFLAGS) -MMD -MP $(INCFLAGS) -c $< -o $@ $(CLINK)
 
 lib%.o: $(OBJFILES)

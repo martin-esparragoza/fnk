@@ -17,7 +17,7 @@ void elftofnk_log_init(struct elftofnk_log* log, FILE* dest) {
     log->dest = dest;
 }
 
-void elftofnk_logvf(struct elftofnk_log* log, unsigned char level, const char* format, va_list args) {
+void elftofnk_log_vf(struct elftofnk_log* log, unsigned char level, const char* format, va_list args) {
     const char* label = level_label_unrecognized;
     if (level < sizeof(level_label_def) / sizeof(level_label_def[0])) {
         label = level_label_def[level];
@@ -29,9 +29,9 @@ void elftofnk_logvf(struct elftofnk_log* log, unsigned char level, const char* f
     vfprintf(log->dest, format, args);
 }
 
-void elftofnk_logf(struct elftofnk_log* log, unsigned char level, const char* format, ...) {
+void elftofnk_log_f(struct elftofnk_log* log, unsigned char level, const char* format, ...) {
     va_list args;
     va_start(args, format);
-    elftofnk_logvf(log, level, format, args);
+    elftofnk_log_vf(log, level, format, args);
     va_end(args);
 }

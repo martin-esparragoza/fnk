@@ -36,7 +36,7 @@ void elftofnk_log_init(struct elftofnk_log* log, FILE* dest);
  * @param [in] format printf format
  * @param [in] args va_list of arguments
  */
-void elftofnk_logvf(struct elftofnk_log* log, unsigned char level, const char* format, va_list args);
+void elftofnk_log_vf(struct elftofnk_log* log, unsigned char level, const char* format, va_list args);
 
 /**
  * @brief Output a log message. Much more user friendly
@@ -44,10 +44,6 @@ void elftofnk_logvf(struct elftofnk_log* log, unsigned char level, const char* f
  * @param [in] level Level to use. Can be user defined with altarr
  * @param [in] format printf format
  */
-void elftofnk_logf(struct elftofnk_log_log* logger, unsigned char level, const char* format, ...);
-
-#define ELFTOFNK_LOG_INFO(format, ...) elftofnk_logf(&logger, ELFTOFNK_LOG_LEVEL_INFO, format, ## __VA_ARGS__)
-#define ELFTOFNK_LOG_WARN(format, ...) elftofnk_logf(&logger, ELFTOFNK_LOG_LEVEL_WARNING, format, ## __VA_ARGS__)
-#define ELFTOFNK_LOG_ERRR(format, ...) elftofnk_logf(&logger, ELFTOFNK_LOG_LEVEL_ERROR, format, ## __VA_ARGS__)
+void elftofnk_log_f(struct elftofnk_log* log, unsigned char level, const char* format, ...);
 
 #endif

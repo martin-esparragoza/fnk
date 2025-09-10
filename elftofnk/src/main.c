@@ -19,15 +19,19 @@
 
 #define PARAMS_LEN 3
 
-const char* log_loglevel_label_alt[0];
-size_t log_loglevel_label_alt_sizeof = 0;
+const char* elftofnk_log_level_label_alt[0];
+size_t elftofnk_log_level_label_alt_sizeof = 0;
 
-static struct log_logger logger;
+static struct elftofnk_log log;
+
+#define QINFO(format, ...) elftofnk_log_f(&log, ELFTOFNK_LOG_LEVEL_INFO, format, ## __VA_ARGS__)
+#define QWARN(format, ...) elftofnk_log_f(&log, ELFTOFNK_LOG_LEVEL_WARNING, format, ## __VA_ARGS__)
+#define QERRR(format, ...) elftofnk_log_f(&log, ELFTOFNK_LOG_LEVEL_ERROR, format, ## __VA_ARGS__)
 
 static bfd* abfd;
 static FILE* ofile;
 
-static asymbol* symtab[];
+static asymbol** symtab;
 static long numsyms;
 
 enum {
@@ -36,20 +40,21 @@ enum {
     I_PJD,
     I_DATA,
     I_RODATA,
+    I_ENTRY,
     I_BSS
 };
 
 typedef struct mappedsection {
     const char* name; // Identifier for when we search for useful sections
     asection* section;
-    arelent* reloctable[];
+    arelent** reloctable;
     long numrelocentries;
     void* data;
     bool required;
 } mappedsection_t;
 
 // This is so we can do some nice recur stuff while still being able to individually manipualte stuff too
-static struct elftofnk_mappedsection sectionmap[] = {
+static struct mappedsection sectionmap[] = {
     [I_LJD] = {
         .name = ".ljd",
         .required = false
@@ -70,6 +75,10 @@ static struct elftofnk_mappedsection sectionmap[] = {
         .name = ".rodata",
         .required = false
     },
+    [I_ENTRY] = {
+        .name = ".entry",
+        .required = false
+    },
     [I_BSS] = {
         .name = ".bss",
         .required = false
@@ -81,8 +90,8 @@ static void cleanup(void) {
         fclose(ofile);
     if (abfd)
         bfd_close(abfd);
-    if (symboltable)
-        free(symboltable);
+    if (symtab)
+        free(symtab);
 
     for (
         struct mappedsection* mapped = sectionmap;
@@ -99,14 +108,14 @@ static void cleanup(void) {
 static void kill(const char* format, ...) {
     va_list args;
     va_start(args, format);
-    log_logger_vlog(&logger, LOG_LOGLEVEL_ERROR, format, args);
+    elftofnk_log_vf(&log, ELFTOFNK_LOG_LEVEL_ERROR, format, args);
     va_end(args);
     cleanup();
     exit(EXIT_FAILURE);
 }
 
 int main(int argc, char* argv[]) {
-    log_logger_init(&logger, stdout);
+    elftofnk_log_init(&log, stdout);
     bfd_init();
 
     if (argc != PARAMS_LEN)
@@ -123,8 +132,56 @@ int main(int argc, char* argv[]) {
 
     unsigned errc; // Just a general reused errc variable
 
-    if (!(errc = elftofnk_loadf_allocsymtabptrs(abfd, &symtab, &numsyms)))
-        kill("Failed to allocate symbol table. Errc: %s\n", elftofnk_loadf_errctostr(errc));
+    if ((errc = elftofnk_loadf_allocsymtabptrs(abfd, &symtab, &numsyms)))
+        kill("Failed to allocate symbol table. Error: %s\n", elftofnk_loadf_errctostr(errc));
+
+    // Find and map out all sections
+    for (asection* section = abfd->sections; section; section = section->next) {
+        const char* name = bfd_section_name(section);
+        struct mappedsection* mapped;
+        for (mapped = sectionmap; mapped < (sectionmap + sizeof(sectionmap) / sizeof(sectionmap[0])); mapped++) {
+            if (strcmp(name, mapped->name) == 0) {
+                QINFO("Mappable section %s found\n", name);
+                mapped->section = section;
+                break;
+            }
+        }
+        if (mapped == sectionmap + sizeof(sectionmap) / sizeof(sectionmap[0])) {
+            QWARN("Unmapable section found with name \"%s\". Discarding\n", name);
+            continue;
+        }
+    }
+
+    // I want to offload all loading to a different loop because it could become expensive without reason (exit first without doing big stuff)
+
+    // Before that though we have to check if we are not missing any sections
+    for (struct mappedsection* mapped = sectionmap; mapped < (sectionmap + sizeof(sectionmap) / sizeof(sectionmap[0])); mapped++) {
+        if (!mapped->section) {
+            QWARN("Section %s not found. Proceeding\n", mapped->name);
+            if (mapped->required)
+                kill("Required section %s not found\n", mapped->name);
+        }
+    }
+
+    // Now we can start loading in everything
+    for (struct mappedsection* mapped = sectionmap; mapped < (sectionmap + sizeof(sectionmap) / sizeof(sectionmap[0])); mapped++) {
+        if (mapped->section) {
+            if ((errc = elftofnk_loadf_allocreloctabptrs(abfd, mapped->section, &mapped->reloctable, &mapped->numrelocentries)))
+                kill("Failed to allocate relocation table pointers for section %s. Error: %s\n", mapped->name, elftofnk_loadf_errctostr(errc));
+            if ((errc = elftofnk_loadf_allocsectiondata(abfd, mapped->section, &mapped->data)))
+                kill("Failed to allocate section data for section %s. Error: %s\n", mapped->name, elftofnk_loadf_errctostr(errc));
+        }
+    }
+
+    // TODO: Build the relocation table. We can use this to resolve offset dependencies
+
+    if (fflush(ofile))
+        kill("Failed to flush to file\n");
+
+    cleanup();
+    return 0;
+
+
     /*{
         long symboltablesize = bfd_get_symtab_upper_bound(abfd);
         if (symboltablesize >= 0) {
@@ -140,7 +197,7 @@ int main(int argc, char* argv[]) {
     }*/
 
     // Map all sections
-    for (asection* section = abfd->sections; section; section = section->next) {
+    /*for (asection* section = abfd->sections; section; section = section->next) {
         const char* name = bfd_section_name(section);
         struct mappedsection* mapped;
         for (mapped = sectionmap; mapped < (sectionmap + sizeof(sectionmap) / sizeof(sectionmap[0])); mapped++) {
@@ -198,7 +255,7 @@ int main(int argc, char* argv[]) {
             fseek(ofile, COMMON_FNKCONFIG_NAMESIZE - namesize - 1, SEEK_CUR);
             fwrite("", 1, 1, ofile);
         }
-    }
+    }*/
 
     // TODO: Write the temporary section data data structure
 
@@ -243,13 +300,7 @@ int main(int argc, char* argv[]) {
 
     }*/
 
-    if (fflush(ofile))
-        kill("Failed to flush to file\n");
-
-    cleanup();
-    return 0;
-
-    /*
+        /*
     size_t relsections[] = {I_RELPJD, I_RELAPJD, I_RELLJD, I_RELALJD, I_RELTEXT, I_RELATEXT, I_RELDATA, I_RELADATA};
     for (size_t i = 0; i < sizeof(relsections) / sizeof(relsections[0]); i++) {
         struct mappedsection* sect = &(sectionmap[relsections[i]]);
@@ -291,6 +342,4 @@ int main(int argc, char* argv[]) {
     close(ifile);
     fclose(ofile);
     */
-
-    return 0;
 }

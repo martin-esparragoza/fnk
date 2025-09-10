@@ -6,11 +6,12 @@
 #ifndef ELFTOFNK_INCLUDE_LOADF_H_
 #define ELFTOFNK_INCLUDE_LOADF_H_
 
+#include <bfd.h>
+#include "common/include/errc.h"
+
 #define ELFTOFNK_LOADF_ERRC_FAILED_ALLOC    COMMON_ERRC_BASE + 0
 #define ELFTOFNK_LOADF_ERRC_FAILED_GET      COMMON_ERRC_BASE + 1
 #define ELFTOFNK_LOADF_ERRC_FAILED_GET_SIZE COMMON_ERRC_BASE + 2
-
-#include <bfd.h>
 
 /**
  * @brief Get error string
@@ -31,7 +32,7 @@ const char* elftofnk_loadf_errctostr(unsigned errc);
  * @retval ELFTOFNK_LOADF_ERRC_FAILED_GET_SIZE
  * @retval 0 If everything went fine
  */
-unsigned elftofnk_loadf_allocsymtableptrs(const bfd* abfd, asymbol** symtab[], long* numsyms);
+unsigned elftofnk_loadf_allocsymtabptrs(const bfd* abfd, asymbol*** symtab, long* numsyms);
 
 /**
  * @brief Allocate the reloctation table pointers onto the heap
@@ -46,7 +47,7 @@ unsigned elftofnk_loadf_allocsymtableptrs(const bfd* abfd, asymbol** symtab[], l
  * @retval ELFTOFNK_LOADF_ERRC_FAILED_GET_SIZE
  * @retval 0 If everything went fine
  */
-unsigned elftofnk_loadf_allocreloctableptrs(const bfd* abfd, const asection* section, arelent** reloctable[], long* numentries);
+unsigned elftofnk_loadf_allocreloctabptrs(const bfd* abfd, const asection* section, arelent*** reloctable, long* numentries);
 
 /**
  * @brief Allocate the sections data to the heap

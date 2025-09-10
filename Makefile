@@ -3,7 +3,7 @@
 # 2. Lookup to generate the list of objects
 # 3. Imported makefile does the final binary assembly if needed
 
-# Set this yourself
+# Set this variable yourself (this is the TARGET compilation not the native one)
 ARCH := testlinux
 
 LD := ld
@@ -24,10 +24,7 @@ CFLAGS := \
 	-fno-unwind-tables
 CLINK :=
 
-OBJCOPY := objcopy
-
 INCFLAGS := -I ./ -I arch/$(ARCH)/include/ -I comp/$(CC)/include/
-
 
 MAKEDIRS := arch/ \
 			comp/ \
