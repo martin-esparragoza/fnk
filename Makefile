@@ -26,35 +26,38 @@ CLINK :=
 
 INCFLAGS := -I ./ -I arch/$(ARCH)/include/ -I comp/$(CC)/include/
 
-MAKEDIRS := arch/ \
-			comp/ \
-			elftofnk/ \
-			common/ \
-			boot/src/entry/$(ARCH)/ \
-			boot/src/ \
-			boot/ \
-			dll/fnk
+MAKEDIRS := arch \
+			comp \
+			elftofnk \
+			common \
+			boot/src/entry/$(ARCH) \
+			boot/src \
+			boot #\
+			#dll/fnk
 .PHONY: all clean $(MAKEDIRS)
-all: $(MAKEDIRS)
 
 ifeq ($(BUILDTARGET),)
 # Enumerate
-$(MAKEDIRS):
-	$(MAKE) BUILDTARGET=$@
+all:
+	$(MAKE) $(MAKEDIRS)
 clean:
-	$(foreach d,$(MAKEDIRS),$(MAKE) BUILDTARGET=$d clean;)
+	$(MAKE) $(MAKEDIRS) MAKECMDARGS=$@
+$(MAKEDIRS):
+	$(MAKE) BUILDTARGET=$@ $(MAKECMDARGS)
 else
+all: $(MAKEDIRS) # Ok. Genuinely I have no clue why this works. It makes the ENTIRE thing work, I added it a while ago, and now I don't know what the hell it does
 # Defines all of our variables like TARGETS and DEPFILES
 include $(BUILDTARGET)/Makefile
 
 # Now we are in the process of building. Lets turn this build target into its requirements
 include rules.mk
 -include $(BUILDTARGET)/ruleoverride.mk # This is specifically so they can override stuff defined in rules.mk like %.o
-.PHONY: all inc-depfiles clean # inc-depfiles because we need the depfiles to be included before we build anything
-all: inc-depfiles $(TARGETS) # Attempt to make them
-inc-depfiles:
+.PHONY += all buildprereq clean # buildprereq because we need the depfiles to be included before we build anything + for the target dir to be made
+all: buildprereq $(TARGETS) # Attempt to make them
+buildprereq:
 -include $(DEPFILES)
 clean:
-	rm -rf $(TARGETS)
-	rm -rf $(DEPFILES)
+	@echo removing $(TARGETS) $(DEPFILES)
+	@rm -rf $(TARGETS)
+	@rm -rf $(DEPFILES)
 endif

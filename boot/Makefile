@@ -13,7 +13,7 @@ TARGETS := $(BINARY)
 UPPEROBJS := boot/src/main.o boot/src/entry/$(ARCH)/entry.o
 LIBFILES := arch/lib$(ARCH).o comp/lib$(CC).o common/libcommon.o
 
-$(UPPEROBJS) $(LIBFILES) $(OBJFILES):
+$(OBJFILES) $(UPPEROBJS) $(LIBFILES):
 	@
 
 $(BINARY): boot/linker_$(ARCH).ld $(OBJFILES) $(UPPEROBJS) $(LIBFILES)
